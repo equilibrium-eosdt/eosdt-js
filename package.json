@@ -1,0 +1,27 @@
+{
+  "name": "@eosdt/eosdt-js",
+  "version": "0.3.1",
+  "description": "JS library to execute EOSDT contracts methods",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Equilibrium",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node-fetch": "^2.1.4",
+    "@types/text-encoding": "0.0.35",
+    "bignumber.js": "^8.0.2",
+    "eosjs": "20.0.0-beta3",
+    "node-fetch": "^2.3.0",
+    "text-encoding": "^0.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^3.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/equilibrium-eosdt/eosdt-js"
+  },
+  "homepage": "https://github.com/equilibrium-eosdt/eosdt-js#readme"
+}
