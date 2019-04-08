@@ -8,7 +8,6 @@ export declare class Governance {
     constructor(connector: EosdtConnector);
     propose(proposalName: string, title: string, proposalJson: string, expire: string, creatorName: string): Promise<any>;
     expire(proposalName: string, creator: string): Promise<any>;
-    unexpire(proposalName: string, newExpireDate: string, creator: string): Promise<any>;
     applyChanges(proposalName: string, fromAccount: string): Promise<any>;
     cleanProposal(proposalName: string, deletedVotes: number, actor: string): Promise<any>;
     stake(sender: string, amount: string | number | BigNumber): Promise<any>;

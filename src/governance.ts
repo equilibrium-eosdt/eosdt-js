@@ -62,28 +62,6 @@ export class Governance {
     return receipt
   }
 
-  public async unexpire(proposalName: string, newExpireDate: string, creator: string): Promise<any> {
-    const receipt = await this.api.transact(
-      {
-        actions: [{
-          account: this.contractName,
-          name: "unexpire",
-          authorization: [{ actor: creator, permission: "active" }],
-          data: {
-            proposal_name: proposalName,
-            expires_at: newExpireDate,
-          },
-        }],
-      },
-      {
-        blocksBehind: 3,
-        expireSeconds: 60
-      }
-    )
-
-    return receipt
-  }
-
   public async applyChanges(proposalName: string, fromAccount: string): Promise<any> {
     const receipt = await this.api.transact(
       {

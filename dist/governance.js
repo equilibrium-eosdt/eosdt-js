@@ -58,25 +58,6 @@ class Governance {
             return receipt;
         });
     }
-    unexpire(proposalName, newExpireDate, creator) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const receipt = yield this.api.transact({
-                actions: [{
-                        account: this.contractName,
-                        name: "unexpire",
-                        authorization: [{ actor: creator, permission: "active" }],
-                        data: {
-                            proposal_name: proposalName,
-                            expires_at: newExpireDate,
-                        },
-                    }],
-            }, {
-                blocksBehind: 3,
-                expireSeconds: 60
-            });
-            return receipt;
-        });
-    }
     applyChanges(proposalName, fromAccount) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({

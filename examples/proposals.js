@@ -31,11 +31,6 @@ async function main() {
   await governance.expire("test proposal", accountName)
   console.log(`Proposal expired: \n`, await governance.getProposals())
 
-  // Changing proposal expiration date to new date
-  const newExpirationDate = "2019-08-30T23:59:59"
-  await governance.unexpire("test proposal", newExpirationDate, accountName)
-  console.log(`Proposal unxepired: \n`, await governance.getProposals())
-
   // If your proposal is expired, has 55% "yes" votes and 51% of all NUT tokens
   // voted - you can apply changes from this proposal to system
   await governance.applyChanges("test proposal", accountName)

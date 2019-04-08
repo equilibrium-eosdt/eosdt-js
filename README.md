@@ -48,7 +48,6 @@ Module to manage EOSDT positions. Methods:
 Governance methods help manage the system: create proposals to change system parameters, vote on them and stake NUT tokens for voting. Methods:
 - `propose` - creates a proposal. 
 - `expire` - expires an active proposal.
-- `unexpire` - changes expiration date of an active proposal.
 - `applyChanges` - apply proposed changes (at least 51% of all issued NUT tokens must vote, at least 55% of votes must be positive).
 - `cleanProposal` - remove specified amount of votes from an expired proposal. If 0 votes left, removes proposal.
 - `stake` - sends NUT tokens to contract, staking them and allowing to vote on proposals.
@@ -165,11 +164,6 @@ console.log(`Proposal created: \n`, await governance.getProposals())
 // time of this method execution.
 await governance.expire("test proposal", accountName)
 console.log(`Proposal expired: \n`, await governance.getProposals())
-
-// Changing proposal expiration date to new date
-const newExpirationDate = "2019-08-30T23:59:59"
-await governance.unexpire("test proposal", newExpirationDate, accountName)
-console.log(`Proposal unxepired: \n`, await governance.getProposals())
 
 // If your proposal is expired, has 55% "yes" votes and 51% of all NUT tokens
 // voted - you can apply changes from this proposal to system
