@@ -277,7 +277,7 @@ export class Positions {
 
   public async getSettings(): Promise<EosdtContractSettings> {
     const table = await this.rpc.get_table_rows({
-      code: this.contractName, scope: this.contractName, table: "settings", json: true,
+      code: this.contractName, scope: this.contractName, table: "ctrsettings", json: true,
     })
     return table.rows[0]
   }
