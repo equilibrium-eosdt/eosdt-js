@@ -183,7 +183,7 @@ class Governance {
     getSettings() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: this.contractName, scope: this.contractName, table: "settings", json: true,
+                code: this.contractName, scope: this.contractName, table: "govsettings", json: true,
                 limit: 1
             });
             return table.rows[0];

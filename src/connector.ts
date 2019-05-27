@@ -1,7 +1,8 @@
 import JsSignatureProvider from "eosjs/dist/eosjs-jssig"
 import Fetch from "node-fetch"
 import { JsonRpc, Api } from "eosjs"
-import { Positions, Liquidator, Governance } from ".";
+import { Positions, Liquidator, Governance } from "."
+import {TextDecoder, TextEncoder} from "text-encoding"
 
 export class EosdtConnector {
   public readonly rpc: JsonRpc

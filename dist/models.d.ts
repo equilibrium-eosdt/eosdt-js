@@ -1,5 +1,5 @@
 export interface EosdtContractSettings {
-    id: number;
+    setting_id: number;
     global_lock: number;
     time_shift: number;
     liquidator_account: string;
@@ -39,7 +39,7 @@ export interface Rate {
     onerror_update: string;
 }
 export interface GovernanceSettings {
-    id: number;
+    setting_id: number;
     time_shift: number;
     eosdtcntract_account: string;
     liquidator_account: string;
