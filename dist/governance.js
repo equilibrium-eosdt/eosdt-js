@@ -12,25 +12,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const bignumber_js_1 = __importDefault(require("bignumber.js"));
+const utils_1 = require("./utils");
 class Governance {
     constructor(connector) {
         this.rpc = connector.rpc;
         this.api = connector.api;
         this.contractName = "eosdtgovernc";
     }
-    propose(proposalName, title, proposalJson, expire, creatorName) {
+    propose(proposal, sender) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!sender)
+                sender = proposal.proposer;
             const receipt = yield this.api.transact({
                 actions: [{
                         account: this.contractName,
                         name: "propose",
-                        authorization: [{ actor: creatorName, permission: "active" }],
+                        authorization: [{ actor: sender, permission: "active" }],
                         data: {
-                            proposer: creatorName,
-                            proposal_name: proposalName,
-                            title,
-                            proposal_json: proposalJson,
-                            expires_at: expire
+                            proposer: proposal.proposer,
+                            proposal_name: proposal.name,
+                            title: proposal.title,
+                            proposal_json: proposal.json,
+                            expires_at: utils_1.toEosDate(proposal.expiresAt),
+                            proposal_type: proposal.type,
                         },
                     }],
             }, {
@@ -141,7 +145,7 @@ class Governance {
             return receipt;
         });
     }
-    vote(proposalName, vote, voter) {
+    vote(proposalName, vote, voter, voteJson) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
                 actions: [{
@@ -151,7 +155,8 @@ class Governance {
                         data: {
                             voter,
                             proposal_name: proposalName,
-                            vote
+                            vote,
+                            vote_json: voteJson
                         },
                     }],
             }, {

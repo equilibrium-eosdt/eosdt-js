@@ -1,14 +1,14 @@
-import { JsonRpc, Api } from "eosjs";
-import { EosdtConnector } from "./connector";
+import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
-import { EosdtContractSettings, EosdtContractParameters, Rate } from "./models";
+import { EosdtContractParameters, EosdtContractSettings, Rate } from "./interfaces/positions-contract";
+import { EosdtConnectorInterface } from "./interfaces/connector"
 
 export class Positions {
   private contractName: string
   private rpc: JsonRpc
   private api: Api
 
-  constructor(connector: EosdtConnector) {
+  constructor(connector: EosdtConnectorInterface) {
     this.rpc = connector.rpc
     this.api = connector.api
     this.contractName = "eosdtcntract"

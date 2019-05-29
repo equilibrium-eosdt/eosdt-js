@@ -1,14 +1,14 @@
-import { EosdtConnector } from "./connector"
 import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
-import { LiquidatorParameters } from "./models";
+import { LiquidatorParameters } from "./interfaces/liquidator"
+import { EosdtConnectorInterface } from "./interfaces/connector"
 
 export class Liquidator {
   private contractName: string
   private rpc: JsonRpc
   private api: Api
 
-  constructor(connector: EosdtConnector) {
+  constructor(connector: EosdtConnectorInterface) {
     this.rpc = connector.rpc
     this.api = connector.api
     this.contractName = "eosdtliqdatr"

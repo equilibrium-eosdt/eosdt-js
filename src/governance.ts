@@ -1,34 +1,36 @@
 import { JsonRpc, Api } from "eosjs"
-import { EosdtConnector } from "./connector";
-import BigNumber from "bignumber.js";
-import { GovernanceSettings, Proposal, Vote } from "./models";
+import BigNumber from "bignumber.js"
+import { GovernanceSettings, StoredProposal, Vote, ProposeObject } from "./interfaces/governance"
+import { EosdtConnectorInterface } from "./interfaces/connector"
+import { toEosDate } from "./utils";
 
 export class Governance {
   private contractName: string
   private rpc: JsonRpc
   private api: Api
 
-  constructor(connector: EosdtConnector) {
+  constructor(connector: EosdtConnectorInterface) {
     this.rpc = connector.rpc
     this.api = connector.api
     this.contractName = "eosdtgovernc"
   }
 
-  public async propose(proposalName: string, title: string, proposalJson: string,
-    expire: string, creatorName: string): Promise<any> {
+  public async propose(proposal: ProposeObject, sender?: string): Promise<any> {
+    if (!sender) sender = proposal.proposer
 
     const receipt = await this.api.transact(
       {
         actions: [{
           account: this.contractName,
           name: "propose",
-          authorization: [{ actor: creatorName, permission: "active" }],
+          authorization: [{ actor: sender, permission: "active" }],
           data: {
-            proposer: creatorName,
-            proposal_name: proposalName,
-            title,
-            proposal_json: proposalJson,
-            expires_at: expire
+            proposer: proposal.proposer,
+            proposal_name: proposal.name,
+            title: proposal.title,
+            proposal_json: proposal.json,
+            expires_at: toEosDate(proposal.expiresAt),
+            proposal_type: proposal.type,
           },
         }],
       },
@@ -159,7 +161,8 @@ export class Governance {
     return receipt
   }
 
-  public async vote(proposalName: string, vote: number, voter: string): Promise<any> {
+  public async vote(proposalName: string, vote: number, voter: string, voteJson: string
+  ): Promise<any> {
     const receipt = await this.api.transact(
       {
         actions: [{
@@ -169,7 +172,8 @@ export class Governance {
           data: {
             voter,
             proposal_name: proposalName,
-            vote
+            vote,
+            vote_json: voteJson
           },
         }],
       },
@@ -212,7 +216,7 @@ export class Governance {
     return table.rows[0]
   }
 
-  public async getProposals(): Promise<Proposal[]> {
+  public async getProposals(): Promise<StoredProposal[]> {
     const table = await this.rpc.get_table_rows({
       code: this.contractName, scope: this.contractName, table: "proposals", json: true,
       limit: 1000

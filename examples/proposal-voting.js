@@ -24,7 +24,7 @@ async function main() {
 
   // Voting whith 2 NUT tokens for proposal with name "test proposal". Vote "1" for 
   // proposal and any other number to vote against it. You vote with all your staked tokens
-  await governance.vote("test proposal", 1, accountName)
+  await governance.vote("test proposal", 1, accountName, "")
   console.log(`Voted successfully, all votes: \n`, await governance.getVotes())
 
   // Cancelling vote for proposal with name "test proposal"

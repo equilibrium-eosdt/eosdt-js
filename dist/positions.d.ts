@@ -1,11 +1,11 @@
-import { EosdtConnector } from "./connector";
 import BigNumber from "bignumber.js";
-import { EosdtContractSettings, EosdtContractParameters, Rate } from "./models";
+import { EosdtContractParameters, EosdtContractSettings, Rate } from "./interfaces/positions-contract";
+import { EosdtConnectorInterface } from "./interfaces/connector";
 export declare class Positions {
     private contractName;
     private rpc;
     private api;
-    constructor(connector: EosdtConnector);
+    constructor(connector: EosdtConnectorInterface);
     create(accountName: string, eosAmount: string | number | BigNumber, eosdtAmount: string | number | BigNumber): Promise<any>;
     close(senderAccount: string, positionId: number): Promise<any>;
     delete(senderAccount: string, positionId: number): Promise<any>;
