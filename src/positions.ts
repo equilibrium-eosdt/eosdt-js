@@ -1,6 +1,6 @@
 import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
-import { EosdtContractParameters, EosdtContractSettings, TokenRate } from "./interfaces/positions-contract";
+import { EosdtContractParameters, EosdtContractSettings, TokenRate, EosdtPosition } from "./interfaces/positions-contract"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 
 export class PositionsContract {
@@ -243,7 +243,7 @@ export class PositionsContract {
     return table.rows
   }
 
-  public async getPositionById(id: number): Promise<Position | undefined> {
+  public async getPositionById(id: number): Promise<EosdtPosition | undefined> {
     // Example output: 
     // { position_id: 12,
     //   maker: 'accname',
@@ -259,7 +259,7 @@ export class PositionsContract {
     return table.rows[0]
   }
 
-  public async getAllUserPositions(maker: string): Promise<Position[]> {
+  public async getAllUserPositions(maker: string): Promise<EosdtPosition[]> {
     const table = await this.rpc.get_table_rows({
       code: this.contractName, scope: this.contractName, table: "positions", json: true, limit: 100,
       table_key: "maker", index_position: "secondary", key_type: "name",

@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import { EosdtContractParameters, EosdtContractSettings, TokenRate } from "./interfaces/positions-contract";
+import { EosdtContractParameters, EosdtContractSettings, TokenRate, EosdtPosition } from "./interfaces/positions-contract";
 import { EosdtConnectorInterface } from "./interfaces/connector";
 export declare class PositionsContract {
     private contractName;
@@ -15,8 +15,8 @@ export declare class PositionsContract {
     burnbackDebt(account: string, amount: string | number | BigNumber, positionId: number): Promise<any>;
     marginCall(senderAccount: string, positionId: number): Promise<any>;
     getRates(): Promise<TokenRate[]>;
-    getPositionById(id: number): Promise<Position | undefined>;
-    getAllUserPositions(maker: string): Promise<Position[]>;
+    getPositionById(id: number): Promise<EosdtPosition | undefined>;
+    getAllUserPositions(maker: string): Promise<EosdtPosition[]>;
     getParameters(): Promise<EosdtContractParameters>;
     getSettings(): Promise<EosdtContractSettings>;
 }
