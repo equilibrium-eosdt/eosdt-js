@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const liquidator_1 = require("./liquidator");
+var liquidator_1 = require("./liquidator");
 exports.Liquidator = liquidator_1.Liquidator;
-const governance_1 = require("./governance");
+var governance_1 = require("./governance");
 exports.Governance = governance_1.Governance;
-const connector_1 = require("./connector");
+var connector_1 = require("./connector");
 exports.EosdtConnector = connector_1.EosdtConnector;
-const positions_1 = require("./positions");
+var positions_1 = require("./positions");
 exports.Positions = positions_1.Positions;

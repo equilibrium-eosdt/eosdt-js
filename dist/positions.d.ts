@@ -8,7 +8,7 @@ export declare class Positions {
     constructor(connector: EosdtConnectorInterface);
     create(accountName: string, eosAmount: string | number | BigNumber, eosdtAmount: string | number | BigNumber): Promise<any>;
     close(senderAccount: string, positionId: number): Promise<any>;
-    delete(senderAccount: string, positionId: number): Promise<any>;
+    delete(creator: string, positionId: number): Promise<any>;
     addCollateral(account: string, amount: string | number | BigNumber, positionId: number): Promise<any>;
     deleteCollateral(sender: string, amount: string | number | BigNumber, positionId: number): Promise<any>;
     generateDebt(account: string, amount: string | number | BigNumber, positionId: number): Promise<any>;

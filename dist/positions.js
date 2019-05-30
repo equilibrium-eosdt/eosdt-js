@@ -71,13 +71,13 @@ class Positions {
             return receipt;
         });
     }
-    delete(senderAccount, positionId) {
+    delete(creator, positionId) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
                 actions: [{
                         account: this.contractName,
                         name: "positiondel",
-                        authorization: [{ actor: senderAccount, permission: "active" }],
+                        authorization: [{ actor: creator, permission: "active" }],
                         data: { position_id: positionId },
                     }]
             }, {

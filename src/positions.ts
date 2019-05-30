@@ -76,14 +76,14 @@ export class Positions {
     return receipt
   }
 
-  public async delete(senderAccount: string, positionId: number): Promise<any> {
+  public async delete(creator: string, positionId: number): Promise<any> {
 
     const receipt = await this.api.transact(
       {
         actions: [{
           account: this.contractName,
           name: "positiondel",
-          authorization: [{ actor: senderAccount, permission: "active" }],
+          authorization: [{ actor: creator, permission: "active" }],
           data: { position_id: positionId },
         }]
       },

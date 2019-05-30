@@ -1,6 +1,8 @@
-import { Liquidator } from "./liquidator"
-import { Governance } from "./governance"
-import { EosdtConnector } from "./connector"
-import { Positions } from "./positions"
-
-export { Liquidator, Governance, EosdtConnector, Positions }
+export { Liquidator } from "./liquidator"
+export { Governance } from "./governance"
+export { EosdtConnector } from "./connector"
+export { Positions } from "./positions"
+export * from "./interfaces/positions-contract"
+export * from "./interfaces/connector"
+export * from "./interfaces/governance"
+export * from "./interfaces/liquidator"
