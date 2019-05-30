@@ -1,8 +1,9 @@
 import JsSignatureProvider from "eosjs/dist/eosjs-jssig"
 import Fetch from "node-fetch"
 import { JsonRpc, Api } from "eosjs"
-import { Positions, Liquidator, Governance } from "."
-import {TextDecoder, TextEncoder} from "text-encoding"
+import { LiquidatorContract, GovernanceContract } from "."
+import { TextDecoder, TextEncoder } from "text-encoding"
+import { PositionsContract } from "./positions"
 
 export class EosdtConnector {
   public readonly rpc: JsonRpc
@@ -17,15 +18,15 @@ export class EosdtConnector {
     })
   }
 
-  public getPositions(): Positions {
-    return new Positions(this)
+  public getPositions(): PositionsContract {
+    return new PositionsContract(this)
   }
 
-  public getLiquidator(): Liquidator {
-    return new Liquidator(this)
+  public getLiquidator(): LiquidatorContract {
+    return new LiquidatorContract(this)
   }
 
-  public getGovernance(): Governance {
-    return new Governance(this)
+  public getGovernance(): GovernanceContract {
+    return new GovernanceContract(this)
   }
 }

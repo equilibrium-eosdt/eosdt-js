@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 import { LiquidatorParameters } from "./interfaces/liquidator";
 import { EosdtConnectorInterface } from "./interfaces/connector";
-export declare class Liquidator {
+export declare class LiquidatorContract {
     private contractName;
     private rpc;
     private api;

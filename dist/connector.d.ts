@@ -1,10 +1,11 @@
 import { JsonRpc, Api } from "eosjs";
-import { Positions, Liquidator, Governance } from ".";
+import { LiquidatorContract, GovernanceContract } from ".";
+import { PositionsContract } from "./positions";
 export declare class EosdtConnector {
     readonly rpc: JsonRpc;
     readonly api: Api;
     constructor(nodeAddress: string, privateKeys: string[]);
-    getPositions(): Positions;
-    getLiquidator(): Liquidator;
-    getGovernance(): Governance;
+    getPositions(): PositionsContract;
+    getLiquidator(): LiquidatorContract;
+    getGovernance(): GovernanceContract;
 }

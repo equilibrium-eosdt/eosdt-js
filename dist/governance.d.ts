@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
-import { GovernanceSettings, StoredProposal, Vote, ProposeObject } from "./interfaces/governance";
+import { GovernanceSettings, StoredProposal, EosdtVote, ProposeObject } from "./interfaces/governance";
 import { EosdtConnectorInterface } from "./interfaces/connector";
-export declare class Governance {
+export declare class GovernanceContract {
     private contractName;
     private rpc;
     private api;
@@ -16,5 +16,5 @@ export declare class Governance {
     unvote(proposalName: string, voter: string): Promise<any>;
     getSettings(): Promise<GovernanceSettings>;
     getProposals(): Promise<StoredProposal[]>;
-    getVotes(): Promise<Vote[]>;
+    getVotes(): Promise<EosdtVote[]>;
 }

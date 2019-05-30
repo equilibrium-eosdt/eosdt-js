@@ -1,10 +1,10 @@
 import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
-import { GovernanceSettings, StoredProposal, Vote, ProposeObject } from "./interfaces/governance"
+import { GovernanceSettings, StoredProposal, EosdtVote, ProposeObject } from "./interfaces/governance"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 import { toEosDate } from "./utils";
 
-export class Governance {
+export class GovernanceContract {
   private contractName: string
   private rpc: JsonRpc
   private api: Api
@@ -224,7 +224,7 @@ export class Governance {
     return table.rows
   }
 
-  public async getVotes(): Promise<Vote[]> {
+  public async getVotes(): Promise<EosdtVote[]> {
     const table = await this.rpc.get_table_rows({
       code: this.contractName, scope: this.contractName, table: "votes", json: true,
       limit: 1000

@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const bignumber_js_1 = __importDefault(require("bignumber.js"));
 const utils_1 = require("./utils");
-class Governance {
+class GovernanceContract {
     constructor(connector) {
         this.rpc = connector.rpc;
         this.api = connector.api;
@@ -213,4 +213,4 @@ class Governance {
         });
     }
 }
-exports.Governance = Governance;
+exports.GovernanceContract = GovernanceContract;

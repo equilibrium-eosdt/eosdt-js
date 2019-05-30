@@ -3,7 +3,7 @@ import BigNumber from "bignumber.js"
 import { LiquidatorParameters } from "./interfaces/liquidator"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 
-export class Liquidator {
+export class LiquidatorContract {
   private contractName: string
   private rpc: JsonRpc
   private api: Api

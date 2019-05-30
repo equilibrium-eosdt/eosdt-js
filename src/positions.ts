@@ -1,9 +1,9 @@
 import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
-import { EosdtContractParameters, EosdtContractSettings, Rate } from "./interfaces/positions-contract";
+import { EosdtContractParameters, EosdtContractSettings, TokenRate } from "./interfaces/positions-contract";
 import { EosdtConnectorInterface } from "./interfaces/connector"
 
-export class Positions {
+export class PositionsContract {
   private contractName: string
   private rpc: JsonRpc
   private api: Api
@@ -235,7 +235,7 @@ export class Positions {
     return receipt
   }
 
-  public async getRates(): Promise<Rate[]> {
+  public async getRates(): Promise<TokenRate[]> {
     const table = await this.rpc.get_table_rows({
       code: "eosdtorclize", scope: "eosdtorclize", table: "oracle.rates", json: true,
       limit: 500

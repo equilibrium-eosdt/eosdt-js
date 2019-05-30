@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var liquidator_1 = require("./liquidator");
-exports.Liquidator = liquidator_1.Liquidator;
+exports.LiquidatorContract = liquidator_1.LiquidatorContract;
 var governance_1 = require("./governance");
-exports.Governance = governance_1.Governance;
+exports.GovernanceContract = governance_1.GovernanceContract;
 var connector_1 = require("./connector");
 exports.EosdtConnector = connector_1.EosdtConnector;
 var positions_1 = require("./positions");
-exports.Positions = positions_1.Positions;
+exports.PositionsContract = positions_1.PositionsContract;

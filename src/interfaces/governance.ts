@@ -17,7 +17,7 @@ export interface ProposeObject {
   type: number,
 }
 
-export interface Vote {
+export interface EosdtVote {
   id: number,
   proposal_name: string,
   voter: string,

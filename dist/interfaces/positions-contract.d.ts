@@ -1,11 +1,11 @@
-export interface Position {
+export interface EosdtPosition {
     position_id: number;
     maker: string;
     outstanding: string;
     governance: string;
     collateral: string;
 }
-export interface Rate {
+export interface TokenRate {
     rate: string;
     last_update: string;
     master_update: string;

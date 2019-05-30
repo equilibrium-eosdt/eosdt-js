@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const bignumber_js_1 = __importDefault(require("bignumber.js"));
-class Positions {
+class PositionsContract {
     constructor(connector) {
         this.rpc = connector.rpc;
         this.api = connector.api;
@@ -256,4 +256,4 @@ class Positions {
         });
     }
 }
-exports.Positions = Positions;
+exports.PositionsContract = PositionsContract;
