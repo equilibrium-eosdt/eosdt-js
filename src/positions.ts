@@ -187,9 +187,11 @@ export class PositionsContract {
 
   public async burnbackDebt(account: string, amount: string | number | BigNumber,
     positionId: number): Promise<any> {
+
     if (typeof amount === "string" || typeof amount === "number") {
       amount = new BigNumber(amount)
     }
+    const roundedAmount = amount.dp(4, 1)
 
     const receipt = await this.api.transact(
       {
@@ -201,7 +203,7 @@ export class PositionsContract {
             to: this.contractName,
             from: account,
             maker: account,
-            quantity: `${amount.toFixed(9)} EOSDT`,
+            quantity: `${roundedAmount.toFixed(9)} EOSDT`,
             memo: `position_id:${positionId}`,
           },
         }]

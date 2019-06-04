@@ -2,7 +2,7 @@ import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
 import { GovernanceSettings, StoredProposal, EosdtVote, ProposeObject } from "./interfaces/governance"
 import { EosdtConnectorInterface } from "./interfaces/connector"
-import { toEosDate } from "./utils";
+import { toEosDate } from "./utils"
 
 export class GovernanceContract {
   private contractName: string
