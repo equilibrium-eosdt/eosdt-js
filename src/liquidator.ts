@@ -2,6 +2,7 @@ import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
 import { LiquidatorParameters } from "./interfaces/liquidator"
 import { EosdtConnectorInterface } from "./interfaces/connector"
+import { toBigNumber } from "./utils";
 
 export class LiquidatorContract {
   private contractName: string
@@ -16,9 +17,8 @@ export class LiquidatorContract {
 
   public async marginCallAndBuyoutEos(senderAccount: string, positionId: number,
     eosdtToTransfer: string | number | BigNumber): Promise<any> {
-    if (typeof eosdtToTransfer === "string" || typeof eosdtToTransfer === "number") {
-      eosdtToTransfer = new BigNumber(eosdtToTransfer)
-    }
+
+    eosdtToTransfer = toBigNumber(eosdtToTransfer)
 
     const receipt = await this.api.transact(
       {
@@ -53,9 +53,8 @@ export class LiquidatorContract {
 
   public async transferEos(sender: string, amount: string | number | BigNumber,
     memo: string): Promise<any> {
-    if (typeof amount === "string" || typeof amount === "number") {
-      amount = new BigNumber(amount)
-    }
+
+    amount = toBigNumber(amount)
 
     const result = await this.api.transact(
       {
@@ -81,9 +80,8 @@ export class LiquidatorContract {
 
   public async transferEosdt(sender: string, amount: string | number | BigNumber,
     memo: string): Promise<any> {
-    if (typeof amount === "string" || typeof amount === "number") {
-      amount = new BigNumber(amount)
-    }
+
+    amount = toBigNumber(amount)
 
     const result = await this.api.transact(
       {

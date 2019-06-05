@@ -7,11 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const bignumber_js_1 = __importDefault(require("bignumber.js"));
 const utils_1 = require("./utils");
 class GovernanceContract {
     constructor(connector) {
@@ -101,9 +97,7 @@ class GovernanceContract {
     }
     stake(sender, amount) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof amount === "string" || typeof amount === "number") {
-                amount = new bignumber_js_1.default(amount);
-            }
+            amount = utils_1.toBigNumber(amount);
             const receipt = yield this.api.transact({
                 actions: [{
                         account: "eosdtnutoken",
@@ -125,9 +119,7 @@ class GovernanceContract {
     }
     unstake(amount, voter) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof amount === "string" || typeof amount === "number") {
-                amount = new bignumber_js_1.default(amount);
-            }
+            amount = utils_1.toBigNumber(amount);
             const receipt = yield this.api.transact({
                 actions: [{
                         account: this.contractName,

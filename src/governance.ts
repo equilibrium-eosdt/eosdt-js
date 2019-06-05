@@ -2,7 +2,7 @@ import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
 import { GovernanceSettings, StoredProposal, EosdtVote, ProposeObject } from "./interfaces/governance"
 import { EosdtConnectorInterface } from "./interfaces/connector"
-import { toEosDate } from "./utils"
+import { toEosDate, toBigNumber } from "./utils"
 
 export class GovernanceContract {
   private contractName: string
@@ -85,7 +85,8 @@ export class GovernanceContract {
     return receipt
   }
 
-  public async cleanProposal(proposalName: string, deletedVotes: number, actor: string): Promise<any> {
+  public async cleanProposal(proposalName: string, deletedVotes: number, actor: string
+  ): Promise<any> {
     const receipt = await this.api.transact(
       {
         actions: [{
@@ -108,9 +109,7 @@ export class GovernanceContract {
   }
 
   public async stake(sender: string, amount: string | number | BigNumber): Promise<any> {
-    if (typeof amount === "string" || typeof amount === "number") {
-      amount = new BigNumber(amount)
-    }
+    amount = toBigNumber(amount)
 
     const receipt = await this.api.transact(
       {
@@ -136,9 +135,7 @@ export class GovernanceContract {
   }
 
   public async unstake(amount: string | number | BigNumber, voter: string): Promise<any> {
-    if (typeof amount === "string" || typeof amount === "number") {
-      amount = new BigNumber(amount)
-    }
+    amount = toBigNumber(amount)
 
     const receipt = await this.api.transact(
       {

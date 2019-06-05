@@ -2,6 +2,7 @@ import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
 import { EosdtContractParameters, EosdtContractSettings, TokenRate, EosdtPosition } from "./interfaces/positions-contract"
 import { EosdtConnectorInterface } from "./interfaces/connector"
+import { toBigNumber } from "./utils";
 
 export class PositionsContract {
   private contractName: string
@@ -17,12 +18,8 @@ export class PositionsContract {
   public async create(accountName: string, eosAmount: string | number | BigNumber,
     eosdtAmount: string | number | BigNumber): Promise<any> {
 
-    if (typeof eosAmount === "string" || typeof eosAmount === "number") {
-      eosAmount = new BigNumber(eosAmount)
-    }
-    if (typeof eosdtAmount === "string" || typeof eosdtAmount === "number") {
-      eosdtAmount = new BigNumber(eosdtAmount)
-    }
+    eosAmount = toBigNumber(eosAmount)
+    const roundedDebtAmount = toBigNumber(eosdtAmount).dp(4, 1)
 
     const receipt = await this.api.transact(
       {
@@ -43,10 +40,10 @@ export class PositionsContract {
               from: accountName,
               to: this.contractName,
               quantity: `${eosAmount.toFixed(4)} EOS`,
-              memo: `${eosdtAmount.toFixed(9)} EOSDT`,
-            },
-          },
-        ],
+              memo: `${roundedDebtAmount.toFixed(9)} EOSDT`,
+            }
+          }
+        ]
       },
       {
         blocksBehind: 3,
@@ -98,9 +95,8 @@ export class PositionsContract {
 
   public async addCollateral(account: string, amount: string | number | BigNumber,
     positionId: number): Promise<any> {
-    if (typeof amount === "string" || typeof amount === "number") {
-      amount = new BigNumber(amount)
-    }
+
+    amount = toBigNumber(amount)
 
     const receipt = await this.api.transact(
       {
@@ -159,9 +155,8 @@ export class PositionsContract {
 
   public async generateDebt(account: string, amount: string | number | BigNumber,
     positionId: number): Promise<any> {
-    if (typeof amount === "string" || typeof amount === "number") {
-      amount = new BigNumber(amount)
-    }
+
+    const roundedAmount = toBigNumber(amount).dp(4, 1)
 
     const receipt = await this.api.transact(
       {
@@ -171,7 +166,7 @@ export class PositionsContract {
             name: "debtgenerate",
             authorization: [{ actor: account, permission: "active" }],
             data: {
-              debt: `${amount.toFixed(9)} EOSDT`,
+              debt: `${roundedAmount.toFixed(9)} EOSDT`,
               position_id: positionId,
             },
           },
@@ -188,10 +183,7 @@ export class PositionsContract {
   public async burnbackDebt(account: string, amount: string | number | BigNumber,
     positionId: number): Promise<any> {
 
-    if (typeof amount === "string" || typeof amount === "number") {
-      amount = new BigNumber(amount)
-    }
-    const roundedAmount = amount.dp(4, 1)
+    const roundedAmount = toBigNumber(amount).dp(4, 1)
 
     const receipt = await this.api.transact(
       {

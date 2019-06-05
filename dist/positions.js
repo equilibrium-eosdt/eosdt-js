@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const bignumber_js_1 = __importDefault(require("bignumber.js"));
+const utils_1 = require("./utils");
 class PositionsContract {
     constructor(connector) {
         this.rpc = connector.rpc;
@@ -20,12 +21,8 @@ class PositionsContract {
     }
     create(accountName, eosAmount, eosdtAmount) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof eosAmount === "string" || typeof eosAmount === "number") {
-                eosAmount = new bignumber_js_1.default(eosAmount);
-            }
-            if (typeof eosdtAmount === "string" || typeof eosdtAmount === "number") {
-                eosdtAmount = new bignumber_js_1.default(eosdtAmount);
-            }
+            eosAmount = utils_1.toBigNumber(eosAmount);
+            const roundedDebtAmount = utils_1.toBigNumber(eosdtAmount).dp(4, 1);
             const receipt = yield this.api.transact({
                 actions: [
                     {
@@ -44,10 +41,10 @@ class PositionsContract {
                             from: accountName,
                             to: this.contractName,
                             quantity: `${eosAmount.toFixed(4)} EOS`,
-                            memo: `${eosdtAmount.toFixed(9)} EOSDT`,
-                        },
-                    },
-                ],
+                            memo: `${roundedDebtAmount.toFixed(9)} EOSDT`,
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -89,9 +86,7 @@ class PositionsContract {
     }
     addCollateral(account, amount, positionId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof amount === "string" || typeof amount === "number") {
-                amount = new bignumber_js_1.default(amount);
-            }
+            amount = utils_1.toBigNumber(amount);
             const receipt = yield this.api.transact({
                 actions: [
                     {
@@ -140,9 +135,7 @@ class PositionsContract {
     }
     generateDebt(account, amount, positionId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof amount === "string" || typeof amount === "number") {
-                amount = new bignumber_js_1.default(amount);
-            }
+            const roundedAmount = utils_1.toBigNumber(amount).dp(4, 1);
             const receipt = yield this.api.transact({
                 actions: [
                     {
@@ -150,7 +143,7 @@ class PositionsContract {
                         name: "debtgenerate",
                         authorization: [{ actor: account, permission: "active" }],
                         data: {
-                            debt: `${amount.toFixed(9)} EOSDT`,
+                            debt: `${roundedAmount.toFixed(9)} EOSDT`,
                             position_id: positionId,
                         },
                     },
@@ -164,9 +157,7 @@ class PositionsContract {
     }
     burnbackDebt(account, amount, positionId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof amount === "string" || typeof amount === "number") {
-                amount = new bignumber_js_1.default(amount);
-            }
+            const roundedAmount = utils_1.toBigNumber(amount).dp(4, 1);
             const receipt = yield this.api.transact({
                 actions: [{
                         account: "eosdtsttoken",
@@ -176,7 +167,7 @@ class PositionsContract {
                             to: this.contractName,
                             from: account,
                             maker: account,
-                            quantity: `${amount.toFixed(9)} EOSDT`,
+                            quantity: `${roundedAmount.toFixed(9)} EOSDT`,
                             memo: `position_id:${positionId}`,
                         },
                     }]
