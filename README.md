@@ -20,9 +20,6 @@ const governance = connector.getGovernance()
 const liquidator = connector.getLiquidator()
 ```
 
-## Outputs
-EOS types are more precise than this module types. For example both `double` and `asset` types are returned from blockchain as `string`. To see returns with actual values, check out file [outputs.md](outputs.md)
-
 ## Modules
 
 ### Connector 

@@ -207,12 +207,6 @@ class PositionsContract {
     }
     getPositionById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Example output: 
-            // { position_id: 12,
-            //   maker: 'accname',
-            //   outstanding: '14.009165085 EOSDT',
-            //   governance: '14.008324219 EOSDT',
-            //   collateral: '6.41905096720423263' }
             const table = yield this.rpc.get_table_rows({
                 code: this.contractName, scope: this.contractName, table: "positions", json: true, limit: 1,
                 table_key: "position_id", lower_bound: id, upper_bound: id

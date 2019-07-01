@@ -8,10 +8,10 @@ function toEosDate(date) {
     return date.toISOString().slice(0, -5);
 }
 exports.toEosDate = toEosDate;
-function toBigNumber(number) {
-    if (typeof number === "string" || typeof number === "number") {
-        return new bignumber_js_1.default(number);
+function toBigNumber(amount) {
+    if (typeof amount === "string" || typeof amount === "number") {
+        return new bignumber_js_1.default(amount);
     }
-    return number;
+    return amount;
 }
 exports.toBigNumber = toBigNumber;

@@ -28,9 +28,10 @@ export interface EosdtContractSettings {
     liquidation_price: string;
     nut_auct_ratio: string;
     nut_discount: string;
-    reserve_ratio: string;
+    profit_factor: string;
     vote_period: number;
     stake_period: number;
+    reserve_ratio: string;
 }
 export interface EosdtContractParameters {
     parameter_id: number;
@@ -41,4 +42,5 @@ export interface EosdtContractParameters {
     prev_date: string;
     prev_vote: string;
     prev_stake: string;
+    eos_staked: string;
 }
