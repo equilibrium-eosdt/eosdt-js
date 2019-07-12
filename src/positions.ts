@@ -132,17 +132,15 @@ export class PositionsContract {
 
         const receipt = await this.api.transact(
             {
-                actions: [
-                    {
-                        account: this.contractName,
-                        name: "colateraldel",
-                        authorization: [{ actor: sender, permission: "active" }],
-                        data: {
-                            position_id: positionId,
-                            collateral: `${amount.toFixed(4)} EOS`,
-                        },
-                    },
-                ],
+                actions: [{
+                    account: this.contractName,
+                    name: "colateraldel",
+                    authorization: [{ actor: sender, permission: "active" }],
+                    data: {
+                        position_id: positionId,
+                        collateral: `${amount.toFixed(4)} EOS`,
+                    }
+                }],
             },
             {
                 blocksBehind: 3,

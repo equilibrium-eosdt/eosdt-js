@@ -89,6 +89,28 @@ class LiquidatorContract {
             return result;
         });
     }
+    transferNut(sender, amount, memo) {
+        return __awaiter(this, void 0, void 0, function* () {
+            amount = utils_1.toBigNumber(amount);
+            const result = yield this.api.transact({
+                actions: [{
+                        account: "eosdtnutoken",
+                        name: "transfer",
+                        authorization: [{ actor: sender, permission: "active" }],
+                        data: {
+                            from: sender,
+                            to: this.contractName,
+                            quantity: `${amount.toFixed(9)} NUT`,
+                            memo,
+                        },
+                    }],
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 60
+            });
+            return result;
+        });
+    }
     getSurplusDebt() {
         return __awaiter(this, void 0, void 0, function* () {
             const parameters = yield this.getParameters();

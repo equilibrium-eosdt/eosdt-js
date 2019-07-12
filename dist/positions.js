@@ -115,17 +115,15 @@ class PositionsContract {
                 amount = new bignumber_js_1.default(amount);
             }
             const receipt = yield this.api.transact({
-                actions: [
-                    {
+                actions: [{
                         account: this.contractName,
                         name: "colateraldel",
                         authorization: [{ actor: sender, permission: "active" }],
                         data: {
                             position_id: positionId,
                             collateral: `${amount.toFixed(4)} EOS`,
-                        },
-                    },
-                ],
+                        }
+                    }],
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60

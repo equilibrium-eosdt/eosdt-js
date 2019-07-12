@@ -105,6 +105,33 @@ export class LiquidatorContract {
         return result
     }
 
+    public async transferNut(sender: string, amount: string | number | BigNumber,
+        memo: string): Promise<any> {
+
+        amount = toBigNumber(amount)
+
+        const result = await this.api.transact(
+            {
+                actions: [{
+                    account: "eosdtnutoken",
+                    name: "transfer",
+                    authorization: [{ actor: sender, permission: "active" }],
+                    data: {
+                        from: sender,
+                        to: this.contractName,
+                        quantity: `${amount.toFixed(9)} NUT`,
+                        memo,
+                    },
+                }],
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 60
+            }
+        )
+
+        return result
+    }
+
     public async getSurplusDebt(): Promise<string> {
         const parameters = await this.getParameters()
         return parameters.surplus_debt

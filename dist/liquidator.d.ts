@@ -9,6 +9,7 @@ export declare class LiquidatorContract {
     marginCallAndBuyoutEos(senderAccount: string, positionId: number, eosdtToTransfer: string | number | BigNumber): Promise<any>;
     transferEos(sender: string, amount: string | number | BigNumber, memo: string): Promise<any>;
     transferEosdt(sender: string, amount: string | number | BigNumber, memo: string): Promise<any>;
+    transferNut(sender: string, amount: string | number | BigNumber, memo: string): Promise<any>;
     getSurplusDebt(): Promise<string>;
     getBadDebt(): Promise<string>;
     getEosBalance(): Promise<string>;

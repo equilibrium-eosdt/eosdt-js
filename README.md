@@ -58,8 +58,9 @@ Governance methods help manage the system: create proposals to change system par
 ### Liquidator
 Methods to get Liquidator contract parameters and exchange EOS and EOSDT in case of global shutdown. 
 - `marginCallAndBuyoutEos` - performes margin call on a position and transfers specified amount of EOSDT to buyout freed EOS.
-- `transferEos` - sends EOS to Liquidator contract. In case of global shutdown, exchanges it for EOSDT.  
-- `transferEosdt` - sends EOSDT to liquidator contract. In case of global shutdown, exchanges it for EOSDT.  
+- `transferEos` - sends EOS to Liquidator contract. It is used to buyout surplus debt with discount.
+- `transferEosdt` - sends EOSDT to liquidator contract. It is used to cancel bad debt and buyout liquidator EOS with discount.  
+- `transferNut` - sends NUT tokens to liquidator contract. It is used to buyout EOS intended to be bought for NUT tokens (parameter "nut_collat_balance").  
 - `getSurplusDebt` - returns amount of system surplus debt.
 - `getBadDebt` - returns amount of system bad debt. 
 - `getEosBalance` - returns amount of EOS on liquidator contract balance.
