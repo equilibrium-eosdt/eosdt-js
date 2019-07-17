@@ -1,5 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var eosjs_1 = require("eosjs");
+exports.JsonRpc = eosjs_1.JsonRpc;
+exports.Api = eosjs_1.Api;
 var liquidator_1 = require("./liquidator");
 exports.LiquidatorContract = liquidator_1.LiquidatorContract;
 var governance_1 = require("./governance");
@@ -8,3 +11,5 @@ var connector_1 = require("./connector");
 exports.EosdtConnector = connector_1.EosdtConnector;
 var positions_1 = require("./positions");
 exports.PositionsContract = positions_1.PositionsContract;
+var balance_1 = require("./balance");
+exports.BalanceGetter = balance_1.BalanceGetter;

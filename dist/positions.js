@@ -30,8 +30,8 @@ class PositionsContract {
                         name: "positionadd",
                         authorization: [{ actor: accountName, permission: "active" }],
                         data: {
-                            maker: accountName,
-                        },
+                            maker: accountName
+                        }
                     },
                     {
                         account: "eosio.token",
@@ -41,7 +41,7 @@ class PositionsContract {
                             from: accountName,
                             to: this.contractName,
                             quantity: `${eosAmount.toFixed(4)} EOS`,
-                            memo: `${roundedDebtAmount.toFixed(9)} EOSDT`,
+                            memo: `${roundedDebtAmount.toFixed(9)} EOSDT`
                         }
                     }
                 ]
@@ -55,12 +55,14 @@ class PositionsContract {
     close(senderAccount, positionId) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "close",
                         authorization: [{ actor: senderAccount, permission: "active" }],
-                        data: { position_id: positionId },
-                    }]
+                        data: { position_id: positionId }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -71,12 +73,35 @@ class PositionsContract {
     delete(creator, positionId) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "positiondel",
                         authorization: [{ actor: creator, permission: "active" }],
-                        data: { position_id: positionId },
-                    }]
+                        data: { position_id: positionId }
+                    }
+                ]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 60
+            });
+            return receipt;
+        });
+    }
+    give(account, receiver, positionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "positiongive",
+                        authorization: [{ actor: account, permission: "active" }],
+                        data: {
+                            position_id: positionId,
+                            to: receiver
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -98,10 +123,10 @@ class PositionsContract {
                             from: account,
                             maker: account,
                             quantity: `${amount.toFixed(4)} EOS`,
-                            memo: `position_id:${positionId}`,
-                        },
-                    },
-                ],
+                            memo: `position_id:${positionId}`
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -115,15 +140,17 @@ class PositionsContract {
                 amount = new bignumber_js_1.default(amount);
             }
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "colateraldel",
                         authorization: [{ actor: sender, permission: "active" }],
                         data: {
                             position_id: positionId,
-                            collateral: `${amount.toFixed(4)} EOS`,
+                            collateral: `${amount.toFixed(4)} EOS`
                         }
-                    }],
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -142,10 +169,10 @@ class PositionsContract {
                         authorization: [{ actor: account, permission: "active" }],
                         data: {
                             debt: `${roundedAmount.toFixed(9)} EOSDT`,
-                            position_id: positionId,
-                        },
-                    },
-                ],
+                            position_id: positionId
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -157,7 +184,8 @@ class PositionsContract {
         return __awaiter(this, void 0, void 0, function* () {
             const roundedAmount = utils_1.toBigNumber(amount).dp(4, 1);
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: "eosdtsttoken",
                         name: "transfer",
                         authorization: [{ actor: account, permission: "active" }],
@@ -166,9 +194,10 @@ class PositionsContract {
                             from: account,
                             maker: account,
                             quantity: `${roundedAmount.toFixed(9)} EOSDT`,
-                            memo: `position_id:${positionId}`,
-                        },
-                    }]
+                            memo: `position_id:${positionId}`
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -179,14 +208,16 @@ class PositionsContract {
     marginCall(senderAccount, positionId) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "margincall",
                         authorization: [{ actor: senderAccount, permission: "active" }],
                         data: {
                             position_id: positionId
-                        },
-                    }],
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -194,10 +225,19 @@ class PositionsContract {
             return receipt;
         });
     }
+    getContractEosAmount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const balance = yield this.rpc.get_currency_balance("eosio.token", "eosdtcntract", "EOS");
+            return utils_1.balanceToNumber(balance);
+        });
+    }
     getRates() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: "eosdtorclize", scope: "eosdtorclize", table: "oracle.rates", json: true,
+                code: "eosdtorclize",
+                scope: "eosdtorclize",
+                table: "oracle.rates",
+                json: true,
                 limit: 500
             });
             return table.rows;
@@ -206,8 +246,14 @@ class PositionsContract {
     getPositionById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: this.contractName, scope: this.contractName, table: "positions", json: true, limit: 1,
-                table_key: "position_id", lower_bound: id, upper_bound: id
+                code: this.contractName,
+                scope: this.contractName,
+                table: "positions",
+                json: true,
+                limit: 1,
+                table_key: "position_id",
+                lower_bound: id,
+                upper_bound: id
             });
             return table.rows[0];
         });
@@ -215,9 +261,16 @@ class PositionsContract {
     getAllUserPositions(maker) {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: this.contractName, scope: this.contractName, table: "positions", json: true, limit: 100,
-                table_key: "maker", index_position: "secondary", key_type: "name",
-                lower_bound: maker, upper_bound: maker
+                code: this.contractName,
+                scope: this.contractName,
+                table: "positions",
+                json: true,
+                limit: 100,
+                table_key: "maker",
+                index_position: "secondary",
+                key_type: "name",
+                lower_bound: maker,
+                upper_bound: maker
             });
             return table.rows;
         });
@@ -225,7 +278,10 @@ class PositionsContract {
     getParameters() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: this.contractName, scope: this.contractName, table: "parameters", json: true,
+                code: this.contractName,
+                scope: this.contractName,
+                table: "parameters",
+                json: true
             });
             return table.rows[0];
         });
@@ -233,7 +289,10 @@ class PositionsContract {
     getSettings() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: this.contractName, scope: this.contractName, table: "ctrsettings", json: true,
+                code: this.contractName,
+                scope: this.contractName,
+                table: "ctrsettings",
+                json: true
             });
             return table.rows[0];
         });

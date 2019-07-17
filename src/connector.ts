@@ -4,6 +4,7 @@ import { JsonRpc, Api } from "eosjs"
 import { LiquidatorContract, GovernanceContract } from "."
 import { TextDecoder, TextEncoder } from "text-encoding"
 import { PositionsContract } from "./positions"
+import { BalanceGetter } from './balance'
 
 export class EosdtConnector {
     public readonly rpc: JsonRpc
@@ -14,7 +15,10 @@ export class EosdtConnector {
         this.rpc = new JsonRpc(nodeAddress, { fetch })
         const signatureProvider = new JsSignatureProvider(privateKeys)
         this.api = new Api({
-            rpc: this.rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder(),
+            rpc: this.rpc,
+            signatureProvider,
+            textDecoder: new TextDecoder(),
+            textEncoder: new TextEncoder()
         })
     }
 
@@ -28,5 +32,9 @@ export class EosdtConnector {
 
     public getGovernance(): GovernanceContract {
         return new GovernanceContract(this)
+    }
+
+    public getBalances(): BalanceGetter {
+        return new BalanceGetter(this)
     }
 }

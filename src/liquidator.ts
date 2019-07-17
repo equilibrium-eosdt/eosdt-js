@@ -2,7 +2,7 @@ import { JsonRpc, Api } from "eosjs"
 import BigNumber from "bignumber.js"
 import { LiquidatorParameters } from "./interfaces/liquidator"
 import { EosdtConnectorInterface } from "./interfaces/connector"
-import { toBigNumber } from "./utils";
+import { toBigNumber } from "./utils"
 
 export class LiquidatorContract {
     private contractName: string
@@ -15,32 +15,36 @@ export class LiquidatorContract {
         this.contractName = "eosdtliqdatr"
     }
 
-    public async marginCallAndBuyoutEos(senderAccount: string, positionId: number,
-        eosdtToTransfer: string | number | BigNumber): Promise<any> {
-
+    public async marginCallAndBuyoutEos(
+        senderAccount: string,
+        positionId: number,
+        eosdtToTransfer: string | number | BigNumber
+    ): Promise<any> {
         eosdtToTransfer = toBigNumber(eosdtToTransfer)
 
         const receipt = await this.api.transact(
             {
-                actions: [{
-                    account: "eosdtcntract",
-                    name: "margincall",
-                    authorization: [{ actor: senderAccount, permission: "active" }],
-                    data: {
-                        position_id: positionId
+                actions: [
+                    {
+                        account: "eosdtcntract",
+                        name: "margincall",
+                        authorization: [{ actor: senderAccount, permission: "active" }],
+                        data: {
+                            position_id: positionId
+                        }
+                    },
+                    {
+                        account: "eosdtsttoken",
+                        name: "transfer",
+                        authorization: [{ actor: senderAccount, permission: "active" }],
+                        data: {
+                            from: senderAccount,
+                            to: this.contractName,
+                            quantity: `${eosdtToTransfer.toFixed(9)} EOSDT`,
+                            memo: ""
+                        }
                     }
-                },
-                {
-                    account: "eosdtsttoken",
-                    name: "transfer",
-                    authorization: [{ actor: senderAccount, permission: "active" }],
-                    data: {
-                        from: senderAccount,
-                        to: this.contractName,
-                        quantity: `${eosdtToTransfer.toFixed(9)} EOSDT`,
-                        memo: "",
-                    }
-                }],
+                ]
             },
             {
                 blocksBehind: 3,
@@ -51,25 +55,30 @@ export class LiquidatorContract {
         return receipt
     }
 
-    public async transferEos(sender: string, amount: string | number | BigNumber,
-        memo: string): Promise<any> {
-
+    public async transferEos(
+        sender: string,
+        amount: string | number | BigNumber,
+        memo: string
+    ): Promise<any> {
         amount = toBigNumber(amount)
 
         const result = await this.api.transact(
             {
-                actions: [{
-                    account: "eosio.token",
-                    name: "transfer",
-                    authorization: [{ actor: sender, permission: "active" }],
-                    data: {
-                        from: sender,
-                        to: this.contractName,
-                        quantity: `${amount.toFixed(4)} EOS`,
-                        memo,
-                    },
-                }],
-            }, {
+                actions: [
+                    {
+                        account: "eosio.token",
+                        name: "transfer",
+                        authorization: [{ actor: sender, permission: "active" }],
+                        data: {
+                            from: sender,
+                            to: this.contractName,
+                            quantity: `${amount.toFixed(4)} EOS`,
+                            memo
+                        }
+                    }
+                ]
+            },
+            {
                 blocksBehind: 3,
                 expireSeconds: 60
             }
@@ -78,25 +87,30 @@ export class LiquidatorContract {
         return result
     }
 
-    public async transferEosdt(sender: string, amount: string | number | BigNumber,
-        memo: string): Promise<any> {
-
+    public async transferEosdt(
+        sender: string,
+        amount: string | number | BigNumber,
+        memo: string
+    ): Promise<any> {
         amount = toBigNumber(amount)
 
         const result = await this.api.transact(
             {
-                actions: [{
-                    account: "eosdtsttoken",
-                    name: "transfer",
-                    authorization: [{ actor: sender, permission: "active" }],
-                    data: {
-                        from: sender,
-                        to: this.contractName,
-                        quantity: `${amount.toFixed(9)} EOSDT`,
-                        memo,
-                    },
-                }],
-            }, {
+                actions: [
+                    {
+                        account: "eosdtsttoken",
+                        name: "transfer",
+                        authorization: [{ actor: sender, permission: "active" }],
+                        data: {
+                            from: sender,
+                            to: this.contractName,
+                            quantity: `${amount.toFixed(9)} EOSDT`,
+                            memo
+                        }
+                    }
+                ]
+            },
+            {
                 blocksBehind: 3,
                 expireSeconds: 60
             }
@@ -105,25 +119,30 @@ export class LiquidatorContract {
         return result
     }
 
-    public async transferNut(sender: string, amount: string | number | BigNumber,
-        memo: string): Promise<any> {
-
+    public async transferNut(
+        sender: string,
+        amount: string | number | BigNumber,
+        memo: string
+    ): Promise<any> {
         amount = toBigNumber(amount)
 
         const result = await this.api.transact(
             {
-                actions: [{
-                    account: "eosdtnutoken",
-                    name: "transfer",
-                    authorization: [{ actor: sender, permission: "active" }],
-                    data: {
-                        from: sender,
-                        to: this.contractName,
-                        quantity: `${amount.toFixed(9)} NUT`,
-                        memo,
-                    },
-                }],
-            }, {
+                actions: [
+                    {
+                        account: "eosdtnutoken",
+                        name: "transfer",
+                        authorization: [{ actor: sender, permission: "active" }],
+                        data: {
+                            from: sender,
+                            to: this.contractName,
+                            quantity: `${amount.toFixed(9)} NUT`,
+                            memo
+                        }
+                    }
+                ]
+            },
+            {
                 blocksBehind: 3,
                 expireSeconds: 60
             }
@@ -149,7 +168,11 @@ export class LiquidatorContract {
 
     public async getParameters(): Promise<LiquidatorParameters> {
         const table = await this.rpc.get_table_rows({
-            code: this.contractName, scope: this.contractName, table: "parameters", json: true, limit: 1,
+            code: this.contractName,
+            scope: this.contractName,
+            table: "parameters",
+            json: true,
+            limit: 1
         })
         return table.rows[0]
     }

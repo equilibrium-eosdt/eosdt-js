@@ -9,13 +9,17 @@ const eosjs_1 = require("eosjs");
 const _1 = require(".");
 const text_encoding_1 = require("text-encoding");
 const positions_1 = require("./positions");
+const balance_1 = require("./balance");
 class EosdtConnector {
     constructor(nodeAddress, privateKeys) {
         const fetch = node_fetch_1.default; // Workaroung to avoid incompatibility of fetch types in 'eosjs' and 'node-fetch'
         this.rpc = new eosjs_1.JsonRpc(nodeAddress, { fetch });
         const signatureProvider = new eosjs_jssig_1.default(privateKeys);
         this.api = new eosjs_1.Api({
-            rpc: this.rpc, signatureProvider, textDecoder: new text_encoding_1.TextDecoder(), textEncoder: new text_encoding_1.TextEncoder(),
+            rpc: this.rpc,
+            signatureProvider,
+            textDecoder: new text_encoding_1.TextDecoder(),
+            textEncoder: new text_encoding_1.TextEncoder()
         });
     }
     getPositions() {
@@ -26,6 +30,9 @@ class EosdtConnector {
     }
     getGovernance() {
         return new _1.GovernanceContract(this);
+    }
+    getBalances() {
+        return new balance_1.BalanceGetter(this);
     }
 }
 exports.EosdtConnector = EosdtConnector;

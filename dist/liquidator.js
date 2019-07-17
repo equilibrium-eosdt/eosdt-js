@@ -19,7 +19,8 @@ class LiquidatorContract {
         return __awaiter(this, void 0, void 0, function* () {
             eosdtToTransfer = utils_1.toBigNumber(eosdtToTransfer);
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: "eosdtcntract",
                         name: "margincall",
                         authorization: [{ actor: senderAccount, permission: "active" }],
@@ -35,9 +36,10 @@ class LiquidatorContract {
                             from: senderAccount,
                             to: this.contractName,
                             quantity: `${eosdtToTransfer.toFixed(9)} EOSDT`,
-                            memo: "",
+                            memo: ""
                         }
-                    }],
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -49,7 +51,8 @@ class LiquidatorContract {
         return __awaiter(this, void 0, void 0, function* () {
             amount = utils_1.toBigNumber(amount);
             const result = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: "eosio.token",
                         name: "transfer",
                         authorization: [{ actor: sender, permission: "active" }],
@@ -57,9 +60,10 @@ class LiquidatorContract {
                             from: sender,
                             to: this.contractName,
                             quantity: `${amount.toFixed(4)} EOS`,
-                            memo,
-                        },
-                    }],
+                            memo
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -71,7 +75,8 @@ class LiquidatorContract {
         return __awaiter(this, void 0, void 0, function* () {
             amount = utils_1.toBigNumber(amount);
             const result = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: "eosdtsttoken",
                         name: "transfer",
                         authorization: [{ actor: sender, permission: "active" }],
@@ -79,9 +84,10 @@ class LiquidatorContract {
                             from: sender,
                             to: this.contractName,
                             quantity: `${amount.toFixed(9)} EOSDT`,
-                            memo,
-                        },
-                    }],
+                            memo
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -93,7 +99,8 @@ class LiquidatorContract {
         return __awaiter(this, void 0, void 0, function* () {
             amount = utils_1.toBigNumber(amount);
             const result = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: "eosdtnutoken",
                         name: "transfer",
                         authorization: [{ actor: sender, permission: "active" }],
@@ -101,9 +108,10 @@ class LiquidatorContract {
                             from: sender,
                             to: this.contractName,
                             quantity: `${amount.toFixed(9)} NUT`,
-                            memo,
-                        },
-                    }],
+                            memo
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -132,7 +140,11 @@ class LiquidatorContract {
     getParameters() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: this.contractName, scope: this.contractName, table: "parameters", json: true, limit: 1,
+                code: this.contractName,
+                scope: this.contractName,
+                table: "parameters",
+                json: true,
+                limit: 1
             });
             return table.rows[0];
         });

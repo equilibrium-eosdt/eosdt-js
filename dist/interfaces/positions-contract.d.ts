@@ -32,6 +32,7 @@ export interface EosdtContractSettings {
     vote_period: number;
     stake_period: number;
     reserve_ratio: string;
+    staking_weight: string;
 }
 export interface EosdtContractParameters {
     parameter_id: number;

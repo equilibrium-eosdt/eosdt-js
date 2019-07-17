@@ -20,7 +20,8 @@ class GovernanceContract {
             if (!sender)
                 sender = proposal.proposer;
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "propose",
                         authorization: [{ actor: sender, permission: "active" }],
@@ -30,9 +31,10 @@ class GovernanceContract {
                             title: proposal.title,
                             proposal_json: proposal.json,
                             expires_at: utils_1.toEosDate(proposal.expiresAt),
-                            proposal_type: proposal.type,
-                        },
-                    }],
+                            proposal_type: proposal.type
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -43,14 +45,16 @@ class GovernanceContract {
     expire(proposalName, creator) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "expire",
                         authorization: [{ actor: creator, permission: "active" }],
                         data: {
                             proposal_name: proposalName
-                        },
-                    }],
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -61,14 +65,16 @@ class GovernanceContract {
     applyChanges(proposalName, fromAccount) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "apply",
                         authorization: [{ actor: fromAccount, permission: "active" }],
                         data: {
                             proposal_name: proposalName
-                        },
-                    }],
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -79,15 +85,17 @@ class GovernanceContract {
     cleanProposal(proposalName, deletedVotes, actor) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "clnproposal",
                         authorization: [{ actor, permission: "active" }],
                         data: {
                             proposal_name: proposalName,
                             max_count: deletedVotes
-                        },
-                    }],
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -99,7 +107,8 @@ class GovernanceContract {
         return __awaiter(this, void 0, void 0, function* () {
             amount = utils_1.toBigNumber(amount);
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: "eosdtnutoken",
                         name: "transfer",
                         authorization: [{ actor: sender, permission: "active" }],
@@ -107,9 +116,10 @@ class GovernanceContract {
                             from: sender,
                             to: this.contractName,
                             quantity: `${amount.toFixed(9)} NUT`,
-                            memo: "",
-                        },
-                    }],
+                            memo: ""
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -121,15 +131,17 @@ class GovernanceContract {
         return __awaiter(this, void 0, void 0, function* () {
             amount = utils_1.toBigNumber(amount);
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "unstake",
                         authorization: [{ actor: voter, permission: "active" }],
                         data: {
                             voter,
-                            quantity: `${amount.toFixed(9)} NUT`,
-                        },
-                    }],
+                            quantity: `${amount.toFixed(9)} NUT`
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -140,7 +152,8 @@ class GovernanceContract {
     vote(proposalName, vote, voter, voteJson) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "vote",
                         authorization: [{ actor: voter, permission: "active" }],
@@ -149,8 +162,9 @@ class GovernanceContract {
                             proposal_name: proposalName,
                             vote,
                             vote_json: voteJson
-                        },
-                    }],
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -161,15 +175,17 @@ class GovernanceContract {
     unvote(proposalName, voter) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
-                actions: [{
+                actions: [
+                    {
                         account: this.contractName,
                         name: "unvote",
                         authorization: [{ actor: voter, permission: "active" }],
                         data: {
                             voter,
-                            proposal_name: proposalName,
-                        },
-                    }],
+                            proposal_name: proposalName
+                        }
+                    }
+                ]
             }, {
                 blocksBehind: 3,
                 expireSeconds: 60
@@ -180,7 +196,10 @@ class GovernanceContract {
     getSettings() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: this.contractName, scope: this.contractName, table: "govsettings", json: true,
+                code: this.contractName,
+                scope: this.contractName,
+                table: "govsettings",
+                json: true,
                 limit: 1
             });
             return table.rows[0];
@@ -189,7 +208,10 @@ class GovernanceContract {
     getProposals() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: this.contractName, scope: this.contractName, table: "proposals", json: true,
+                code: this.contractName,
+                scope: this.contractName,
+                table: "proposals",
+                json: true,
                 limit: 1000
             });
             return table.rows;
@@ -198,7 +220,10 @@ class GovernanceContract {
     getVotes() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: this.contractName, scope: this.contractName, table: "votes", json: true,
+                code: this.contractName,
+                scope: this.contractName,
+                table: "votes",
+                json: true,
                 limit: 1000
             });
             return table.rows;
