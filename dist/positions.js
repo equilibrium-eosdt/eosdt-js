@@ -70,7 +70,7 @@ class PositionsContract {
             return receipt;
         });
     }
-    delete(creator, positionId) {
+    del(creator, positionId) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({
                 actions: [

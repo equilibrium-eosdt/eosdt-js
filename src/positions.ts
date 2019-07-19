@@ -82,7 +82,7 @@ export class PositionsContract {
         return receipt
     }
 
-    public async delete(creator: string, positionId: number): Promise<any> {
+    public async del(creator: string, positionId: number): Promise<any> {
         const receipt = await this.api.transact(
             {
                 actions: [

@@ -37,7 +37,7 @@ Module to manage EOSDT positions. Methods:
 
 -   `create` - creates new position, using specified amount of EOS as collateral and issuing specified amount of EOSDT to creator.
 -   `close` - used to close a position in event of a global shutdown.
--   `delete` - deletes position that has 0 debt.
+-   `del` - deletes position that has 0 debt.
 -   `give` - transfers position ownership to another account
 -   `addCollateral` - sends EOS to position to increase it's collateralization.
 -   `deleteCollateral` - returns specified part of used collateral to user if LTV stays above critical.
@@ -166,7 +166,7 @@ console.log("Position collateral decreased: ", updatedPosition)
 
 // Deleting position and returning all collateral to user. Would only work, if
 // position has zero debts.
-await positions.delete(accountName, positionId)
+await positions.del(accountName, positionId)
 
 updatedPosition = await positions.getPositionById(positionId)
 console.log("Position deleted, excess EOS returned to user, position must now be undefined: ",
