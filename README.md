@@ -10,7 +10,7 @@ Install the module using NPM:
 $ npm install @eosdt/eosdt-js
 ```
 
-Use service module `Connector` to initiate one of four functional modules (`Positions`, `Governance`, `Liquidator` or `Balances`). `Connector` requires address of node that would process transactions and an array of private keys, used to sign transactions.
+Use service module `Connector` to initiate one of four functional modules (`Positions`, `Governance`, `Liquidator` or `Balances`). `Connector` uses EOS node address and an array of private keys. Transactions would be signed with given keys and sent to blockchain through given node.
 
 ```Javascript
 const { EosdtConnector } = require("@eosdt/eosdt-js")
@@ -36,6 +36,7 @@ Creates a connector object, used to initiate functional modules and invoke their
 Module to manage EOSDT positions. Methods:
 
 -   `create` - creates new position, using specified amount of EOS as collateral and issuing specified amount of EOSDT to creator.
+-   `createEmptyPosition` - creates a new position without any debt or collateral.
 -   `close` - used to close a position in event of a global shutdown.
 -   `del` - deletes position that has 0 debt.
 -   `give` - transfers position ownership to another account

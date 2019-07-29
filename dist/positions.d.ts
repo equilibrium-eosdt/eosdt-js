@@ -7,6 +7,7 @@ export declare class PositionsContract {
     private api;
     constructor(connector: EosdtConnectorInterface);
     create(accountName: string, eosAmount: string | number | BigNumber, eosdtAmount: string | number | BigNumber): Promise<any>;
+    createEmptyPosition(accountName: string): Promise<any>;
     close(senderAccount: string, positionId: number): Promise<any>;
     del(creator: string, positionId: number): Promise<any>;
     give(account: string, receiver: string, positionId: number): Promise<any>;

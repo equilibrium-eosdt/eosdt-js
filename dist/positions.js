@@ -52,6 +52,24 @@ class PositionsContract {
             return receipt;
         });
     }
+    createEmptyPosition(accountName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "positionadd",
+                        authorization: [{ actor: accountName, permission: "active" }],
+                        data: { maker: accountName }
+                    }
+                ]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 60
+            });
+            return receipt;
+        });
+    }
     close(senderAccount, positionId) {
         return __awaiter(this, void 0, void 0, function* () {
             const receipt = yield this.api.transact({

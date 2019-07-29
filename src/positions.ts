@@ -61,6 +61,27 @@ export class PositionsContract {
         return receipt
     }
 
+    public async createEmptyPosition(accountName: string): Promise<any> {
+        const receipt = await this.api.transact(
+            {
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "positionadd",
+                        authorization: [{ actor: accountName, permission: "active" }],
+                        data: { maker: accountName }
+                    }
+                ]
+            },
+            {
+                blocksBehind: 3,
+                expireSeconds: 60
+            }
+        )
+
+        return receipt
+    }
+
     public async close(senderAccount: string, positionId: number): Promise<any> {
         const receipt = await this.api.transact(
             {
