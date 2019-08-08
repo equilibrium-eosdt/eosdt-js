@@ -1,9 +1,10 @@
 {
   "name": "@eosdt/eosdt-js",
-  "version": "0.4.41",
+  "version": "0.5.0",
   "description": "JS library to execute EOSDT contracts methods",
   "main": "./dist/index.js",
   "scripts": {
+    "build": "tsc --build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Equilibrium",

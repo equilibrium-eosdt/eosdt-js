@@ -7,10 +7,13 @@ export interface EosdtPosition {
 }
 export interface TokenRate {
     rate: string;
-    last_update: string;
-    master_update: string;
-    slave_update: string;
-    onerror_update: string;
+    update: string;
+    provablecb1a_price: string;
+    provablecb1a_update: string;
+    eosnationdsp_price: string;
+    eosnationdsp_update: string;
+    equilibriumdsp_price: string;
+    equilibriumdsp_update: string;
 }
 export interface EosdtContractSettings {
     setting_id: number;
@@ -33,6 +36,8 @@ export interface EosdtContractSettings {
     stake_period: number;
     reserve_ratio: string;
     staking_weight: string;
+    bpproxy_account: string;
+    governc_account: string;
 }
 export interface EosdtContractParameters {
     parameter_id: number;

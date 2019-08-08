@@ -127,6 +127,16 @@ class GovernanceContract {
             return receipt;
         });
     }
+    getVoterInfo(accountName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                table: "voters",
+                scope: accountName
+            });
+            return result.rows[0];
+        });
+    }
     unstake(amount, voter) {
         return __awaiter(this, void 0, void 0, function* () {
             amount = utils_1.toBigNumber(amount);
@@ -162,6 +172,30 @@ class GovernanceContract {
                             proposal_name: proposalName,
                             vote,
                             vote_json: voteJson
+                        }
+                    }
+                ]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 60
+            });
+            return receipt;
+        });
+    }
+    voteForBlockProducers(voter, ...producers) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers });
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "vote",
+                        authorization: [{ actor: voter, permission: "active" }],
+                        data: {
+                            voter,
+                            proposal_name: "blockproduce",
+                            vote: 1,
+                            vote_json
                         }
                     }
                 ]
@@ -225,6 +259,16 @@ class GovernanceContract {
                 table: "votes",
                 json: true,
                 limit: 1000
+            });
+            return table.rows;
+        });
+    }
+    getBpVotes() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "bpvotes"
             });
             return table.rows;
         });

@@ -315,7 +315,7 @@ export class PositionsContract {
         const table = await this.rpc.get_table_rows({
             code: "eosdtorclize",
             scope: "eosdtorclize",
-            table: "oracle.rates",
+            table: "orarates",
             json: true,
             limit: 500
         })

@@ -18,22 +18,31 @@ export interface ProposeObject {
 export interface EosdtVote {
     id: number;
     proposal_name: string;
+    updated_at: string;
     voter: string;
     vote: number;
-    updated_at: string;
-    quantity: string;
+    vote_json: string;
 }
 export interface GovernanceSettings {
     setting_id: number;
-    time_shift: number;
     eosdtcntract_account: string;
-    liquidator_account: string;
-    oraclize_account: string;
-    nutoken_account: string;
     min_proposal_weight: string;
     freeze_period: number;
     min_participation: string;
     success_margin: string;
     top_holders_amount: number;
-    min_threshold: string;
+    max_bp_count: number;
+    max_bp_votes: number;
+    min_vote_stake: string;
+    unstake_period: number;
+    bpproxy_account: string;
+    governc_account: string;
+}
+export interface BPVotes {
+    producer: string;
+    votes: string;
+}
+export interface VoterInfo {
+    voting_amount: string;
+    withdrawal_date: string;
 }

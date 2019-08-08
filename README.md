@@ -67,6 +67,9 @@ Governance methods help manage the system: create proposals to change system par
 -   `getSettings` - returns governance contract settings.
 -   `getProposals` - returns an array with all proposals (up to 1000).
 -   `getVotes` - returns an array with all votes (up to 1000).
+-   `getVoterInfo` - returns amount of staked EOS and unstake date for specified voter.
+-   `voteForBlockProducers` - voting with staked NUTs for specified block producers.
+-   `getBpVotes` - returns array of block producers names and amount of NUT votes for them.
 
 ### Liquidator
 
