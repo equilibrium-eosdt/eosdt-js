@@ -157,6 +157,50 @@ export class GovernanceContract {
         return receipt
     }
 
+    public async stakeAndVote(
+      sender: string,
+      amount: string | number | BigNumber,
+      producers: string[]
+  ): Promise<any> {
+      amount = toBigNumber(amount)
+      const voter = sender
+      const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers })
+      const receipt = await this.api.transact(
+          {
+              actions: [
+                  {
+                      account: "eosdtnutoken",
+                      name: "transfer",
+                      authorization: [{ actor: sender, permission: "active" }],
+                      data: {
+                          from: sender,
+                          to: this.contractName,
+                          quantity: `${amount.toFixed(9)} NUT`,
+                          memo: ""
+                      }
+                  },
+                  {
+                      account: this.contractName,
+                      name: "vote",
+                      authorization: [{ actor: voter, permission: "active" }],
+                      data: {
+                        voter,
+                          proposal_name: "blockproduce",
+                          vote: 1,
+                          vote_json
+                      }
+                  }
+              ]
+          },
+          {
+              blocksBehind: 3,
+              expireSeconds: 60
+          }
+      )
+
+      return receipt
+  }
+
     public async getVoterInfo(accountName: string): Promise<VoterInfo | undefined> {
         const result = await this.rpc.get_table_rows({
             code: this.contractName,

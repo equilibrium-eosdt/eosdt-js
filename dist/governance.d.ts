@@ -11,6 +11,7 @@ export declare class GovernanceContract {
     applyChanges(proposalName: string, fromAccount: string): Promise<any>;
     cleanProposal(proposalName: string, deletedVotes: number, actor: string): Promise<any>;
     stake(sender: string, amount: string | number | BigNumber): Promise<any>;
+    stakeAndVote(sender: string, amount: string | number | BigNumber, producers: string[]): Promise<any>;
     getVoterInfo(accountName: string): Promise<VoterInfo | undefined>;
     unstake(amount: string | number | BigNumber, voter: string): Promise<any>;
     vote(proposalName: string, vote: number, voter: string, voteJson: string): Promise<any>;

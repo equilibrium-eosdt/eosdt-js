@@ -127,6 +127,43 @@ class GovernanceContract {
             return receipt;
         });
     }
+    stakeAndVote(sender, amount, producers) {
+        return __awaiter(this, void 0, void 0, function* () {
+            amount = utils_1.toBigNumber(amount);
+            const voter = sender;
+            const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers });
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: "eosdtnutoken",
+                        name: "transfer",
+                        authorization: [{ actor: sender, permission: "active" }],
+                        data: {
+                            from: sender,
+                            to: this.contractName,
+                            quantity: `${amount.toFixed(9)} NUT`,
+                            memo: ""
+                        }
+                    },
+                    {
+                        account: this.contractName,
+                        name: "vote",
+                        authorization: [{ actor: voter, permission: "active" }],
+                        data: {
+                            voter,
+                            proposal_name: "blockproduce",
+                            vote: 1,
+                            vote_json
+                        }
+                    }
+                ]
+            }, {
+                blocksBehind: 3,
+                expireSeconds: 60
+            });
+            return receipt;
+        });
+    }
     getVoterInfo(accountName) {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield this.rpc.get_table_rows({
