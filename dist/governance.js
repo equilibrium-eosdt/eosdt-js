@@ -305,7 +305,8 @@ class GovernanceContract {
             const table = yield this.rpc.get_table_rows({
                 code: this.contractName,
                 scope: this.contractName,
-                table: "bpvotes"
+                table: "bpvotes",
+                limit: 1000
             });
             return table.rows;
         });
