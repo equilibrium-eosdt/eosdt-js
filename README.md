@@ -64,12 +64,14 @@ Governance methods help manage the system: create proposals to change system par
 -   `unstake` - unstakes NUT tokens, returning them to user and lowering amount of available votes.
 -   `vote` - vote for or against a proposal. Vote `1` as "yes", `0` or any other number as "no".
 -   `unvote` - removes all user votes from a proposal.
--   `getSettings` - returns governance contract settings.
--   `getProposals` - returns an array with all proposals (up to 1000).
--   `getVotes` - returns an array with all votes (up to 1000).
--   `getVoterInfo` - returns amount of staked EOS and unstake date for specified voter.
 -   `voteForBlockProducers` - voting with staked NUTs for specified block producers.
+-   `stakeAndVoteForBlockProducers` - stakes NUT and votes for BPs in one transaction.
+-   `getVoterInfo` - returns amount of NUTs staked by account in EOSDT Governance contract and their unstake date.
+-   `getVotes` - returns an array with all votes (up to 1000).
+-   `getProposals` - returns an array with all proposals (up to 1000).
 -   `getBpVotes` - returns array of block producers names and amount of NUT votes for them.
+-   `getProxyInfo` - returns voter info for `eosdtbpproxy`.
+-   `getSettings` - returns governance contract settings.
 
 ### Liquidator
 
@@ -86,7 +88,7 @@ Methods to get Liquidator contract parameters and exchange EOS and EOSDT in case
 
 ### Balances
 
-Module to get user's balances of EOSDT, EOS and NUT. Methods:
+Module to get account's balances of EOSDT, EOS and NUT. Methods:
 
 -   `getNut` - returns NUT balance of account
 -   `getEosdt` - returns EOSDT balance of account

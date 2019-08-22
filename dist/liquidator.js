@@ -15,108 +15,114 @@ class LiquidatorContract {
         this.api = connector.api;
         this.contractName = "eosdtliqdatr";
     }
-    marginCallAndBuyoutEos(senderAccount, positionId, eosdtToTransfer) {
+    marginCallAndBuyoutEos(senderName, positionId, eosdtToTransfer, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            eosdtToTransfer = utils_1.toBigNumber(eosdtToTransfer);
+            const eosdtAssetString = utils_1.amountToAssetString(eosdtToTransfer, "EOSDT");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: "eosdtcntract",
                         name: "margincall",
-                        authorization: [{ actor: senderAccount, permission: "active" }],
-                        data: {
-                            position_id: positionId
-                        }
+                        authorization,
+                        data: { position_id: positionId }
                     },
                     {
                         account: "eosdtsttoken",
                         name: "transfer",
-                        authorization: [{ actor: senderAccount, permission: "active" }],
+                        authorization,
                         data: {
-                            from: senderAccount,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${eosdtToTransfer.toFixed(9)} EOSDT`,
-                            memo: ""
+                            quantity: eosdtAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js buyout"
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    transferEos(sender, amount, memo) {
+    transferEos(senderName, amount, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            amount = utils_1.toBigNumber(amount);
-            const result = yield this.api.transact({
+            const eosAssetString = utils_1.amountToAssetString(amount, "EOS");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
+            const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: "eosio.token",
                         name: "transfer",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
-                            from: sender,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${amount.toFixed(4)} EOS`,
-                            memo
+                            quantity: eosAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js transferEos()"
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
-            return result;
+            return receipt;
         });
     }
-    transferEosdt(sender, amount, memo) {
+    transferEosdt(senderName, eosdtAmount, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            amount = utils_1.toBigNumber(amount);
-            const result = yield this.api.transact({
+            const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
+            const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: "eosdtsttoken",
                         name: "transfer",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
-                            from: sender,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${amount.toFixed(9)} EOSDT`,
-                            memo
+                            quantity: eosdtAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js transferEosdt()"
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
-            return result;
+            return receipt;
         });
     }
-    transferNut(sender, amount, memo) {
+    transferNut(senderName, nutAmount, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            amount = utils_1.toBigNumber(amount);
-            const result = yield this.api.transact({
+            const nutAssetString = utils_1.amountToAssetString(nutAmount, "NUT");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
+            const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: "eosdtnutoken",
                         name: "transfer",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
-                            from: sender,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${amount.toFixed(9)} NUT`,
-                            memo
+                            quantity: nutAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js transferNut()"
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
-            return result;
+            return receipt;
         });
     }
     getSurplusDebt() {
@@ -142,9 +148,7 @@ class LiquidatorContract {
             const table = yield this.rpc.get_table_rows({
                 code: this.contractName,
                 scope: this.contractName,
-                table: "parameters",
-                json: true,
-                limit: 1
+                table: "parameters"
             });
             return table.rows[0];
         });

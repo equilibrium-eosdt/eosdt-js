@@ -51,3 +51,16 @@ export interface VoterInfo {
     voting_amount: string // EOS type: asset (NUT)
     withdrawal_date: string // EOS type: time_point_sec
 }
+
+export interface EosVoterInfo {
+    owner: string
+    proxy: string
+    producers: string[]
+    staked: number
+    last_vote_weight: string
+    proxied_vote_weight: string
+    is_proxy: number
+    flags1: number
+    reserved2: number
+    reserved3: string
+}

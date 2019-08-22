@@ -1,15 +1,16 @@
-import BigNumber from "bignumber.js"
-import { JsonRpc, Api } from "eosjs"
+import { Api, JsonRpc } from "eosjs"
 import { EosdtConnectorInterface } from "./interfaces/connector"
-import { toEosDate, toBigNumber } from "./utils"
 import {
-    GovernanceSettings,
-    StoredProposal,
-    EosdtVote,
-    ProposeObject,
     BPVotes,
+    EosdtVote,
+    EosVoterInfo,
+    GovernanceSettings,
+    ProposeObject,
+    StoredProposal,
     VoterInfo
 } from "./interfaces/governance"
+import { ITrxParamsArgument } from "./interfaces/transaction"
+import { amountToAssetString, dateToEosDate, setTransactionParams } from "./utils"
 
 export class GovernanceContract {
     private contractName: string
@@ -22,8 +23,13 @@ export class GovernanceContract {
         this.contractName = "eosdtgovernc"
     }
 
-    public async propose(proposal: ProposeObject, sender?: string): Promise<any> {
-        if (!sender) sender = proposal.proposer
+    public async propose(
+        proposal: ProposeObject,
+        senderName: string,
+        transactionParams?: ITrxParamsArgument
+    ): Promise<any> {
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: senderName, permission: trxParams.permission }]
 
         const receipt = await this.api.transact(
             {
@@ -31,67 +37,77 @@ export class GovernanceContract {
                     {
                         account: this.contractName,
                         name: "propose",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
                             proposer: proposal.proposer,
                             proposal_name: proposal.name,
                             title: proposal.title,
                             proposal_json: proposal.json,
-                            expires_at: toEosDate(proposal.expiresAt),
+                            expires_at: dateToEosDate(proposal.expiresAt),
                             proposal_type: proposal.type
                         }
                     }
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
         return receipt
     }
 
-    public async expire(proposalName: string, creator: string): Promise<any> {
+    public async expire(
+        proposalName: string,
+        senderName: string,
+        transactionParams?: ITrxParamsArgument
+    ): Promise<any> {
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: senderName, permission: trxParams.permission }]
+
         const receipt = await this.api.transact(
             {
                 actions: [
                     {
                         account: this.contractName,
                         name: "expire",
-                        authorization: [{ actor: creator, permission: "active" }],
-                        data: {
-                            proposal_name: proposalName
-                        }
+                        authorization,
+                        data: { proposal_name: proposalName }
                     }
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
         return receipt
     }
 
-    public async applyChanges(proposalName: string, fromAccount: string): Promise<any> {
+    public async applyChanges(
+        proposalName: string,
+        senderName: string,
+        transactionParams?: ITrxParamsArgument
+    ): Promise<any> {
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: senderName, permission: trxParams.permission }]
+
         const receipt = await this.api.transact(
             {
                 actions: [
                     {
                         account: this.contractName,
                         name: "apply",
-                        authorization: [{ actor: fromAccount, permission: "active" }],
-                        data: {
-                            proposal_name: proposalName
-                        }
+                        authorization,
+                        data: { proposal_name: proposalName }
                     }
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
@@ -101,15 +117,19 @@ export class GovernanceContract {
     public async cleanProposal(
         proposalName: string,
         deletedVotes: number,
-        actor: string
+        senderName: string,
+        transactionParams?: ITrxParamsArgument
     ): Promise<any> {
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: senderName, permission: trxParams.permission }]
+
         const receipt = await this.api.transact(
             {
                 actions: [
                     {
                         account: this.contractName,
                         name: "clnproposal",
-                        authorization: [{ actor, permission: "active" }],
+                        authorization,
                         data: {
                             proposal_name: proposalName,
                             max_count: deletedVotes
@@ -118,8 +138,8 @@ export class GovernanceContract {
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
@@ -127,10 +147,14 @@ export class GovernanceContract {
     }
 
     public async stake(
-        sender: string,
-        amount: string | number | BigNumber
+        senderName: string,
+        nutAmount: string | number,
+        trxMemo?: string,
+        transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        amount = toBigNumber(amount)
+        const nutAssetString = amountToAssetString(nutAmount, "NUT")
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: senderName, permission: trxParams.permission }]
 
         const receipt = await this.api.transact(
             {
@@ -138,83 +162,33 @@ export class GovernanceContract {
                     {
                         account: "eosdtnutoken",
                         name: "transfer",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
-                            from: sender,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${amount.toFixed(9)} NUT`,
-                            memo: ""
+                            quantity: nutAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js stake()"
                         }
                     }
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
         return receipt
     }
 
-    public async stakeAndVote(
-      sender: string,
-      amount: string | number | BigNumber,
-      producers: string[]
-  ): Promise<any> {
-      amount = toBigNumber(amount)
-      const voter = sender
-      const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers })
-      const receipt = await this.api.transact(
-          {
-              actions: [
-                  {
-                      account: "eosdtnutoken",
-                      name: "transfer",
-                      authorization: [{ actor: sender, permission: "active" }],
-                      data: {
-                          from: sender,
-                          to: this.contractName,
-                          quantity: `${amount.toFixed(9)} NUT`,
-                          memo: ""
-                      }
-                  },
-                  {
-                      account: this.contractName,
-                      name: "vote",
-                      authorization: [{ actor: voter, permission: "active" }],
-                      data: {
-                        voter,
-                          proposal_name: "blockproduce",
-                          vote: 1,
-                          vote_json
-                      }
-                  }
-              ]
-          },
-          {
-              blocksBehind: 3,
-              expireSeconds: 60
-          }
-      )
-
-      return receipt
-  }
-
-    public async getVoterInfo(accountName: string): Promise<VoterInfo | undefined> {
-        const result = await this.rpc.get_table_rows({
-            code: this.contractName,
-            table: "voters",
-            scope: accountName
-        })
-        return result.rows[0]
-    }
-
     public async unstake(
-        amount: string | number | BigNumber,
-        voter: string
+        nutAmount: string | number,
+        voterName: string,
+        transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        amount = toBigNumber(amount)
+        const nutAssetString = amountToAssetString(nutAmount, "NUT")
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: voterName, permission: trxParams.permission }]
 
         const receipt = await this.api.transact(
             {
@@ -222,17 +196,17 @@ export class GovernanceContract {
                     {
                         account: this.contractName,
                         name: "unstake",
-                        authorization: [{ actor: voter, permission: "active" }],
+                        authorization,
                         data: {
-                            voter,
-                            quantity: `${amount.toFixed(9)} NUT`
+                            voter: voterName,
+                            quantity: nutAssetString
                         }
                     }
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
@@ -242,18 +216,22 @@ export class GovernanceContract {
     public async vote(
         proposalName: string,
         vote: number,
-        voter: string,
-        voteJson: string
+        voterName: string,
+        voteJson: string,
+        transactionParams?: ITrxParamsArgument
     ): Promise<any> {
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: voterName, permission: trxParams.permission }]
+
         const receipt = await this.api.transact(
             {
                 actions: [
                     {
                         account: this.contractName,
                         name: "vote",
-                        authorization: [{ actor: voter, permission: "active" }],
+                        authorization,
                         data: {
-                            voter,
+                            voter: voterName,
                             proposal_name: proposalName,
                             vote,
                             vote_json: voteJson
@@ -262,8 +240,39 @@ export class GovernanceContract {
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            }
+        )
+
+        return receipt
+    }
+
+    public async unvote(
+        proposalName: string,
+        voterName: string,
+        transactionParams?: ITrxParamsArgument
+    ): Promise<any> {
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: voterName, permission: trxParams.permission }]
+
+        const receipt = await this.api.transact(
+            {
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "unvote",
+                        authorization,
+                        data: {
+                            voter: voterName,
+                            proposal_name: proposalName
+                        }
+                    }
+                ]
+            },
+            {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
@@ -271,17 +280,69 @@ export class GovernanceContract {
     }
 
     public async voteForBlockProducers(
-        voter: string,
+        voterName: string,
+        transactionParams?: ITrxParamsArgument,
         ...producers: string[]
     ): Promise<any> {
         const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers })
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: voterName, permission: trxParams.permission }]
+
         const receipt = await this.api.transact(
             {
                 actions: [
                     {
                         account: this.contractName,
                         name: "vote",
-                        authorization: [{ actor: voter, permission: "active" }],
+                        authorization,
+                        data: {
+                            voter: voterName,
+                            proposal_name: "blockproduce",
+                            vote: 1,
+                            vote_json
+                        }
+                    }
+                ]
+            },
+            {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            }
+        )
+        return receipt
+    }
+
+    public async stakeAndVoteForBlockProducers(
+        voterName: string,
+        nutAmount: string | number,
+        producers: string[],
+        transactionParams?: ITrxParamsArgument
+    ): Promise<any> {
+        const nutAssetString = amountToAssetString(nutAmount, "NUT")
+        const voter = voterName
+        const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers })
+
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: voterName, permission: trxParams.permission }]
+
+        const receipt = await this.api.transact(
+            {
+                actions: [
+                    {
+                        account: "eosdtnutoken",
+                        name: "transfer",
+                        authorization,
+                        data: {
+                            from: voterName,
+                            to: this.contractName,
+                            quantity: nutAssetString,
+                            memo: ""
+                        }
+                    },
+                    {
+                        account: this.contractName,
+                        name: "vote",
+                        authorization,
                         data: {
                             voter,
                             proposal_name: "blockproduce",
@@ -292,57 +353,21 @@ export class GovernanceContract {
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
-            }
-        )
-        return receipt
-    }
-
-    public async unvote(proposalName: string, voter: string): Promise<any> {
-        const receipt = await this.api.transact(
-            {
-                actions: [
-                    {
-                        account: this.contractName,
-                        name: "unvote",
-                        authorization: [{ actor: voter, permission: "active" }],
-                        data: {
-                            voter,
-                            proposal_name: proposalName
-                        }
-                    }
-                ]
-            },
-            {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
         return receipt
     }
 
-    public async getSettings(): Promise<GovernanceSettings> {
+    public async getVoterInfo(accountName: string): Promise<VoterInfo | undefined> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
-            scope: this.contractName,
-            table: "govsettings",
-            json: true,
-            limit: 1
+            table: "voters",
+            scope: accountName
         })
         return table.rows[0]
-    }
-
-    public async getProposals(): Promise<StoredProposal[]> {
-        const table = await this.rpc.get_table_rows({
-            code: this.contractName,
-            scope: this.contractName,
-            table: "proposals",
-            json: true,
-            limit: 1000
-        })
-        return table.rows
     }
 
     public async getVotes(): Promise<EosdtVote[]> {
@@ -350,7 +375,16 @@ export class GovernanceContract {
             code: this.contractName,
             scope: this.contractName,
             table: "votes",
-            json: true,
+            limit: 1000
+        })
+        return table.rows
+    }
+
+    public async getProposals(): Promise<StoredProposal[]> {
+        const table = await this.rpc.get_table_rows({
+            code: this.contractName,
+            scope: this.contractName,
+            table: "proposals",
             limit: 1000
         })
         return table.rows
@@ -361,8 +395,28 @@ export class GovernanceContract {
             code: this.contractName,
             scope: this.contractName,
             table: "bpvotes",
-	    limit: 1000
+            limit: 1000
         })
         return table.rows
+    }
+
+    public async getProxyInfo(): Promise<EosVoterInfo | undefined> {
+        const table = await this.rpc.get_table_rows({
+            code: "eosio",
+            scope: "eosio",
+            table: "voters",
+            lower_bound: "eosdtbpproxy",
+            upper_bound: "eosdtbpproxy"
+        })
+        return table.rows[0]
+    }
+
+    public async getSettings(): Promise<GovernanceSettings> {
+        const table = await this.rpc.get_table_rows({
+            code: this.contractName,
+            scope: this.contractName,
+            table: "govsettings"
+        })
+        return table.rows[0]
     }
 }

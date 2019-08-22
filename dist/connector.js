@@ -3,13 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const eosjs_1 = require("eosjs");
 const eosjs_jssig_1 = __importDefault(require("eosjs/dist/eosjs-jssig"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
-const eosjs_1 = require("eosjs");
-const _1 = require(".");
 const text_encoding_1 = require("text-encoding");
-const positions_1 = require("./positions");
+const _1 = require(".");
 const balance_1 = require("./balance");
+const positions_1 = require("./positions");
 class EosdtConnector {
     constructor(nodeAddress, privateKeys) {
         const fetch = node_fetch_1.default; // Workaroung to avoid incompatibility of fetch types in 'eosjs' and 'node-fetch'

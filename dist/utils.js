@@ -1,20 +1,41 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const bignumber_js_1 = __importDefault(require("bignumber.js"));
-function toEosDate(date) {
+function setTransactionParams(trxParams) {
+    const parameters = {
+        permission: "active",
+        blocksBehind: 3,
+        expireSeconds: 60
+    };
+    if (!trxParams)
+        return parameters;
+    if (trxParams.permission)
+        parameters.permission = trxParams.permission;
+    if (trxParams.blocksBehind)
+        parameters.blocksBehind = trxParams.blocksBehind;
+    if (trxParams.expireSeconds)
+        parameters.expireSeconds = trxParams.expireSeconds;
+    return parameters;
+}
+exports.setTransactionParams = setTransactionParams;
+function dateToEosDate(date) {
     return date.toISOString().slice(0, -5);
 }
-exports.toEosDate = toEosDate;
-function toBigNumber(amount) {
-    if (typeof amount === "string" || typeof amount === "number") {
-        return new bignumber_js_1.default(amount);
-    }
-    return amount;
+exports.dateToEosDate = dateToEosDate;
+function amountToAssetString(amount, assetSymbol) {
+    if (typeof amount === "string")
+        amount = parseFloat(amount);
+    assetSymbol = assetSymbol.toUpperCase();
+    let decimals;
+    if (assetSymbol === "EOS")
+        decimals = 4;
+    else if (assetSymbol === "EOSDT" || assetSymbol === "NUT")
+        decimals = 9;
+    else
+        throw new Error(`${amountToAssetString.name}(): unknown interface
+    interfacesymbol ${assetSymbol}`);
+    return `${amount.toFixed(decimals)} ${assetSymbol}`;
 }
-exports.toBigNumber = toBigNumber;
+exports.amountToAssetString = amountToAssetString;
 function balanceToNumber(balance) {
     if (Array.isArray(balance) && typeof balance[0] === "string") {
         const x = balance[0].match(/[0-9,\.]+/g);

@@ -1,8 +1,8 @@
-import { JsonRpc, Api } from "eosjs"
-import BigNumber from "bignumber.js"
-import { LiquidatorParameters } from "./interfaces/liquidator"
+import { Api, JsonRpc } from "eosjs"
 import { EosdtConnectorInterface } from "./interfaces/connector"
-import { toBigNumber } from "./utils"
+import { LiquidatorParameters } from "./interfaces/liquidator"
+import { ITrxParamsArgument } from "./interfaces/transaction"
+import { amountToAssetString, setTransactionParams } from "./utils"
 
 export class LiquidatorContract {
     private contractName: string
@@ -16,11 +16,15 @@ export class LiquidatorContract {
     }
 
     public async marginCallAndBuyoutEos(
-        senderAccount: string,
+        senderName: string,
         positionId: number,
-        eosdtToTransfer: string | number | BigNumber
+        eosdtToTransfer: string | number,
+        trxMemo?: string,
+        transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        eosdtToTransfer = toBigNumber(eosdtToTransfer)
+        const eosdtAssetString = amountToAssetString(eosdtToTransfer, "EOSDT")
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: senderName, permission: trxParams.permission }]
 
         const receipt = await this.api.transact(
             {
@@ -28,27 +32,25 @@ export class LiquidatorContract {
                     {
                         account: "eosdtcntract",
                         name: "margincall",
-                        authorization: [{ actor: senderAccount, permission: "active" }],
-                        data: {
-                            position_id: positionId
-                        }
+                        authorization,
+                        data: { position_id: positionId }
                     },
                     {
                         account: "eosdtsttoken",
                         name: "transfer",
-                        authorization: [{ actor: senderAccount, permission: "active" }],
+                        authorization,
                         data: {
-                            from: senderAccount,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${eosdtToTransfer.toFixed(9)} EOSDT`,
-                            memo: ""
+                            quantity: eosdtAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js buyout"
                         }
                     }
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
@@ -56,99 +58,108 @@ export class LiquidatorContract {
     }
 
     public async transferEos(
-        sender: string,
-        amount: string | number | BigNumber,
-        memo: string
+        senderName: string,
+        amount: string | number,
+        trxMemo?: string,
+        transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        amount = toBigNumber(amount)
+        const eosAssetString = amountToAssetString(amount, "EOS")
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: senderName, permission: trxParams.permission }]
 
-        const result = await this.api.transact(
+        const receipt = await this.api.transact(
             {
                 actions: [
                     {
                         account: "eosio.token",
                         name: "transfer",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
-                            from: sender,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${amount.toFixed(4)} EOS`,
-                            memo
+                            quantity: eosAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js transferEos()"
                         }
                     }
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
-        return result
+        return receipt
     }
 
     public async transferEosdt(
-        sender: string,
-        amount: string | number | BigNumber,
-        memo: string
+        senderName: string,
+        eosdtAmount: string | number,
+        trxMemo?: string,
+        transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        amount = toBigNumber(amount)
+        const eosdtAssetString = amountToAssetString(eosdtAmount, "EOSDT")
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: senderName, permission: trxParams.permission }]
 
-        const result = await this.api.transact(
+        const receipt = await this.api.transact(
             {
                 actions: [
                     {
                         account: "eosdtsttoken",
                         name: "transfer",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
-                            from: sender,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${amount.toFixed(9)} EOSDT`,
-                            memo
+                            quantity: eosdtAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js transferEosdt()"
                         }
                     }
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
-        return result
+        return receipt
     }
 
     public async transferNut(
-        sender: string,
-        amount: string | number | BigNumber,
-        memo: string
+        senderName: string,
+        nutAmount: string | number,
+        trxMemo: string,
+        transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        amount = toBigNumber(amount)
+        const nutAssetString = amountToAssetString(nutAmount, "NUT")
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: senderName, permission: trxParams.permission }]
 
-        const result = await this.api.transact(
+        const receipt = await this.api.transact(
             {
                 actions: [
                     {
                         account: "eosdtnutoken",
                         name: "transfer",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
-                            from: sender,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${amount.toFixed(9)} NUT`,
-                            memo
+                            quantity: nutAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js transferNut()"
                         }
                     }
                 ]
             },
             {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             }
         )
 
-        return result
+        return receipt
     }
 
     public async getSurplusDebt(): Promise<string> {
@@ -170,9 +181,7 @@ export class LiquidatorContract {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
             scope: this.contractName,
-            table: "parameters",
-            json: true,
-            limit: 1
+            table: "parameters"
         })
         return table.rows[0]
     }

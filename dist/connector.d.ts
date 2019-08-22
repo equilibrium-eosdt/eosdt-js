@@ -1,7 +1,7 @@
-import { JsonRpc, Api } from "eosjs";
-import { LiquidatorContract, GovernanceContract } from ".";
+import { Api, JsonRpc } from "eosjs";
+import { GovernanceContract, LiquidatorContract } from ".";
+import { BalanceGetter } from "./balance";
 import { PositionsContract } from "./positions";
-import { BalanceGetter } from './balance';
 export declare class EosdtConnector {
     readonly rpc: JsonRpc;
     readonly api: Api;

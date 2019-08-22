@@ -1,10 +1,10 @@
+import { Api, JsonRpc } from "eosjs"
 import JsSignatureProvider from "eosjs/dist/eosjs-jssig"
 import Fetch from "node-fetch"
-import { JsonRpc, Api } from "eosjs"
-import { LiquidatorContract, GovernanceContract } from "."
 import { TextDecoder, TextEncoder } from "text-encoding"
+import { GovernanceContract, LiquidatorContract } from "."
+import { BalanceGetter } from "./balance"
 import { PositionsContract } from "./positions"
-import { BalanceGetter } from './balance'
 
 export class EosdtConnector {
     public readonly rpc: JsonRpc

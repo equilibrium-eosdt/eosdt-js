@@ -1,10 +1,11 @@
-export { JsonRpc, Api } from "eosjs";
-export { LiquidatorContract } from "./liquidator";
-export { GovernanceContract } from "./governance";
-export { EosdtConnector } from "./connector";
-export { PositionsContract } from "./positions";
 export { BalanceGetter } from "./balance";
-export * from "./interfaces/positions-contract";
+export { EosdtConnector } from "./connector";
+export { JsonRpc, Api } from "eosjs";
+export { GovernanceContract } from "./governance";
+export { LiquidatorContract } from "./liquidator";
+export { PositionsContract } from "./positions";
 export * from "./interfaces/connector";
 export * from "./interfaces/governance";
 export * from "./interfaces/liquidator";
+export * from "./interfaces/positions-contract";
+export * from "./interfaces/transaction";

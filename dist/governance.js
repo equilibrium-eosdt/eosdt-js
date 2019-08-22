@@ -15,81 +15,83 @@ class GovernanceContract {
         this.api = connector.api;
         this.contractName = "eosdtgovernc";
     }
-    propose(proposal, sender) {
+    propose(proposal, senderName, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!sender)
-                sender = proposal.proposer;
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "propose",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
                             proposer: proposal.proposer,
                             proposal_name: proposal.name,
                             title: proposal.title,
                             proposal_json: proposal.json,
-                            expires_at: utils_1.toEosDate(proposal.expiresAt),
+                            expires_at: utils_1.dateToEosDate(proposal.expiresAt),
                             proposal_type: proposal.type
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    expire(proposalName, creator) {
+    expire(proposalName, senderName, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "expire",
-                        authorization: [{ actor: creator, permission: "active" }],
-                        data: {
-                            proposal_name: proposalName
-                        }
+                        authorization,
+                        data: { proposal_name: proposalName }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    applyChanges(proposalName, fromAccount) {
+    applyChanges(proposalName, senderName, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "apply",
-                        authorization: [{ actor: fromAccount, permission: "active" }],
-                        data: {
-                            proposal_name: proposalName
-                        }
+                        authorization,
+                        data: { proposal_name: proposalName }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    cleanProposal(proposalName, deletedVotes, actor) {
+    cleanProposal(proposalName, deletedVotes, senderName, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "clnproposal",
-                        authorization: [{ actor, permission: "active" }],
+                        authorization,
                         data: {
                             proposal_name: proposalName,
                             max_count: deletedVotes
@@ -97,115 +99,74 @@ class GovernanceContract {
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    stake(sender, amount) {
+    stake(senderName, nutAmount, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            amount = utils_1.toBigNumber(amount);
+            const nutAssetString = utils_1.amountToAssetString(nutAmount, "NUT");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: "eosdtnutoken",
                         name: "transfer",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
-                            from: sender,
+                            from: senderName,
                             to: this.contractName,
-                            quantity: `${amount.toFixed(9)} NUT`,
-                            memo: ""
+                            quantity: nutAssetString,
+                            memo: trxMemo ? trxMemo : "eosdt-js stake()"
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    stakeAndVote(sender, amount, producers) {
+    unstake(nutAmount, voterName, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            amount = utils_1.toBigNumber(amount);
-            const voter = sender;
-            const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers });
-            const receipt = yield this.api.transact({
-                actions: [
-                    {
-                        account: "eosdtnutoken",
-                        name: "transfer",
-                        authorization: [{ actor: sender, permission: "active" }],
-                        data: {
-                            from: sender,
-                            to: this.contractName,
-                            quantity: `${amount.toFixed(9)} NUT`,
-                            memo: ""
-                        }
-                    },
-                    {
-                        account: this.contractName,
-                        name: "vote",
-                        authorization: [{ actor: voter, permission: "active" }],
-                        data: {
-                            voter,
-                            proposal_name: "blockproduce",
-                            vote: 1,
-                            vote_json
-                        }
-                    }
-                ]
-            }, {
-                blocksBehind: 3,
-                expireSeconds: 60
-            });
-            return receipt;
-        });
-    }
-    getVoterInfo(accountName) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.rpc.get_table_rows({
-                code: this.contractName,
-                table: "voters",
-                scope: accountName
-            });
-            return result.rows[0];
-        });
-    }
-    unstake(amount, voter) {
-        return __awaiter(this, void 0, void 0, function* () {
-            amount = utils_1.toBigNumber(amount);
+            const nutAssetString = utils_1.amountToAssetString(nutAmount, "NUT");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: voterName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "unstake",
-                        authorization: [{ actor: voter, permission: "active" }],
+                        authorization,
                         data: {
-                            voter,
-                            quantity: `${amount.toFixed(9)} NUT`
+                            voter: voterName,
+                            quantity: nutAssetString
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    vote(proposalName, vote, voter, voteJson) {
+    vote(proposalName, vote, voterName, voteJson, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: voterName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "vote",
-                        authorization: [{ actor: voter, permission: "active" }],
+                        authorization,
                         data: {
-                            voter,
+                            voter: voterName,
                             proposal_name: proposalName,
                             vote,
                             vote_json: voteJson
@@ -213,21 +174,85 @@ class GovernanceContract {
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    voteForBlockProducers(voter, ...producers) {
+    unvote(proposalName, voterName, transactionParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: voterName, permission: trxParams.permission }];
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "unvote",
+                        authorization,
+                        data: {
+                            voter: voterName,
+                            proposal_name: proposalName
+                        }
+                    }
+                ]
+            }, {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            });
+            return receipt;
+        });
+    }
+    voteForBlockProducers(voterName, transactionParams, ...producers) {
         return __awaiter(this, void 0, void 0, function* () {
             const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers });
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: voterName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "vote",
-                        authorization: [{ actor: voter, permission: "active" }],
+                        authorization,
+                        data: {
+                            voter: voterName,
+                            proposal_name: "blockproduce",
+                            vote: 1,
+                            vote_json
+                        }
+                    }
+                ]
+            }, {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            });
+            return receipt;
+        });
+    }
+    stakeAndVoteForBlockProducers(voterName, nutAmount, producers, transactionParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const nutAssetString = utils_1.amountToAssetString(nutAmount, "NUT");
+            const voter = voterName;
+            const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers });
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: voterName, permission: trxParams.permission }];
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: "eosdtnutoken",
+                        name: "transfer",
+                        authorization,
+                        data: {
+                            from: voterName,
+                            to: this.contractName,
+                            quantity: nutAssetString,
+                            memo: ""
+                        }
+                    },
+                    {
+                        account: this.contractName,
+                        name: "vote",
+                        authorization,
                         data: {
                             voter,
                             proposal_name: "blockproduce",
@@ -237,55 +262,20 @@ class GovernanceContract {
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    unvote(proposalName, voter) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const receipt = yield this.api.transact({
-                actions: [
-                    {
-                        account: this.contractName,
-                        name: "unvote",
-                        authorization: [{ actor: voter, permission: "active" }],
-                        data: {
-                            voter,
-                            proposal_name: proposalName
-                        }
-                    }
-                ]
-            }, {
-                blocksBehind: 3,
-                expireSeconds: 60
-            });
-            return receipt;
-        });
-    }
-    getSettings() {
+    getVoterInfo(accountName) {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
                 code: this.contractName,
-                scope: this.contractName,
-                table: "govsettings",
-                json: true,
-                limit: 1
+                table: "voters",
+                scope: accountName
             });
             return table.rows[0];
-        });
-    }
-    getProposals() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const table = yield this.rpc.get_table_rows({
-                code: this.contractName,
-                scope: this.contractName,
-                table: "proposals",
-                json: true,
-                limit: 1000
-            });
-            return table.rows;
         });
     }
     getVotes() {
@@ -294,7 +284,17 @@ class GovernanceContract {
                 code: this.contractName,
                 scope: this.contractName,
                 table: "votes",
-                json: true,
+                limit: 1000
+            });
+            return table.rows;
+        });
+    }
+    getProposals() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "proposals",
                 limit: 1000
             });
             return table.rows;
@@ -309,6 +309,28 @@ class GovernanceContract {
                 limit: 1000
             });
             return table.rows;
+        });
+    }
+    getProxyInfo() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: "eosio",
+                scope: "eosio",
+                table: "voters",
+                lower_bound: "eosdtbpproxy",
+                upper_bound: "eosdtbpproxy"
+            });
+            return table.rows[0];
+        });
+    }
+    getSettings() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "govsettings"
+            });
+            return table.rows[0];
         });
     }
 }

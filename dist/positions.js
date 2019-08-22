@@ -7,11 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const bignumber_js_1 = __importDefault(require("bignumber.js"));
 const utils_1 = require("./utils");
 class PositionsContract {
     constructor(connector) {
@@ -19,101 +15,109 @@ class PositionsContract {
         this.api = connector.api;
         this.contractName = "eosdtcntract";
     }
-    create(accountName, eosAmount, eosdtAmount) {
+    create(accountName, eosAmount, eosdtAmount, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            eosAmount = utils_1.toBigNumber(eosAmount);
-            const roundedDebtAmount = utils_1.toBigNumber(eosdtAmount).dp(4, 1);
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const eosAssetString = utils_1.amountToAssetString(eosAmount, "EOS");
+            const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
+            const authorization = [{ actor: accountName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "positionadd",
-                        authorization: [{ actor: accountName, permission: "active" }],
-                        data: {
-                            maker: accountName
-                        }
+                        authorization,
+                        data: { maker: accountName }
                     },
                     {
                         account: "eosio.token",
                         name: "transfer",
-                        authorization: [{ actor: accountName, permission: "active" }],
+                        authorization,
                         data: {
                             from: accountName,
                             to: this.contractName,
-                            quantity: `${eosAmount.toFixed(4)} EOS`,
-                            memo: `${roundedDebtAmount.toFixed(9)} EOSDT`
+                            quantity: eosAssetString,
+                            memo: eosdtAssetString
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    createEmptyPosition(accountName) {
+    createEmptyPosition(accountName, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: accountName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "positionadd",
-                        authorization: [{ actor: accountName, permission: "active" }],
+                        authorization,
                         data: { maker: accountName }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    close(senderAccount, positionId) {
+    close(senderAccount, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderAccount, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "close",
-                        authorization: [{ actor: senderAccount, permission: "active" }],
+                        authorization,
                         data: { position_id: positionId }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    del(creator, positionId) {
+    del(creator, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: creator, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "positiondel",
-                        authorization: [{ actor: creator, permission: "active" }],
+                        authorization,
                         data: { position_id: positionId }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    give(account, receiver, positionId) {
+    give(giverAccount, receiver, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: giverAccount, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "positiongive",
-                        authorization: [{ actor: account, permission: "active" }],
+                        authorization,
                         data: {
                             position_id: positionId,
                             to: receiver
@@ -121,124 +125,132 @@ class PositionsContract {
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    addCollateral(account, amount, positionId) {
+    addCollateral(senderName, amount, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            amount = utils_1.toBigNumber(amount);
+            const eosAssetString = utils_1.amountToAssetString(amount, "EOS");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: "eosio.token",
                         name: "transfer",
-                        authorization: [{ actor: account, permission: "active" }],
+                        authorization,
                         data: {
                             to: this.contractName,
-                            from: account,
-                            maker: account,
-                            quantity: `${amount.toFixed(4)} EOS`,
+                            from: senderName,
+                            maker: senderName,
+                            quantity: eosAssetString,
                             memo: `position_id:${positionId}`
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    deleteCollateral(sender, amount, positionId) {
+    deleteCollateral(senderName, amount, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (typeof amount === "string" || typeof amount === "number") {
-                amount = new bignumber_js_1.default(amount);
-            }
+            const eosAssetString = utils_1.amountToAssetString(amount, "EOS");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "colateraldel",
-                        authorization: [{ actor: sender, permission: "active" }],
+                        authorization,
                         data: {
                             position_id: positionId,
-                            collateral: `${amount.toFixed(4)} EOS`
+                            collateral: eosAssetString
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    generateDebt(account, amount, positionId) {
+    generateDebt(senderName, amount, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            const roundedAmount = utils_1.toBigNumber(amount).dp(4, 1);
+            const eosdtAssetString = utils_1.amountToAssetString(amount, "EOSDT");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "debtgenerate",
-                        authorization: [{ actor: account, permission: "active" }],
+                        authorization,
                         data: {
-                            debt: `${roundedAmount.toFixed(9)} EOSDT`,
+                            debt: eosdtAssetString,
                             position_id: positionId
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    burnbackDebt(account, amount, positionId) {
+    burnbackDebt(senderName, amount, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            const roundedAmount = utils_1.toBigNumber(amount).dp(4, 1);
+            const eosdtAssetString = utils_1.amountToAssetString(amount, "EOSDT");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: "eosdtsttoken",
                         name: "transfer",
-                        authorization: [{ actor: account, permission: "active" }],
+                        authorization,
                         data: {
                             to: this.contractName,
-                            from: account,
-                            maker: account,
-                            quantity: `${roundedAmount.toFixed(9)} EOSDT`,
+                            from: senderName,
+                            maker: senderName,
+                            quantity: eosdtAssetString,
                             memo: `position_id:${positionId}`
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    marginCall(senderAccount, positionId) {
+    marginCall(senderName, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.contractName,
                         name: "margincall",
-                        authorization: [{ actor: senderAccount, permission: "active" }],
+                        authorization,
                         data: {
                             position_id: positionId
                         }
                     }
                 ]
             }, {
-                blocksBehind: 3,
-                expireSeconds: 60
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
@@ -256,7 +268,7 @@ class PositionsContract {
                 scope: "eosdtorclize",
                 table: "orarates",
                 json: true,
-                limit: 500
+                limit: 1000
             });
             return table.rows;
         });
@@ -267,8 +279,6 @@ class PositionsContract {
                 code: this.contractName,
                 scope: this.contractName,
                 table: "positions",
-                json: true,
-                limit: 1,
                 table_key: "position_id",
                 lower_bound: id,
                 upper_bound: id
@@ -282,8 +292,7 @@ class PositionsContract {
                 code: this.contractName,
                 scope: this.contractName,
                 table: "positions",
-                json: true,
-                limit: 100,
+                limit: 1000,
                 table_key: "maker",
                 index_position: "secondary",
                 key_type: "name",
@@ -298,8 +307,7 @@ class PositionsContract {
             const table = yield this.rpc.get_table_rows({
                 code: this.contractName,
                 scope: this.contractName,
-                table: "parameters",
-                json: true
+                table: "parameters"
             });
             return table.rows[0];
         });
@@ -309,8 +317,7 @@ class PositionsContract {
             const table = yield this.rpc.get_table_rows({
                 code: this.contractName,
                 scope: this.contractName,
-                table: "ctrsettings",
-                json: true
+                table: "ctrsettings"
             });
             return table.rows[0];
         });

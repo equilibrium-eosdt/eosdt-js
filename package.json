@@ -1,6 +1,6 @@
 {
   "name": "@eosdt/eosdt-js",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "JS library to execute EOSDT contracts methods",
   "main": "./dist/index.js",
   "scripts": {
@@ -12,7 +12,6 @@
   "dependencies": {
     "@types/node-fetch": "^2.3.4",
     "@types/text-encoding": "0.0.35",
-    "bignumber.js": "^8.1.1",
     "eosjs": "20.0.0-beta3",
     "node-fetch": "^2.6.0",
     "text-encoding": "^0.7.0"
