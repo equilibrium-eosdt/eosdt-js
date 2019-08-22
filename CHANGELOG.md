@@ -2,10 +2,11 @@
 
 All notable changes will be documented in this file.
 
-#### [0.6.0] - 2019-08-22
+#### [0.6.1] - 2019-08-22
 
 -   All action sending methods now have `transactionParams` optional argument. It may be used to overwrite transaction's parameters `permission`, `blocksBehind` and `expireSeconds`.
 -   Renamed `GovernanceContract.stakeAndVote()` to `GovernanceContract.stakeAndVoteForBlockProducers()`
+-   `GovernanceContract.voteForBlockProducers()` now requires Block Producers names to be an array.
 -   New method `GovernanceContract.getProxyInfo()`
 -   `GovernanceContract.propose()` now requires `senderName` argument
 -   Removed rounding EOSDT asset amounts to 4th decimal

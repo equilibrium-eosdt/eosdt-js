@@ -203,7 +203,7 @@ class GovernanceContract {
             return receipt;
         });
     }
-    voteForBlockProducers(voterName, transactionParams, ...producers) {
+    voteForBlockProducers(voterName, producers, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers });
             const trxParams = utils_1.setTransactionParams(transactionParams);

@@ -281,8 +281,8 @@ export class GovernanceContract {
 
     public async voteForBlockProducers(
         voterName: string,
-        transactionParams?: ITrxParamsArgument,
-        ...producers: string[]
+        producers: string[],
+        transactionParams?: ITrxParamsArgument
     ): Promise<any> {
         const vote_json = JSON.stringify({ "eosdtbpproxy.producers": producers })
         const trxParams = setTransactionParams(transactionParams)
