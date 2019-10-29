@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -18,50 +19,74 @@ class PositionsContract {
     create(accountName, eosAmount, eosdtAmount, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const trxParams = utils_1.setTransactionParams(transactionParams);
-            const eosAssetString = utils_1.amountToAssetString(eosAmount, "EOS");
-            const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
             const authorization = [{ actor: accountName, permission: trxParams.permission }];
-            const receipt = yield this.api.transact({
-                actions: [
-                    {
-                        account: this.contractName,
-                        name: "positionadd",
-                        authorization,
-                        data: { maker: accountName }
-                    },
-                    {
-                        account: "eosio.token",
-                        name: "transfer",
-                        authorization,
-                        data: {
-                            from: accountName,
-                            to: this.contractName,
-                            quantity: eosAssetString,
-                            memo: eosdtAssetString
-                        }
+            // Creates a new empty position
+            const actions = [];
+            actions.push({
+                account: this.contractName,
+                name: "positionadd",
+                authorization,
+                data: { maker: accountName }
+            });
+            // Sends EOS collateral and generates EOSDT if eosAmount > 0
+            if (typeof eosAmount === "string")
+                eosAmount = parseFloat(eosAmount);
+            if (eosAmount > 0) {
+                const eosAssetString = utils_1.amountToAssetString(eosAmount, "EOS");
+                const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
+                actions.push({
+                    account: "eosio.token",
+                    name: "transfer",
+                    authorization,
+                    data: {
+                        from: accountName,
+                        to: this.contractName,
+                        quantity: eosAssetString,
+                        memo: eosdtAssetString
                     }
-                ]
-            }, {
+                });
+            }
+            const receipt = yield this.api.transact({ actions }, {
                 blocksBehind: trxParams.blocksBehind,
                 expireSeconds: trxParams.expireSeconds
             });
             return receipt;
         });
     }
-    createEmptyPosition(accountName, transactionParams) {
+    createWithReferral(accountName, eosAmount, eosdtAmount, referralId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: accountName, permission: trxParams.permission }];
-            const receipt = yield this.api.transact({
-                actions: [
-                    {
-                        account: this.contractName,
-                        name: "positionadd",
-                        authorization,
-                        data: { maker: accountName }
+            // Creates a new empty position
+            const actions = [];
+            actions.push({
+                account: this.contractName,
+                name: "posandrefadd",
+                authorization,
+                data: {
+                    referral_id: referralId,
+                    maker: accountName
+                }
+            });
+            // Sends EOS collateral and generates EOSDT if eosAmount > 0
+            if (typeof eosAmount === "string")
+                eosAmount = parseFloat(eosAmount);
+            if (eosAmount > 0) {
+                const eosAssetString = utils_1.amountToAssetString(eosAmount, "EOS");
+                const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
+                actions.push({
+                    account: "eosio.token",
+                    name: "transfer",
+                    authorization,
+                    data: {
+                        from: accountName,
+                        to: this.contractName,
+                        quantity: eosAssetString,
+                        memo: eosdtAssetString
                     }
-                ]
-            }, {
+                });
+            }
+            const receipt = yield this.api.transact({ actions }, {
                 blocksBehind: trxParams.blocksBehind,
                 expireSeconds: trxParams.expireSeconds
             });
@@ -292,7 +317,7 @@ class PositionsContract {
                 code: this.contractName,
                 scope: this.contractName,
                 table: "positions",
-                limit: 1000,
+                limit: 10000,
                 table_key: "maker",
                 index_position: "secondary",
                 key_type: "name",
@@ -320,6 +345,132 @@ class PositionsContract {
                 table: "ctrsettings"
             });
             return table.rows[0];
+        });
+    }
+    addReferral(senderName, nutAmount, transactionParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const nutAssetString = utils_1.amountToAssetString(nutAmount, "NUT");
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: "eosdtnutoken",
+                        name: "transfer",
+                        authorization,
+                        data: {
+                            to: this.contractName,
+                            from: senderName,
+                            quantity: nutAssetString,
+                            memo: `referral`
+                        }
+                    }
+                ]
+            }, {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            });
+            return receipt;
+        });
+    }
+    deleteReferral(senderName, referralId, transactionParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: senderName, permission: trxParams.permission }];
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: "eosdtcntract",
+                        name: "referraldel",
+                        authorization,
+                        data: { referral_id: referralId }
+                    }
+                ]
+            }, {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            });
+            return receipt;
+        });
+    }
+    getReferralById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "ctrreferrals",
+                table_key: "referral_id",
+                lower_bound: id,
+                upper_bound: id
+            });
+            return table.rows[0];
+        });
+    }
+    getAllReferrals() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "ctrreferrals",
+                limit: 10000
+            });
+            return table.rows;
+        });
+    }
+    getReferralByName(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.getAllReferrals();
+            return table.find(row => row.referral === name);
+        });
+    }
+    getPositionReferral(positionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "positionrefs",
+                table_key: "position_id",
+                lower_bound: positionId,
+                upper_bound: positionId
+            });
+            return table.rows[0];
+        });
+    }
+    getPositionReferralsTable() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let lowerBound = 0;
+            let upperBound = 9999;
+            const limit = 10000;
+            function getTablePart(that) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    return yield that.rpc.get_table_rows({
+                        code: that.contractName,
+                        scope: that.contractName,
+                        table: "positionrefs",
+                        lower_bound: lowerBound,
+                        upper_bound: upperBound,
+                        limit
+                    });
+                });
+            }
+            const firstRequest = yield getTablePart(this);
+            const result = firstRequest.rows;
+            let amountOfPosRefReturned = firstRequest.rows.length;
+            while (amountOfPosRefReturned !== 0) {
+                lowerBound += limit;
+                upperBound += limit;
+                const moreReferrals = yield getTablePart(this);
+                result.push(...moreReferrals.rows);
+                amountOfPosRefReturned = moreReferrals.rows.length;
+            }
+            return result;
+        });
+    }
+    getAllReferralPositionsIds(referralId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (yield this.getPositionReferralsTable())
+                .filter(refPos => refPos.referral_id === referralId)
+                .map(refInfo => refInfo.position_id);
         });
     }
 }

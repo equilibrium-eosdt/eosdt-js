@@ -37,6 +37,8 @@ function amountToAssetString(amount, assetSymbol) {
 }
 exports.amountToAssetString = amountToAssetString;
 function balanceToNumber(balance) {
+    if (balance.length === 0)
+        return 0;
     if (Array.isArray(balance) && typeof balance[0] === "string") {
         const x = balance[0].match(/[0-9,\.]+/g);
         if (Array.isArray(x)) {
@@ -46,6 +48,6 @@ function balanceToNumber(balance) {
             throw new Error(`balanceToNumber(): balance string does not contain numbers. Arg: ${balance}`);
     }
     else
-        throw new Error(`balanceToNumber(): recieved invalid balance argument. Arg array: ${balance}`);
+        throw new Error(`balanceToNumber(): received invalid balance argument. Arg array: ${balance}`);
 }
 exports.balanceToNumber = balanceToNumber;

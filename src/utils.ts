@@ -37,6 +37,8 @@ export function amountToAssetString(
 }
 
 export function balanceToNumber(balance: string[]): number {
+    if (balance.length === 0) return 0
+
     if (Array.isArray(balance) && typeof balance[0] === "string") {
         const x = balance[0].match(/[0-9,\.]+/g)
         if (Array.isArray(x)) {
@@ -47,6 +49,6 @@ export function balanceToNumber(balance: string[]): number {
             )
     } else
         throw new Error(
-            `balanceToNumber(): recieved invalid balance argument. Arg array: ${balance}`
+            `balanceToNumber(): received invalid balance argument. Arg array: ${balance}`
         )
 }

@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const eosjs_1 = require("eosjs");
-const eosjs_jssig_1 = __importDefault(require("eosjs/dist/eosjs-jssig"));
+const eosjs_jssig_1 = require("eosjs/dist/eosjs-jssig");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const text_encoding_1 = require("text-encoding");
 const _1 = require(".");
@@ -14,7 +14,7 @@ class EosdtConnector {
     constructor(nodeAddress, privateKeys) {
         const fetch = node_fetch_1.default; // Workaroung to avoid incompatibility of fetch types in 'eosjs' and 'node-fetch'
         this.rpc = new eosjs_1.JsonRpc(nodeAddress, { fetch });
-        const signatureProvider = new eosjs_jssig_1.default(privateKeys);
+        const signatureProvider = new eosjs_jssig_1.JsSignatureProvider(privateKeys);
         this.api = new eosjs_1.Api({
             rpc: this.rpc,
             signatureProvider,

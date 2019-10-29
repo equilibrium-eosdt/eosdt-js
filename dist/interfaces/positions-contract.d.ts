@@ -5,6 +5,15 @@ export interface EosdtPosition {
     governance: string;
     collateral: string;
 }
+export interface Referral {
+    referral_id: number;
+    referral: string;
+    staked_amount: string;
+}
+export interface PositionReferral {
+    referral_id: number;
+    position_id: number;
+}
 export interface TokenRate {
     rate: string;
     update: string;
@@ -38,6 +47,8 @@ export interface EosdtContractSettings {
     staking_weight: string;
     bpproxy_account: string;
     governc_account: string;
+    referral_min_stake: string;
+    referral_ratio: string;
 }
 export interface EosdtContractParameters {
     parameter_id: number;

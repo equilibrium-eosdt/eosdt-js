@@ -1,5 +1,5 @@
 import { Api, JsonRpc } from "eosjs"
-import JsSignatureProvider from "eosjs/dist/eosjs-jssig"
+import { JsSignatureProvider } from "eosjs/dist/eosjs-jssig"
 import Fetch from "node-fetch"
 import { TextDecoder, TextEncoder } from "text-encoding"
 import { GovernanceContract, LiquidatorContract } from "."

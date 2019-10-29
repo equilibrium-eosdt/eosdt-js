@@ -17,6 +17,7 @@ export declare class GovernanceContract {
     voteForBlockProducers(voterName: string, producers: string[], transactionParams?: ITrxParamsArgument): Promise<any>;
     stakeAndVoteForBlockProducers(voterName: string, nutAmount: string | number, producers: string[], transactionParams?: ITrxParamsArgument): Promise<any>;
     getVoterInfo(accountName: string): Promise<VoterInfo | undefined>;
+    getVoterInfosTable(): Promise<VoterInfo[]>;
     getVotes(): Promise<EosdtVote[]>;
     getProposals(): Promise<StoredProposal[]>;
     getBpVotes(): Promise<BPVotes[]>;

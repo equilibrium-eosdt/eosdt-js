@@ -6,6 +6,17 @@ export interface EosdtPosition {
     collateral: string
 }
 
+export interface Referral {
+    referral_id: number
+    referral: string
+    staked_amount: string
+}
+
+export interface PositionReferral {
+    referral_id: number
+    position_id: number
+}
+
 export interface TokenRate {
     rate: string
     update: string
@@ -43,6 +54,9 @@ export interface EosdtContractSettings {
     staking_weight: string // EOS type: float64
     bpproxy_account: string // EOS type: name
     governc_account: string // EOS type: name
+
+    referral_min_stake: string // EOS type: asset
+    referral_ratio: string // EOS type: float64
 }
 
 export interface EosdtContractParameters {

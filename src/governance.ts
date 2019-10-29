@@ -364,10 +364,22 @@ export class GovernanceContract {
     public async getVoterInfo(accountName: string): Promise<VoterInfo | undefined> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
-            table: "voters",
-            scope: accountName
+            table: "govvoters",
+            scope: this.contractName,
+            lower_bound: accountName,
+            upper_bound: accountName
         })
         return table.rows[0]
+    }
+
+    public async getVoterInfosTable(): Promise<VoterInfo[]> {
+        const table = await this.rpc.get_table_rows({
+            code: this.contractName,
+            table: "govvoters",
+            scope: this.contractName,
+            limit: 100_000
+        })
+        return table.rows
     }
 
     public async getVotes(): Promise<EosdtVote[]> {

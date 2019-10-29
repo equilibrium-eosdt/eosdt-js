@@ -35,11 +35,11 @@ Creates a connector object, used to initiate functional modules and invoke their
 
 Module to manage EOSDT positions. Methods:
 
--   `create` - creates new position, using specified amount of EOS as collateral and issuing specified amount of EOSDT to creator.
--   `createEmptyPosition` - creates a new position without any debt or collateral.
+-   `create` - creates new position, using specified amount of EOS as collateral and issuing specified amount of EOSDT to creator. If `eosAmount` arg is equal to zero, creates an empty position.
+-   `createWithReferral` - same as `create`, but also sets a referral on position.
 -   `close` - used to close a position in event of a global shutdown.
 -   `del` - deletes position that has 0 debt.
--   `give` - transfers position ownership to another account
+-   `give` - transfers position ownership to another account.
 -   `addCollateral` - sends EOS to position to increase it's collateralization.
 -   `deleteCollateral` - returns specified part of used collateral to user if LTV stays above critical.
 -   `generateDebt` - issues additional EOSDT for position if this does not bring LTV below critical.
@@ -51,6 +51,14 @@ Module to manage EOSDT positions. Methods:
 -   `getAllUserPositions` - returns an array of all positions for specified user (up to 100 positions).
 -   `getParameters` - returns Positions contract parameters.
 -   `getSettings` - return Positions contract settings.
+-   `addReferral` - creates new referral, staking given amount of NUT. Rejects when amount is less then `referral_min_stake` in positions contract settings.
+-   `deleteReferral` - removes referral and unstakes that referral's NUT.
+-   `getReferralById` - returns a referral object.
+-   `getReferralByName` - returns a referral object.
+-   `getAllReferrals` - returns table of existing referrals.
+-   `getPositionReferral` - returns referral of a given position (`undefined` if none exists).
+-   `getPositionReferralsTable` - returns an array of positions ids and those positions referrals.
+-   `getAllReferralPositionsIds` - returns an array of positions with given referral id.
 
 ### Governance
 
@@ -67,6 +75,7 @@ Governance methods help manage the system: create proposals to change system par
 -   `voteForBlockProducers` - voting with staked NUTs for specified block producers.
 -   `stakeAndVoteForBlockProducers` - stakes NUT and votes for BPs in one transaction.
 -   `getVoterInfo` - returns amount of NUTs staked by account in EOSDT Governance contract and their unstake date.
+-   `getVoterInfosTable` - returns the whole table of information on accounts that staked NUT
 -   `getVotes` - returns an array with all votes (up to 1000).
 -   `getProposals` - returns an array with all proposals (up to 1000).
 -   `getBpVotes` - returns array of block producers names and amount of NUT votes for them.

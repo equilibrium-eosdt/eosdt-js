@@ -1,5 +1,5 @@
 import { EosdtConnectorInterface } from "./interfaces/connector";
-import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, TokenRate } from "./interfaces/positions-contract";
+import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, TokenRate, Referral, PositionReferral } from "./interfaces/positions-contract";
 import { ITrxParamsArgument } from "./interfaces/transaction";
 export declare class PositionsContract {
     private contractName;
@@ -7,7 +7,7 @@ export declare class PositionsContract {
     private api;
     constructor(connector: EosdtConnectorInterface);
     create(accountName: string, eosAmount: string | number, eosdtAmount: string | number, transactionParams?: ITrxParamsArgument): Promise<any>;
-    createEmptyPosition(accountName: string, transactionParams?: ITrxParamsArgument): Promise<any>;
+    createWithReferral(accountName: string, eosAmount: string | number, eosdtAmount: string | number, referralId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     close(senderAccount: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     del(creator: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     give(giverAccount: string, receiver: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
@@ -22,4 +22,12 @@ export declare class PositionsContract {
     getAllUserPositions(maker: string): Promise<EosdtPosition[]>;
     getParameters(): Promise<EosdtContractParameters>;
     getSettings(): Promise<EosdtContractSettings>;
+    addReferral(senderName: string, nutAmount: string | number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    deleteReferral(senderName: string, referralId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    getReferralById(id: number): Promise<Referral | undefined>;
+    getAllReferrals(): Promise<Referral[]>;
+    getReferralByName(name: string): Promise<Referral | undefined>;
+    getPositionReferral(positionId: number): Promise<PositionReferral | undefined>;
+    getPositionReferralsTable(): Promise<PositionReferral[]>;
+    getAllReferralPositionsIds(referralId: number): Promise<number[]>;
 }

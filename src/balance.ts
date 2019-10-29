@@ -31,7 +31,6 @@ export class BalanceGetter {
 
     public async getEos(account: string): Promise<number> {
         const balance = await this.rpc.get_currency_balance("eosio.token", account, "EOS")
-
         return balanceToNumber(balance)
     }
 }

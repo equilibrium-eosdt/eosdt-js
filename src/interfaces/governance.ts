@@ -48,6 +48,7 @@ export interface BPVotes {
 }
 
 export interface VoterInfo {
+    voter: string // EOS type: name
     voting_amount: string // EOS type: asset (NUT)
     withdrawal_date: string // EOS type: time_point_sec
 }

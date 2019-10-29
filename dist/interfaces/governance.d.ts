@@ -43,6 +43,7 @@ export interface BPVotes {
     votes: string;
 }
 export interface VoterInfo {
+    voter: string;
     voting_amount: string;
     withdrawal_date: string;
 }
