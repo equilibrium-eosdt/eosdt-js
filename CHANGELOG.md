@@ -2,6 +2,22 @@
 
 All notable changes will be documented in this file.
 
+#### [0.6.31] - 2019-11-02
+
+-   Added `BpManager` with following methods to help manage block producers positions
+
+-   `getBpPosition()`
+-   `getAllBpPositions()`
+-   `registerBlockProducer()`
+-   `changeBlockProducerReward()`
+-   `unRegisterBlockProducer()`
+-   `depositEos()`
+
+-   New governance settings
+
+-   `min_reward`
+-   `reward_weight`
+
 #### [0.6.2] - 2019-10-11
 
 -   `PostionsContract.createEmptyPosition()` - removed. To create empty position, use `create()` or `createWithReferral()` with `eosAmount` equal to zero

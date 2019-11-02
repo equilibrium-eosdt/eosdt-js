@@ -13,3 +13,5 @@ var liquidator_1 = require("./liquidator");
 exports.LiquidatorContract = liquidator_1.LiquidatorContract;
 var positions_1 = require("./positions");
 exports.PositionsContract = positions_1.PositionsContract;
+var bp_manager_1 = require("./bp-manager");
+exports.BpManager = bp_manager_1.BpManager;

@@ -40,6 +40,8 @@ export interface GovernanceSettings {
     unstake_period: number // EOS type: uint32
     bpproxy_account: string
     governc_account: string
+    min_reward: string
+    reward_weight: number
 }
 
 export interface BPVotes {
@@ -64,4 +66,13 @@ export interface EosVoterInfo {
     flags1: number
     reserved2: number
     reserved3: string
+}
+
+export interface BpPosition {
+    bp_name: string
+    reward_amount: string
+    balance: string
+    enabled: number //  0 or 1
+    is_active: number //  0 or 1
+    active_since: string
 }

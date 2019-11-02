@@ -82,6 +82,17 @@ Governance methods help manage the system: create proposals to change system par
 -   `getProxyInfo` - returns voter info for `eosdtbpproxy`.
 -   `getSettings` - returns governance contract settings.
 
+### Bp manager
+
+Governance account methods for block producers to manage their voting positions: register, change reward amount, deposit EOS, unregister.
+
+-   `getBpPosition` - returns information about registered block producer.
+-   `getAllBpPositions` - returns an array of objects, that contain information about registered block producers.
+-   `registerBlockProducer` - registers a block producer in BP voting reward program.
+-   `changeBlockProducerReward` - changes amount of EOS reward payed out by block producer.
+-   `unRegisterBlockProducer` - make block producer position inactive.
+-   `depositEos` - deposit EOS to block producer position.
+
 ### Liquidator
 
 Methods to get Liquidator contract parameters and exchange EOS and EOSDT in case of global shutdown.
