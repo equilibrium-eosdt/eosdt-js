@@ -2,7 +2,7 @@
 
 All notable changes will be documented in this file.
 
-#### [0.6.31] - 2019-11-02
+#### [0.6.37] - 2019-11-20
 
 -   Added `BpManager` with following methods to help manage block producers positions
 
@@ -17,6 +17,8 @@ All notable changes will be documented in this file.
 
 -   `min_reward`
 -   `reward_weight`
+
+-   `PostionsContract` method `getPositionReferralsTable()` fixed for big ids
 
 #### [0.6.2] - 2019-10-11
 

@@ -548,7 +548,6 @@ export class PositionsContract {
 
     public async getPositionReferralsTable(): Promise<PositionReferral[]> {
         let lowerBound = 0
-        let upperBound = 9_999
         const limit = 10_000
 
         async function getTablePart(that: any): Promise<any> {
@@ -557,21 +556,19 @@ export class PositionsContract {
                 scope: that.contractName,
                 table: "positionrefs",
                 lower_bound: lowerBound,
-                upper_bound: upperBound,
                 limit
             })
         }
 
         const firstRequest = await getTablePart(this)
         const result: PositionReferral[] = firstRequest.rows
-        let amountOfPosRefReturned = firstRequest.rows.length
+        let more = firstRequest.more
 
-        while (amountOfPosRefReturned !== 0) {
-            lowerBound += limit
-            upperBound += limit
+        while (more) {
+            lowerBound = result[result.length - 1].position_id + 1
             const moreReferrals = await getTablePart(this)
             result.push(...moreReferrals.rows)
-            amountOfPosRefReturned = moreReferrals.rows.length
+            more = moreReferrals.more
         }
 
         return result

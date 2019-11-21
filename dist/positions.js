@@ -439,7 +439,6 @@ class PositionsContract {
     getPositionReferralsTable() {
         return __awaiter(this, void 0, void 0, function* () {
             let lowerBound = 0;
-            let upperBound = 9999;
             const limit = 10000;
             function getTablePart(that) {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -448,20 +447,18 @@ class PositionsContract {
                         scope: that.contractName,
                         table: "positionrefs",
                         lower_bound: lowerBound,
-                        upper_bound: upperBound,
                         limit
                     });
                 });
             }
             const firstRequest = yield getTablePart(this);
             const result = firstRequest.rows;
-            let amountOfPosRefReturned = firstRequest.rows.length;
-            while (amountOfPosRefReturned !== 0) {
-                lowerBound += limit;
-                upperBound += limit;
+            let more = firstRequest.more;
+            while (more) {
+                lowerBound = result[result.length - 1].position_id + 1;
                 const moreReferrals = yield getTablePart(this);
                 result.push(...moreReferrals.rows);
-                amountOfPosRefReturned = moreReferrals.rows.length;
+                more = moreReferrals.more;
             }
             return result;
         });
