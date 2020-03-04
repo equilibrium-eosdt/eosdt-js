@@ -21,15 +21,20 @@ function dateToEosDate(date) {
     return date.toISOString().slice(0, -5);
 }
 exports.dateToEosDate = dateToEosDate;
-function amountToAssetString(amount, assetSymbol) {
+function amountToAssetString(amount, assetSymbol, customDecimals) {
     if (typeof amount === "string")
         amount = parseFloat(amount);
     assetSymbol = assetSymbol.toUpperCase();
     let decimals;
-    if (assetSymbol === "EOS")
+    if (assetSymbol === "EOS") {
         decimals = 4;
-    else if (assetSymbol === "EOSDT" || assetSymbol === "NUT")
+    }
+    else if (assetSymbol === "EOSDT" || assetSymbol === "NUT") {
         decimals = 9;
+    }
+    else if (customDecimals) {
+        decimals = customDecimals;
+    }
     else
         throw new Error(`${amountToAssetString.name}(): unknown interface
     interfacesymbol ${assetSymbol}`);

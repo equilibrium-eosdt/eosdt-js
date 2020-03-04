@@ -2,7 +2,10 @@ import { EosdtConnectorInterface } from "./interfaces/connector";
 import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, TokenRate, Referral, PositionReferral } from "./interfaces/positions-contract";
 import { ITrxParamsArgument } from "./interfaces/transaction";
 export declare class PositionsContract {
-    private contractName;
+    protected contractName: string;
+    protected tokenSymbol: string;
+    protected tokenContract: string;
+    protected decimals: number;
     private rpc;
     private api;
     constructor(connector: EosdtConnectorInterface);
@@ -16,8 +19,13 @@ export declare class PositionsContract {
     generateDebt(senderName: string, amount: string | number, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     burnbackDebt(senderName: string, amount: string | number, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     marginCall(senderName: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    getContractTokenAmount(): Promise<number>;
     getContractEosAmount(): Promise<number>;
     getRates(): Promise<TokenRate[]>;
+    private rateEntryPredicate;
+    getRelativeRates(): Promise<Array<TokenRate & {
+        base: string;
+    }>>;
     getPositionById(id: number): Promise<EosdtPosition | undefined>;
     getAllUserPositions(maker: string): Promise<EosdtPosition[]>;
     getParameters(): Promise<EosdtContractParameters>;

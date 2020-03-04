@@ -12,14 +12,16 @@ import { ITrxParamsArgument } from "./interfaces/transaction"
 import { amountToAssetString, balanceToNumber, setTransactionParams } from "./utils"
 
 export class PositionsContract {
-    private contractName: string
+    protected contractName: string = "eosdtcntract"
+    protected tokenSymbol: string = "EOS"
+    protected tokenContract: string = "eosio.token"
+    protected decimals: number = 4
     private rpc: JsonRpc
     private api: Api
 
     constructor(connector: EosdtConnectorInterface) {
         this.rpc = connector.rpc
         this.api = connector.api
-        this.contractName = "eosdtcntract"
     }
 
     public async create(
@@ -42,12 +44,18 @@ export class PositionsContract {
 
         // Sends EOS collateral and generates EOSDT if eosAmount > 0
         if (typeof eosAmount === "string") eosAmount = parseFloat(eosAmount)
+
         if (eosAmount > 0) {
-            const eosAssetString = amountToAssetString(eosAmount, "EOS")
+            const eosAssetString = amountToAssetString(
+                eosAmount,
+                this.tokenSymbol,
+                this.decimals
+            )
+
             const eosdtAssetString = amountToAssetString(eosdtAmount, "EOSDT")
 
             actions.push({
-                account: "eosio.token",
+                account: this.tokenContract,
                 name: "transfer",
                 authorization,
                 data: {
@@ -95,11 +103,16 @@ export class PositionsContract {
         // Sends EOS collateral and generates EOSDT if eosAmount > 0
         if (typeof eosAmount === "string") eosAmount = parseFloat(eosAmount)
         if (eosAmount > 0) {
-            const eosAssetString = amountToAssetString(eosAmount, "EOS")
+            const eosAssetString = amountToAssetString(
+                eosAmount,
+                this.tokenSymbol,
+                this.decimals
+            )
+
             const eosdtAssetString = amountToAssetString(eosdtAmount, "EOSDT")
 
             actions.push({
-                account: "eosio.token",
+                account: this.tokenContract,
                 name: "transfer",
                 authorization,
                 data: {
@@ -215,7 +228,11 @@ export class PositionsContract {
         positionId: number,
         transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        const eosAssetString = amountToAssetString(amount, "EOS")
+        const eosAssetString = amountToAssetString(
+            amount,
+            this.tokenSymbol,
+            this.decimals
+        )
         const trxParams = setTransactionParams(transactionParams)
         const authorization = [{ actor: senderName, permission: trxParams.permission }]
 
@@ -223,7 +240,7 @@ export class PositionsContract {
             {
                 actions: [
                     {
-                        account: "eosio.token",
+                        account: this.tokenContract,
                         name: "transfer",
                         authorization,
                         data: {
@@ -251,7 +268,11 @@ export class PositionsContract {
         positionId: number,
         transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        const eosAssetString = amountToAssetString(amount, "EOS")
+        const eosAssetString = amountToAssetString(
+            amount,
+            this.tokenSymbol,
+            this.decimals
+        )
         const trxParams = setTransactionParams(transactionParams)
         const authorization = [{ actor: senderName, permission: trxParams.permission }]
 
@@ -377,6 +398,16 @@ export class PositionsContract {
         return receipt
     }
 
+    public async getContractTokenAmount(): Promise<number> {
+        const balance = await this.rpc.get_currency_balance(
+            this.tokenContract,
+            this.contractName,
+            this.tokenSymbol
+        )
+        return balanceToNumber(balance)
+    }
+
+    /* @deprecated */
     public async getContractEosAmount(): Promise<number> {
         const balance = await this.rpc.get_currency_balance(
             "eosio.token",
@@ -386,6 +417,7 @@ export class PositionsContract {
         return balanceToNumber(balance)
     }
 
+    /* @deprecated */
     public async getRates(): Promise<TokenRate[]> {
         const table = await this.rpc.get_table_rows({
             code: "eosdtorclize",
@@ -395,6 +427,30 @@ export class PositionsContract {
             limit: 1000
         })
         return table.rows
+    }
+
+    private rateEntryPredicate = (raw: unknown): raw is TokenRate & { base: string } => {
+        // TODO full validation for all data
+        return ["rate", "base"].every(key => typeof (raw as any)[key] === "string")
+    }
+
+    public async getRelativeRates(): Promise<Array<TokenRate & { base: string }>> {
+        const table = await this.rpc.get_table_rows({
+            code: "eosdtorclize",
+            scope: "eosdtorclize",
+            table: "oraclerates",
+            json: true,
+            limit: 1000
+        })
+
+        return table.rows.map((entry: unknown) => {
+            if (!this.rateEntryPredicate(entry)) {
+                // TODO always parse blockchain response
+                throw new Error("Rates format mismatch")
+            }
+
+            return entry
+        })
     }
 
     public async getPositionById(id: number): Promise<EosdtPosition | undefined> {

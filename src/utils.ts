@@ -21,15 +21,20 @@ export function dateToEosDate(date: Date): string {
 
 export function amountToAssetString(
     amount: number | string,
-    assetSymbol: string
+    assetSymbol: string,
+    customDecimals?: number
 ): string {
     if (typeof amount === "string") amount = parseFloat(amount)
     assetSymbol = assetSymbol.toUpperCase()
 
     let decimals
-    if (assetSymbol === "EOS") decimals = 4
-    else if (assetSymbol === "EOSDT" || assetSymbol === "NUT") decimals = 9
-    else
+    if (assetSymbol === "EOS") {
+        decimals = 4
+    } else if (assetSymbol === "EOSDT" || assetSymbol === "NUT") {
+        decimals = 9
+    } else if (customDecimals) {
+        decimals = customDecimals
+    } else
         throw new Error(`${amountToAssetString.name}(): unknown interface
     interfacesymbol ${assetSymbol}`)
 

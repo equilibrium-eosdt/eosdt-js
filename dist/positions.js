@@ -12,9 +12,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("./utils");
 class PositionsContract {
     constructor(connector) {
+        this.contractName = "eosdtcntract";
+        this.tokenSymbol = "EOS";
+        this.tokenContract = "eosio.token";
+        this.decimals = 4;
+        this.rateEntryPredicate = (raw) => {
+            // TODO full validation for all data
+            return ["rate", "base"].every(key => typeof raw[key] === "string");
+        };
         this.rpc = connector.rpc;
         this.api = connector.api;
-        this.contractName = "eosdtcntract";
     }
     create(accountName, eosAmount, eosdtAmount, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -32,10 +39,10 @@ class PositionsContract {
             if (typeof eosAmount === "string")
                 eosAmount = parseFloat(eosAmount);
             if (eosAmount > 0) {
-                const eosAssetString = utils_1.amountToAssetString(eosAmount, "EOS");
+                const eosAssetString = utils_1.amountToAssetString(eosAmount, this.tokenSymbol, this.decimals);
                 const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
                 actions.push({
-                    account: "eosio.token",
+                    account: this.tokenContract,
                     name: "transfer",
                     authorization,
                     data: {
@@ -72,10 +79,10 @@ class PositionsContract {
             if (typeof eosAmount === "string")
                 eosAmount = parseFloat(eosAmount);
             if (eosAmount > 0) {
-                const eosAssetString = utils_1.amountToAssetString(eosAmount, "EOS");
+                const eosAssetString = utils_1.amountToAssetString(eosAmount, this.tokenSymbol, this.decimals);
                 const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
                 actions.push({
-                    account: "eosio.token",
+                    account: this.tokenContract,
                     name: "transfer",
                     authorization,
                     data: {
@@ -158,13 +165,13 @@ class PositionsContract {
     }
     addCollateral(senderName, amount, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            const eosAssetString = utils_1.amountToAssetString(amount, "EOS");
+            const eosAssetString = utils_1.amountToAssetString(amount, this.tokenSymbol, this.decimals);
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
-                        account: "eosio.token",
+                        account: this.tokenContract,
                         name: "transfer",
                         authorization,
                         data: {
@@ -185,7 +192,7 @@ class PositionsContract {
     }
     deleteCollateral(senderName, amount, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            const eosAssetString = utils_1.amountToAssetString(amount, "EOS");
+            const eosAssetString = utils_1.amountToAssetString(amount, this.tokenSymbol, this.decimals);
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
@@ -280,12 +287,20 @@ class PositionsContract {
             return receipt;
         });
     }
+    getContractTokenAmount() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const balance = yield this.rpc.get_currency_balance(this.tokenContract, this.contractName, this.tokenSymbol);
+            return utils_1.balanceToNumber(balance);
+        });
+    }
+    /* @deprecated */
     getContractEosAmount() {
         return __awaiter(this, void 0, void 0, function* () {
             const balance = yield this.rpc.get_currency_balance("eosio.token", "eosdtcntract", "EOS");
             return utils_1.balanceToNumber(balance);
         });
     }
+    /* @deprecated */
     getRates() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
@@ -296,6 +311,24 @@ class PositionsContract {
                 limit: 1000
             });
             return table.rows;
+        });
+    }
+    getRelativeRates() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: "eosdtorclize",
+                scope: "eosdtorclize",
+                table: "oraclerates",
+                json: true,
+                limit: 1000
+            });
+            return table.rows.map((entry) => {
+                if (!this.rateEntryPredicate(entry)) {
+                    // TODO always parse blockchain response
+                    throw new Error("Rates format mismatch");
+                }
+                return entry;
+            });
         });
     }
     getPositionById(id) {
