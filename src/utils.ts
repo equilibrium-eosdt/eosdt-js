@@ -35,8 +35,9 @@ export function amountToAssetString(
     } else if (customDecimals) {
         decimals = customDecimals
     } else
-        throw new Error(`${amountToAssetString.name}(): unknown interface
-    interfacesymbol ${assetSymbol}`)
+        throw new Error(
+            `${amountToAssetString.name}(): unknown interface symbol ${assetSymbol}`
+        )
 
     return `${amount.toFixed(decimals)} ${assetSymbol}`
 }
@@ -48,12 +49,16 @@ export function balanceToNumber(balance: string[]): number {
         const x = balance[0].match(/[0-9,\.]+/g)
         if (Array.isArray(x)) {
             return parseFloat(x[0])
-        } else
-            throw new Error(
-                `balanceToNumber(): balance string does not contain numbers. Arg: ${balance}`
-            )
-    } else
-        throw new Error(
-            `balanceToNumber(): received invalid balance argument. Arg array: ${balance}`
-        )
+        } else {
+            const logMsg =
+                `${balanceToNumber.name}(): balance string does not contain numbers. ` +
+                `Arg: ${balance}`
+            throw new Error(logMsg)
+        }
+    } else {
+        const logMsg =
+            `${balanceToNumber.name}(): received invalid balance argument. ` +
+            `Arg array: ${balance}`
+        throw new Error(logMsg)
+    }
 }

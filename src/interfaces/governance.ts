@@ -1,11 +1,11 @@
 export interface StoredProposal {
-    proposal_name: string
-    proposer: string
-    title: string
-    proposal_json: string
-    created_at: string
-    expires_at: string
-    proposal_type: number
+    proposal_name: string // EOS type: name
+    proposer: string // EOS type: name
+    title: string // EOS type: string
+    proposal_json: string // EOS type: string
+    created_at: string // EOS type: time_point_sec
+    expires_at: string // EOS type: time_point_sec
+    proposal_type: number // EOS type: uint8
 }
 
 export interface ProposeObject {
@@ -18,17 +18,17 @@ export interface ProposeObject {
 }
 
 export interface EosdtVote {
-    id: number
-    proposal_name: string
-    updated_at: string
-    voter: string
-    vote: number
-    vote_json: string
+    id: number // EOS type: uint64
+    proposal_name: string // EOS type: name
+    updated_at: string // EOS type: time_point_sec
+    voter: string // EOS type: name
+    vote: number // EOS type: uint8
+    vote_json: string // EOS type: string
 }
 
 export interface GovernanceSettings {
     setting_id: number // EOS type: uint64
-    eosdtcntract_account: string // EOS type: name
+    position_account: string // EOS type: name
     min_proposal_weight: string // EOS type: asset
     freeze_period: number // EOS type: uint32
     min_participation: string // EOS type: float64
@@ -38,10 +38,14 @@ export interface GovernanceSettings {
     max_bp_votes: number // EOS type: uint32
     min_vote_stake: string // EOS type: asset
     unstake_period: number // EOS type: uint32
-    bpproxy_account: string
-    governc_account: string
-    min_reward: string
-    reward_weight: number
+    bpproxy_account: string // EOS type: name
+    governc_account: string // EOS type: name
+    min_reward: string // EOS type: asset
+    reward_weight: number // EOS type: float64
+}
+
+export interface GovernanceParameters {
+    NUT_voting_balance: number // EOS type: uint64
 }
 
 export interface BPVotes {
@@ -56,23 +60,23 @@ export interface VoterInfo {
 }
 
 export interface EosVoterInfo {
-    owner: string
-    proxy: string
-    producers: string[]
-    staked: number
-    last_vote_weight: string
-    proxied_vote_weight: string
-    is_proxy: number
-    flags1: number
-    reserved2: number
-    reserved3: string
+    owner: string // EOS type: name
+    proxy: string // EOS type: name
+    producers: string[]  // EOS type: name[]
+    staked: number // EOS type: int64
+    last_vote_weight: string // EOS type: float64
+    proxied_vote_weight: string // EOS type: float64
+    is_proxy: number // EOS type: bool
+    flags1: number // EOS type: uint32
+    reserved2: number // EOS type: uint32
+    reserved3: string // EOS type: asset
 }
 
 export interface BpPosition {
-    bp_name: string
-    reward_amount: string
-    balance: string
-    enabled: number //  0 or 1
-    is_active: number //  0 or 1
-    active_since: string
+    bp_name: string // EOS type: name
+    reward_amount: string // EOS type: asset
+    balance: string // EOS type: asset
+    enabled: number // EOS type: bool
+    is_active: number // EOS type: bool
+    active_since: string // EOS type: time_point_sec
 }

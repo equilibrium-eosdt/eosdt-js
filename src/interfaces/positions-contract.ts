@@ -1,31 +1,48 @@
 export interface EosdtPosition {
-    position_id: number
-    maker: string
-    outstanding: string
-    governance: string
-    collateral: string
+    position_id: number // EOS type: uint64
+    maker: string // EOS type: name
+    outstanding: string // EOS type: asset
+    governance: string // EOS type: asset
+    collateral: string // EOS type: float64
 }
 
 export interface Referral {
-    referral_id: number
-    referral: string
-    staked_amount: string
+    referral_id: number // EOS type: uint64
+    referral: string // EOS type: name
+    staked_amount: string // EOS type: asset
 }
 
 export interface PositionReferral {
-    referral_id: number
-    position_id: number
+    referral_id: number // EOS type: uint64
+    position_id: number // EOS type: uint64
+}
+
+export interface TokenRate_deprecated {
+    rate: string // EOS type: asset
+    update: string // EOS type: time_point_sec
+    provablecb1a_price: string // EOS type: asset
+    provablecb1a_update: string // EOS type: time_point_sec
+    eosnationdsp_price: string // EOS type: asset
+    eosnationdsp_update: string // EOS type: time_point_sec
+    equilibriumdsp_price: string // EOS type: asset
+    equilibriumdsp_update: string // EOS type: time_point_sec
 }
 
 export interface TokenRate {
-    rate: string
-    update: string
-    provablecb1a_price: string
-    provablecb1a_update: string
-    eosnationdsp_price: string
-    eosnationdsp_update: string
-    equilibriumdsp_price: string
-    equilibriumdsp_update: string
+    rate: string // EOS type: asset
+    update: string // EOS type: time_point_sec
+    provablecb1a_price: string // EOS type: asset
+    provablecb1a_update: string // EOS type: time_point_sec
+    delphioracle_price: string // EOS type: asset
+    delphioracle_update: string // EOS type: time_point_sec
+    equilibriumdsp_price: string // EOS type: asset
+    equilibriumdsp_update: string // EOS type: time_point_sec
+    base: string // EOS type: symbol
+}
+
+export interface LtvRatios {
+    position_id: number // EOS type: uint64
+    ltv_ratio: string // EOS type: float64
 }
 
 export interface EosdtContractSettings {
@@ -57,16 +74,19 @@ export interface EosdtContractSettings {
 
     referral_min_stake: string // EOS type: asset
     referral_ratio: string // EOS type: float64
+
+    collateral_account: string // EOS type: name
+    collateral_token: string // EOS type: symbol
 }
 
 export interface EosdtContractParameters {
-    parameter_id: number
-    total_collateral: string
-    total_debt: string
-    stability_rate: string
-    governance_rate: string
-    prev_date: string
-    prev_vote: string
-    prev_stake: string
-    eos_staked: string
+    parameter_id: number // EOS type: uint64
+    total_collateral: string // EOS type: float64
+    total_debt: string // EOS type: asset
+    stability_rate: string // EOS type: float64
+    governance_rate: string // EOS type: float64
+    prev_date: string // EOS type: time_point_sec
+    prev_vote: string // EOS type: time_point_sec
+    prev_stake: string // EOS type: time_point_sec
+    eos_staked: string // EOS type: asset
 }

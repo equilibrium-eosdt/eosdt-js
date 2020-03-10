@@ -14,7 +14,7 @@ export interface PositionReferral {
     referral_id: number;
     position_id: number;
 }
-export interface TokenRate {
+export interface TokenRate_deprecated {
     rate: string;
     update: string;
     provablecb1a_price: string;
@@ -23,6 +23,21 @@ export interface TokenRate {
     eosnationdsp_update: string;
     equilibriumdsp_price: string;
     equilibriumdsp_update: string;
+}
+export interface TokenRate {
+    rate: string;
+    update: string;
+    provablecb1a_price: string;
+    provablecb1a_update: string;
+    delphioracle_price: string;
+    delphioracle_update: string;
+    equilibriumdsp_price: string;
+    equilibriumdsp_update: string;
+    base: string;
+}
+export interface LtvRatios {
+    position_id: number;
+    ltv_ratio: string;
 }
 export interface EosdtContractSettings {
     setting_id: number;
@@ -49,6 +64,8 @@ export interface EosdtContractSettings {
     governc_account: string;
     referral_min_stake: string;
     referral_ratio: string;
+    collateral_account: string;
+    collateral_token: string;
 }
 export interface EosdtContractParameters {
     parameter_id: number;

@@ -1,10 +1,12 @@
 import { Api, JsonRpc } from "eosjs"
 import { EosdtConnectorInterface } from "./interfaces/connector"
-import { LiquidatorParameters } from "./interfaces/liquidator"
+import { LiquidatorParameters, LiquidatorSettings } from "./interfaces/liquidator"
 import { ITrxParamsArgument } from "./interfaces/transaction"
 import { amountToAssetString, setTransactionParams } from "./utils"
 
 export class LiquidatorContract {
+    protected posContractName: string = "eosdtcntract"
+    protected tokenSymbol: string = "EOS"
     private contractName: string
     private rpc: JsonRpc
     private api: Api
@@ -15,7 +17,7 @@ export class LiquidatorContract {
         this.contractName = "eosdtliqdatr"
     }
 
-    public async marginCallAndBuyoutEos(
+    public async marginCallAndBuyoutCollat(
         senderName: string,
         positionId: number,
         eosdtToTransfer: string | number,
@@ -30,7 +32,7 @@ export class LiquidatorContract {
             {
                 actions: [
                     {
-                        account: "eosdtcntract",
+                        account: this.posContractName,
                         name: "margincall",
                         authorization,
                         data: { position_id: positionId }
@@ -44,41 +46,6 @@ export class LiquidatorContract {
                             to: this.contractName,
                             quantity: eosdtAssetString,
                             memo: trxMemo ? trxMemo : "eosdt-js buyout"
-                        }
-                    }
-                ]
-            },
-            {
-                blocksBehind: trxParams.blocksBehind,
-                expireSeconds: trxParams.expireSeconds
-            }
-        )
-
-        return receipt
-    }
-
-    public async transferEos(
-        senderName: string,
-        amount: string | number,
-        trxMemo?: string,
-        transactionParams?: ITrxParamsArgument
-    ): Promise<any> {
-        const eosAssetString = amountToAssetString(amount, "EOS")
-        const trxParams = setTransactionParams(transactionParams)
-        const authorization = [{ actor: senderName, permission: trxParams.permission }]
-
-        const receipt = await this.api.transact(
-            {
-                actions: [
-                    {
-                        account: "eosio.token",
-                        name: "transfer",
-                        authorization,
-                        data: {
-                            from: senderName,
-                            to: this.contractName,
-                            quantity: eosAssetString,
-                            memo: trxMemo ? trxMemo : "eosdt-js transferEos()"
                         }
                     }
                 ]
@@ -172,16 +139,30 @@ export class LiquidatorContract {
         return parameters.bad_debt
     }
 
-    public async getEosBalance(): Promise<string> {
+    public async getCollatBalance(): Promise<string> {
         const parameters = await this.getParameters()
-        return parameters.eos_balance
+        return parameters.collat_balance
     }
 
+    public async getNutCollatBalance(): Promise<string> {
+        const parameters = await this.getParameters()
+        return parameters.nut_collat_balance
+    }
+    
     public async getParameters(): Promise<LiquidatorParameters> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
             scope: this.contractName,
             table: "parameters"
+        })
+        return table.rows[0]
+    }
+
+    public async getSettings(): Promise<LiquidatorSettings> {
+        const table = await this.rpc.get_table_rows({
+            code: this.contractName,
+            scope: this.contractName,
+            table: "liqsettings"
         })
         return table.rows[0]
     }

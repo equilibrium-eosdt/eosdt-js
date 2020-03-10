@@ -1,5 +1,5 @@
 import { EosdtConnectorInterface } from "./interfaces/connector";
-import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, TokenRate, Referral, PositionReferral } from "./interfaces/positions-contract";
+import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, PositionReferral, Referral, TokenRate, TokenRate_deprecated, LtvRatios } from "./interfaces/positions-contract";
 import { ITrxParamsArgument } from "./interfaces/transaction";
 export declare class PositionsContract {
     protected contractName: string;
@@ -9,8 +9,9 @@ export declare class PositionsContract {
     private rpc;
     private api;
     constructor(connector: EosdtConnectorInterface);
-    create(accountName: string, eosAmount: string | number, eosdtAmount: string | number, transactionParams?: ITrxParamsArgument): Promise<any>;
-    createWithReferral(accountName: string, eosAmount: string | number, eosdtAmount: string | number, referralId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    create(accountName: string, collatAmount: string | number, eosdtAmount: string | number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    createWithReferral(accountName: string, collatAmount: string | number, eosdtAmount: string | number, referralId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    createInThreeActions(accountName: string, collatAmount: string | number, eosdtAmount: string | number, referralId?: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     close(senderAccount: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     del(creator: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     give(giverAccount: string, receiver: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
@@ -21,12 +22,10 @@ export declare class PositionsContract {
     marginCall(senderName: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     getContractTokenAmount(): Promise<number>;
     getContractEosAmount(): Promise<number>;
-    getRates(): Promise<TokenRate[]>;
-    private rateEntryPredicate;
-    getRelativeRates(): Promise<Array<TokenRate & {
-        base: string;
-    }>>;
+    getRates(): Promise<TokenRate_deprecated[]>;
+    getRelativeRates(): Promise<Array<TokenRate>>;
     getPositionById(id: number): Promise<EosdtPosition | undefined>;
+    getPositionByMaker(maker: string): Promise<EosdtPosition | undefined>;
     getAllUserPositions(maker: string): Promise<EosdtPosition[]>;
     getParameters(): Promise<EosdtContractParameters>;
     getSettings(): Promise<EosdtContractSettings>;
@@ -38,4 +37,7 @@ export declare class PositionsContract {
     getPositionReferral(positionId: number): Promise<PositionReferral | undefined>;
     getPositionReferralsTable(): Promise<PositionReferral[]>;
     getAllReferralPositionsIds(referralId: number): Promise<number[]>;
+    getLatestUserPosition(accountName: string): Promise<EosdtPosition | undefined>;
+    getLtvRatiosTable(): Promise<LtvRatios[]>;
+    getPositionLtvRatio(id: number): Promise<LtvRatios | undefined>;
 }

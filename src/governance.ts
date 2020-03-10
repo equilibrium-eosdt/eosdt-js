@@ -7,7 +7,8 @@ import {
     GovernanceSettings,
     ProposeObject,
     StoredProposal,
-    VoterInfo
+    VoterInfo,
+    GovernanceParameters
 } from "./interfaces/governance"
 import { ITrxParamsArgument } from "./interfaces/transaction"
 import { amountToAssetString, dateToEosDate, setTransactionParams } from "./utils"
@@ -392,6 +393,15 @@ export class GovernanceContract {
         return table.rows
     }
 
+    public async getVotesForAccount(accountName: string): Promise<EosdtVote[]> {
+        const table = await this.rpc.get_table_rows({
+            code: this.contractName,
+            scope: this.contractName,
+            table: "votes"
+        })
+        return table.rows.filter((vote: EosdtVote) => vote.voter === accountName)
+    }
+
     public async getProposals(): Promise<StoredProposal[]> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
@@ -428,6 +438,15 @@ export class GovernanceContract {
             code: this.contractName,
             scope: this.contractName,
             table: "govsettings"
+        })
+        return table.rows[0]
+    }
+
+    public async getParameters(): Promise<GovernanceParameters> {
+        const table = await this.rpc.get_table_rows({
+            code: this.contractName,
+            scope: this.contractName,
+            table: "govparams"
         })
         return table.rows[0]
     }

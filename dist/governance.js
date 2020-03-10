@@ -303,6 +303,16 @@ class GovernanceContract {
             return table.rows;
         });
     }
+    getVotesForAccount(accountName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "votes"
+            });
+            return table.rows.filter((vote) => vote.voter === accountName);
+        });
+    }
     getProposals() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
@@ -343,6 +353,16 @@ class GovernanceContract {
                 code: this.contractName,
                 scope: this.contractName,
                 table: "govsettings"
+            });
+            return table.rows[0];
+        });
+    }
+    getParameters() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "govparams"
             });
             return table.rows[0];
         });

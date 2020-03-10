@@ -1,5 +1,5 @@
 import { EosdtConnectorInterface } from "./interfaces/connector";
-import { BPVotes, EosdtVote, EosVoterInfo, GovernanceSettings, ProposeObject, StoredProposal, VoterInfo } from "./interfaces/governance";
+import { BPVotes, EosdtVote, EosVoterInfo, GovernanceSettings, ProposeObject, StoredProposal, VoterInfo, GovernanceParameters } from "./interfaces/governance";
 import { ITrxParamsArgument } from "./interfaces/transaction";
 export declare class GovernanceContract {
     private contractName;
@@ -19,8 +19,10 @@ export declare class GovernanceContract {
     getVoterInfo(accountName: string): Promise<VoterInfo | undefined>;
     getVoterInfosTable(): Promise<VoterInfo[]>;
     getVotes(): Promise<EosdtVote[]>;
+    getVotesForAccount(accountName: string): Promise<EosdtVote[]>;
     getProposals(): Promise<StoredProposal[]>;
     getBpVotes(): Promise<BPVotes[]>;
     getProxyInfo(): Promise<EosVoterInfo | undefined>;
     getSettings(): Promise<GovernanceSettings>;
+    getParameters(): Promise<GovernanceParameters>;
 }

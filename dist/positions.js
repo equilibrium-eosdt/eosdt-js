@@ -16,14 +16,10 @@ class PositionsContract {
         this.tokenSymbol = "EOS";
         this.tokenContract = "eosio.token";
         this.decimals = 4;
-        this.rateEntryPredicate = (raw) => {
-            // TODO full validation for all data
-            return ["rate", "base"].every(key => typeof raw[key] === "string");
-        };
         this.rpc = connector.rpc;
         this.api = connector.api;
     }
-    create(accountName, eosAmount, eosdtAmount, transactionParams) {
+    create(accountName, collatAmount, eosdtAmount, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: accountName, permission: trxParams.permission }];
@@ -35,11 +31,11 @@ class PositionsContract {
                 authorization,
                 data: { maker: accountName }
             });
-            // Sends EOS collateral and generates EOSDT if eosAmount > 0
-            if (typeof eosAmount === "string")
-                eosAmount = parseFloat(eosAmount);
-            if (eosAmount > 0) {
-                const eosAssetString = utils_1.amountToAssetString(eosAmount, this.tokenSymbol, this.decimals);
+            // Sends collateral and generates EOSDT if collatAmount > 0
+            if (typeof collatAmount === "string")
+                collatAmount = parseFloat(collatAmount);
+            if (collatAmount > 0) {
+                const collatAssetString = utils_1.amountToAssetString(collatAmount, this.tokenSymbol, this.decimals);
                 const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
                 actions.push({
                     account: this.tokenContract,
@@ -48,7 +44,7 @@ class PositionsContract {
                     data: {
                         from: accountName,
                         to: this.contractName,
-                        quantity: eosAssetString,
+                        quantity: collatAssetString,
                         memo: eosdtAssetString
                     }
                 });
@@ -60,7 +56,7 @@ class PositionsContract {
             return receipt;
         });
     }
-    createWithReferral(accountName, eosAmount, eosdtAmount, referralId, transactionParams) {
+    createWithReferral(accountName, collatAmount, eosdtAmount, referralId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: accountName, permission: trxParams.permission }];
@@ -75,11 +71,13 @@ class PositionsContract {
                     maker: accountName
                 }
             });
-            // Sends EOS collateral and generates EOSDT if eosAmount > 0
-            if (typeof eosAmount === "string")
-                eosAmount = parseFloat(eosAmount);
-            if (eosAmount > 0) {
-                const eosAssetString = utils_1.amountToAssetString(eosAmount, this.tokenSymbol, this.decimals);
+            // Sends collateral and generates EOSDT if collatAmount > 0
+            if (typeof collatAmount === "string")
+                collatAmount = parseFloat(collatAmount);
+            if (collatAmount > 0) {
+                const collatAssetString = utils_1.amountToAssetString(collatAmount, this.tokenSymbol, this.decimals);
+                if (typeof eosdtAmount === "string")
+                    eosdtAmount = parseFloat(eosdtAmount);
                 const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
                 actions.push({
                     account: this.tokenContract,
@@ -88,7 +86,7 @@ class PositionsContract {
                     data: {
                         from: accountName,
                         to: this.contractName,
-                        quantity: eosAssetString,
+                        quantity: collatAssetString,
                         memo: eosdtAssetString
                     }
                 });
@@ -98,6 +96,78 @@ class PositionsContract {
                 expireSeconds: trxParams.expireSeconds
             });
             return receipt;
+        });
+    }
+    createInThreeActions(accountName, collatAmount, eosdtAmount, referralId, transactionParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: accountName, permission: trxParams.permission }];
+            let createPosAction;
+            if (referralId) {
+                createPosAction = {
+                    account: this.contractName,
+                    name: "posandrefadd",
+                    authorization,
+                    data: {
+                        referral_id: referralId,
+                        maker: accountName
+                    }
+                };
+            }
+            else {
+                createPosAction = {
+                    account: this.contractName,
+                    name: "positionadd",
+                    authorization,
+                    data: { maker: accountName }
+                };
+            }
+            // Creating position and getting it's ID
+            const creationReceipt = yield this.api.transact({ actions: [createPosAction] }, {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            });
+            const position = yield this.getLatestUserPosition(accountName);
+            if (!position)
+                throw new Error(`Couldn't find position for user ${accountName}`);
+            const positionId = position.position_id;
+            const actions = [];
+            // Sends collateral and generates EOSDT if collatAmount > 0
+            if (typeof collatAmount === "string")
+                collatAmount = parseFloat(collatAmount);
+            if (collatAmount > 0) {
+                const collatAssetString = utils_1.amountToAssetString(collatAmount, this.tokenSymbol, this.decimals);
+                actions.push({
+                    account: this.tokenContract,
+                    name: "transfer",
+                    authorization,
+                    data: {
+                        from: accountName,
+                        to: this.contractName,
+                        quantity: collatAssetString,
+                        memo: `position_id:${positionId}`
+                    }
+                });
+            }
+            if (typeof eosdtAmount === "string")
+                eosdtAmount = parseFloat(eosdtAmount);
+            if (eosdtAmount > 0) {
+                const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
+                actions.push({
+                    account: this.contractName,
+                    name: "debtgenerate",
+                    authorization,
+                    data: {
+                        debt: eosdtAssetString,
+                        position_id: positionId
+                    }
+                });
+            }
+            const receipt = yield this.api.transact({ actions }, {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            });
+            return [creationReceipt, receipt];
         });
     }
     close(senderAccount, positionId, transactionParams) {
@@ -165,7 +235,7 @@ class PositionsContract {
     }
     addCollateral(senderName, amount, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            const eosAssetString = utils_1.amountToAssetString(amount, this.tokenSymbol, this.decimals);
+            const collatAssetString = utils_1.amountToAssetString(amount, this.tokenSymbol, this.decimals);
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
@@ -178,7 +248,7 @@ class PositionsContract {
                             to: this.contractName,
                             from: senderName,
                             maker: senderName,
-                            quantity: eosAssetString,
+                            quantity: collatAssetString,
                             memo: `position_id:${positionId}`
                         }
                     }
@@ -192,7 +262,7 @@ class PositionsContract {
     }
     deleteCollateral(senderName, amount, positionId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            const eosAssetString = utils_1.amountToAssetString(amount, this.tokenSymbol, this.decimals);
+            const collatAssetString = utils_1.amountToAssetString(amount, this.tokenSymbol, this.decimals);
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
@@ -203,7 +273,7 @@ class PositionsContract {
                         authorization,
                         data: {
                             position_id: positionId,
-                            collateral: eosAssetString
+                            collateral: collatAssetString
                         }
                     }
                 ]
@@ -322,13 +392,7 @@ class PositionsContract {
                 json: true,
                 limit: 1000
             });
-            return table.rows.map((entry) => {
-                if (!this.rateEntryPredicate(entry)) {
-                    // TODO always parse blockchain response
-                    throw new Error("Rates format mismatch");
-                }
-                return entry;
-            });
+            return table.rows;
         });
     }
     getPositionById(id) {
@@ -340,6 +404,23 @@ class PositionsContract {
                 table_key: "position_id",
                 lower_bound: id,
                 upper_bound: id
+            });
+            return table.rows[0];
+        });
+    }
+    getPositionByMaker(maker) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "positions",
+                json: true,
+                limit: 1,
+                table_key: "maker",
+                index_position: "secondary",
+                key_type: "name",
+                lower_bound: maker,
+                upper_bound: maker
             });
             return table.rows[0];
         });
@@ -501,6 +582,46 @@ class PositionsContract {
             return (yield this.getPositionReferralsTable())
                 .filter(refPos => refPos.referral_id === referralId)
                 .map(refInfo => refInfo.position_id);
+        });
+    }
+    getLatestUserPosition(accountName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const userPositions = yield this.getAllUserPositions(accountName);
+            if (userPositions.length === 0) {
+                const logMsg = `${this.getLatestUserPosition.name}(): ` +
+                    `user ${accountName} does not have positions`;
+                throw new Error(logMsg);
+            }
+            return userPositions.reduce((a, b) => {
+                if (Math.max(a.position_id, b.position_id) === a.position_id)
+                    return a;
+                else
+                    return b;
+            });
+        });
+    }
+    getLtvRatiosTable() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "ctrltvratios",
+                limit: 10000
+            });
+            return table.rows;
+        });
+    }
+    getPositionLtvRatio(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "ctrltvratios",
+                table_key: "position_id",
+                lower_bound: id,
+                upper_bound: id
+            });
+            return table.rows[0];
         });
     }
 }

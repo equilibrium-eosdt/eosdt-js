@@ -35,28 +35,33 @@ Creates a connector object, used to initiate functional modules and invoke their
 
 Module to manage EOSDT positions. Methods:
 
--   `create` - creates new position, using specified amount of EOS as collateral and issuing specified amount of EOSDT to creator. If `eosAmount` arg is equal to zero, creates an empty position.
+-   `create` - creates new position, using specified amount of collateral and issuing specified amount of EOSDT to creator. If `collatAmount` arg is equal to zero, creates an empty position.
 -   `createWithReferral` - same as `create`, but also sets a referral on position.
+-   `createInThreeActions` - same as `create`, but used when creator already have positions.
 -   `close` - used to close a position in event of a global shutdown.
 -   `del` - deletes position that has 0 debt.
 -   `give` - transfers position ownership to another account.
--   `addCollateral` - sends EOS to position to increase it's collateralization.
+-   `addCollateral` - sends collateral to position to increase it's collateralization.
 -   `deleteCollateral` - returns specified part of used collateral to user if LTV stays above critical.
 -   `generateDebt` - issues additional EOSDT for position if this does not bring LTV below critical.
 -   `burnbackDebt` - repays specified amount of EOSDT decreasing debt.
 -   `marginCall` - called on a position with critical LTV, to perform a margin call.
 -   `getContractEosAmount` - returns eosdtcntract EOS balance __deprecated__
--   `getContractTokenAmount` - returns contracts collateral asset balance
--   `getRates` - returns table of current system token prices (rates). __deprecated__
+-   `getContractTokenAmount` - returns contracts collateral asset balance.
+-   `getRates` - returns table of current system token prices (rates_deprecated). __deprecated__
 -   `getRelativeRates` - returns table of current system token prices (rates).
 -   `getPositionById` - returns a position object, selecting it by id.
+-   `getPositionByMaker` - returns a position object, selecting it by maker name.
 -   `getAllUserPositions` - returns an array of all positions for specified user (up to 100 positions).
+-   `getLatestUserPosition` - returns latest position (with maximum id value) for specified user.
+-   `getLtvRatiosTable` - returns table of current LTV ratios for all positions.
+-   `getPositionLtvRatio` - returns current LTV ratio for position by id.
 -   `getParameters` - returns Positions contract parameters.
 -   `getSettings` - return Positions contract settings.
 -   `addReferral` - creates new referral, staking given amount of NUT. Rejects when amount is less then `referral_min_stake` in positions contract settings.
 -   `deleteReferral` - removes referral and unstakes that referral's NUT.
--   `getReferralById` - returns a referral object.
--   `getReferralByName` - returns a referral object.
+-   `getReferralById` - returns a referral object, selecting it by referral id.
+-   `getReferralByName` - returns a referral object, selecting it by referral name.
 -   `getAllReferrals` - returns table of existing referrals.
 -   `getPositionReferral` - returns referral of a given position (`undefined` if none exists).
 -   `getPositionReferralsTable` - returns an array of positions ids and those positions referrals.
@@ -79,10 +84,12 @@ Governance methods help manage the system: create proposals to change system par
 -   `getVoterInfo` - returns amount of NUTs staked by account in EOSDT Governance contract and their unstake date.
 -   `getVoterInfosTable` - returns the whole table of information on accounts that staked NUT
 -   `getVotes` - returns an array with all votes (up to 1000).
+-   `getVotesForAccount` - returns an array with all votes for voter, selecting it by name.
 -   `getProposals` - returns an array with all proposals (up to 1000).
 -   `getBpVotes` - returns array of block producers names and amount of NUT votes for them.
 -   `getProxyInfo` - returns voter info for `eosdtbpproxy`.
--   `getSettings` - returns governance contract settings.
+-   `getSettings` - returns Governance contract settings.
+-   `getParameters` - returns Governance contract parameters.
 
 ### Bp manager
 
@@ -99,14 +106,15 @@ Governance account methods for block producers to manage their voting positions:
 
 Methods to get Liquidator contract parameters and exchange EOS and EOSDT in case of global shutdown.
 
--   `marginCallAndBuyoutEos` - performes margin call on a position and transfers specified amount of EOSDT to buyout freed EOS.
--   `transferEos` - sends EOS to Liquidator contract. It is used to buyout surplus debt with discount.
--   `transferEosdt` - sends EOSDT to liquidator contract. It is used to cancel bad debt and buyout liquidator EOS with discount.
--   `transferNut` - sends NUT tokens to liquidator contract. It is used to buyout EOS intended to be bought for NUT tokens (parameter "nut_collat_balance").
+-   `marginCallAndBuyoutCollat` - performs margin call on a position and transfers specified amount of EOSDT to buyout freed collateral.
+-   `transferEosdt` - sends EOSDT to liquidator contract. It is used to cancel bad debt and buyout liquidator collateral with discount.
+-   `transferNut` - sends NUT tokens to liquidator contract. With memo "EOS" it is used to buyout EOS intended to be bought for NUT tokens (parameter "nut_collat_balance"). With memo "EOSDT" it is used to buyout EOSDT intended to be bought for NUT tokens (parameter "surplus_debt").
 -   `getSurplusDebt` - returns amount of system surplus debt.
 -   `getBadDebt` - returns amount of system bad debt.
--   `getEosBalance` - returns amount of EOS on liquidator contract balance.
+-   `getCollatBalance` - returns amount of collateral on liquidator contract balance.
+-   `getNutCollatBalance` - returns amount of nut_collateral on liquidator contract balance.
 -   `getParameters` - returns all liquidator contract parameters.
+-   `getSettings` - returns liquidator contract settings.
 
 ### Balances
 
@@ -151,7 +159,7 @@ const balances = connector.getBalances()
 
 ### Position operations
 
-Creating position, adding collateral, issuing addintional debt then returning it, returning collateral from postion and closing it.
+Creating position, adding collateral, issuing additional debt then returning it, returning collateral from position and closing it.
 
 ```Javascript
 // Creating a position to issue 2 EOSDT for 1.5 EOS collateral
@@ -170,7 +178,7 @@ await positions.addCollateral(accountName, 1.6, positionId)
 let updatedPosition = await positions.getPositionById(positionId)
 console.log("Position collateral increased: ", updatedPosition)
 
-// Issuing addintional 2.15 EOSDT of debt
+// Issuing additional 2.15 EOSDT of debt
 await positions.generateDebt(accountName, 2.15, positionId)
 
 updatedPosition = await positions.getPositionById(positionId)
@@ -230,12 +238,12 @@ await governance.applyChanges("test proposal", accountName)
 Staking NUT tokens to vote for and against proposals.
 
 ```Javascript
-// Transfering 2 NUT tokens to use them in voting. Tokens can be unstaked and
+// Transferring 2 NUT tokens to use them in voting. Tokens can be unstaked and
 // transferred back after 3 days wait period (votes, using these tokens must be
 // cancelled first)
 await governance.stake(accountName, 2)
 
-// Voting whith 2 NUT tokens for proposal with name "test proposal". Vote "1" for
+// Voting with 2 NUT tokens for proposal with name "test proposal". Vote "1" for
 // proposal and any other number to vote against it. You vote with all staked tokens
 await governance.vote("test proposal", 1, accountName)
 console.log(`Voted successfully, all votes: \n`, await governance.getVotes())
@@ -250,7 +258,7 @@ await governance.unstake(2, accountName)
 
 ### Balances operations
 
-Gettings balances of EOS, EOSDT or NUT
+Getting balances of EOS, EOSDT or NUT
 
 ```Javascript
 // Getting amount of EOS available on user's balance

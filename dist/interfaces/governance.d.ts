@@ -25,7 +25,7 @@ export interface EosdtVote {
 }
 export interface GovernanceSettings {
     setting_id: number;
-    eosdtcntract_account: string;
+    position_account: string;
     min_proposal_weight: string;
     freeze_period: number;
     min_participation: string;
@@ -39,6 +39,9 @@ export interface GovernanceSettings {
     governc_account: string;
     min_reward: string;
     reward_weight: number;
+}
+export interface GovernanceParameters {
+    NUT_voting_balance: number;
 }
 export interface BPVotes {
     producer: string;

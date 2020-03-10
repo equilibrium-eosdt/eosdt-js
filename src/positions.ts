@@ -4,9 +4,11 @@ import {
     EosdtContractParameters,
     EosdtContractSettings,
     EosdtPosition,
-    TokenRate,
+    PositionReferral,
     Referral,
-    PositionReferral
+    TokenRate,
+    TokenRate_deprecated,
+    LtvRatios
 } from "./interfaces/positions-contract"
 import { ITrxParamsArgument } from "./interfaces/transaction"
 import { amountToAssetString, balanceToNumber, setTransactionParams } from "./utils"
@@ -26,7 +28,7 @@ export class PositionsContract {
 
     public async create(
         accountName: string,
-        eosAmount: string | number,
+        collatAmount: string | number,
         eosdtAmount: string | number,
         transactionParams?: ITrxParamsArgument
     ): Promise<any> {
@@ -42,12 +44,12 @@ export class PositionsContract {
             data: { maker: accountName }
         })
 
-        // Sends EOS collateral and generates EOSDT if eosAmount > 0
-        if (typeof eosAmount === "string") eosAmount = parseFloat(eosAmount)
+        // Sends collateral and generates EOSDT if collatAmount > 0
+        if (typeof collatAmount === "string") collatAmount = parseFloat(collatAmount)
 
-        if (eosAmount > 0) {
-            const eosAssetString = amountToAssetString(
-                eosAmount,
+        if (collatAmount > 0) {
+            const collatAssetString = amountToAssetString(
+                collatAmount,
                 this.tokenSymbol,
                 this.decimals
             )
@@ -61,7 +63,7 @@ export class PositionsContract {
                 data: {
                     from: accountName,
                     to: this.contractName,
-                    quantity: eosAssetString,
+                    quantity: collatAssetString,
                     memo: eosdtAssetString
                 }
             })
@@ -80,7 +82,7 @@ export class PositionsContract {
 
     public async createWithReferral(
         accountName: string,
-        eosAmount: string | number,
+        collatAmount: string | number,
         eosdtAmount: string | number,
         referralId: number,
         transactionParams?: ITrxParamsArgument
@@ -100,15 +102,16 @@ export class PositionsContract {
             }
         })
 
-        // Sends EOS collateral and generates EOSDT if eosAmount > 0
-        if (typeof eosAmount === "string") eosAmount = parseFloat(eosAmount)
-        if (eosAmount > 0) {
-            const eosAssetString = amountToAssetString(
-                eosAmount,
+        // Sends collateral and generates EOSDT if collatAmount > 0
+        if (typeof collatAmount === "string") collatAmount = parseFloat(collatAmount)
+        if (collatAmount > 0) {
+            const collatAssetString = amountToAssetString(
+                collatAmount,
                 this.tokenSymbol,
                 this.decimals
             )
 
+            if (typeof eosdtAmount === "string") eosdtAmount = parseFloat(eosdtAmount)
             const eosdtAssetString = amountToAssetString(eosdtAmount, "EOSDT")
 
             actions.push({
@@ -118,7 +121,7 @@ export class PositionsContract {
                 data: {
                     from: accountName,
                     to: this.contractName,
-                    quantity: eosAssetString,
+                    quantity: collatAssetString,
                     memo: eosdtAssetString
                 }
             })
@@ -133,6 +136,97 @@ export class PositionsContract {
         )
 
         return receipt
+    }
+
+    public async createInThreeActions(
+        accountName: string,
+        collatAmount: string | number,
+        eosdtAmount: string | number,
+        referralId?: number,
+        transactionParams?: ITrxParamsArgument
+    ): Promise<any> {
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: accountName, permission: trxParams.permission }]
+
+        let createPosAction: any
+        if (referralId) {
+            createPosAction = {
+                account: this.contractName,
+                name: "posandrefadd",
+                authorization,
+                data: {
+                    referral_id: referralId,
+                    maker: accountName
+                }
+            }
+        } else {
+            createPosAction = {
+                account: this.contractName,
+                name: "positionadd",
+                authorization,
+                data: { maker: accountName }
+            }
+        }
+
+        // Creating position and getting it's ID
+        const creationReceipt = await this.api.transact(
+            { actions: [createPosAction] },
+            {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            }
+        )
+
+        const position = await this.getLatestUserPosition(accountName)
+        if (!position) throw new Error(`Couldn't find position for user ${accountName}`)
+        const positionId = position.position_id
+
+        const actions = []
+        // Sends collateral and generates EOSDT if collatAmount > 0
+        if (typeof collatAmount === "string") collatAmount = parseFloat(collatAmount)
+        if (collatAmount > 0) {
+            const collatAssetString = amountToAssetString(
+                collatAmount,
+                this.tokenSymbol,
+                this.decimals
+            )
+
+            actions.push({
+                account: this.tokenContract,
+                name: "transfer",
+                authorization,
+                data: {
+                    from: accountName,
+                    to: this.contractName,
+                    quantity: collatAssetString,
+                    memo: `position_id:${positionId}`
+                }
+            })
+        }
+
+        if (typeof eosdtAmount === "string") eosdtAmount = parseFloat(eosdtAmount)
+        if (eosdtAmount > 0) {
+            const eosdtAssetString = amountToAssetString(eosdtAmount, "EOSDT")
+            actions.push({
+                account: this.contractName,
+                name: "debtgenerate",
+                authorization,
+                data: {
+                    debt: eosdtAssetString,
+                    position_id: positionId
+                }
+            })
+        }
+
+        const receipt = await this.api.transact(
+            { actions },
+            {
+                blocksBehind: trxParams.blocksBehind,
+                expireSeconds: trxParams.expireSeconds
+            }
+        )
+
+        return [creationReceipt, receipt]
     }
 
     public async close(
@@ -228,7 +322,7 @@ export class PositionsContract {
         positionId: number,
         transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        const eosAssetString = amountToAssetString(
+        const collatAssetString = amountToAssetString(
             amount,
             this.tokenSymbol,
             this.decimals
@@ -247,7 +341,7 @@ export class PositionsContract {
                             to: this.contractName,
                             from: senderName,
                             maker: senderName,
-                            quantity: eosAssetString,
+                            quantity: collatAssetString,
                             memo: `position_id:${positionId}`
                         }
                     }
@@ -268,7 +362,7 @@ export class PositionsContract {
         positionId: number,
         transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        const eosAssetString = amountToAssetString(
+        const collatAssetString = amountToAssetString(
             amount,
             this.tokenSymbol,
             this.decimals
@@ -285,7 +379,7 @@ export class PositionsContract {
                         authorization,
                         data: {
                             position_id: positionId,
-                            collateral: eosAssetString
+                            collateral: collatAssetString
                         }
                     }
                 ]
@@ -418,7 +512,7 @@ export class PositionsContract {
     }
 
     /* @deprecated */
-    public async getRates(): Promise<TokenRate[]> {
+    public async getRates(): Promise<TokenRate_deprecated[]> {
         const table = await this.rpc.get_table_rows({
             code: "eosdtorclize",
             scope: "eosdtorclize",
@@ -429,12 +523,7 @@ export class PositionsContract {
         return table.rows
     }
 
-    private rateEntryPredicate = (raw: unknown): raw is TokenRate & { base: string } => {
-        // TODO full validation for all data
-        return ["rate", "base"].every(key => typeof (raw as any)[key] === "string")
-    }
-
-    public async getRelativeRates(): Promise<Array<TokenRate & { base: string }>> {
+    public async getRelativeRates(): Promise<Array<TokenRate>> {
         const table = await this.rpc.get_table_rows({
             code: "eosdtorclize",
             scope: "eosdtorclize",
@@ -442,15 +531,8 @@ export class PositionsContract {
             json: true,
             limit: 1000
         })
-
-        return table.rows.map((entry: unknown) => {
-            if (!this.rateEntryPredicate(entry)) {
-                // TODO always parse blockchain response
-                throw new Error("Rates format mismatch")
-            }
-
-            return entry
-        })
+        
+        return table.rows
     }
 
     public async getPositionById(id: number): Promise<EosdtPosition | undefined> {
@@ -461,6 +543,22 @@ export class PositionsContract {
             table_key: "position_id",
             lower_bound: id,
             upper_bound: id
+        })
+        return table.rows[0]
+    }
+
+    public async getPositionByMaker(maker: string): Promise<EosdtPosition | undefined> {
+        const table = await this.rpc.get_table_rows({
+            code: this.contractName,
+            scope: this.contractName,
+            table: "positions",
+            json: true,
+            limit: 1,
+            table_key: "maker",
+            index_position: "secondary",
+            key_type: "name",
+            lower_bound: maker,
+            upper_bound: maker
         })
         return table.rows[0]
     }
@@ -634,5 +732,45 @@ export class PositionsContract {
         return (await this.getPositionReferralsTable())
             .filter(refPos => refPos.referral_id === referralId)
             .map(refInfo => refInfo.position_id)
+    }
+
+    public async getLatestUserPosition(
+        accountName: string
+    ): Promise<EosdtPosition | undefined> {
+        const userPositions = await this.getAllUserPositions(accountName)
+
+        if (userPositions.length === 0) {
+            const logMsg =
+                `${this.getLatestUserPosition.name}(): ` +
+                `user ${accountName} does not have positions`
+            throw new Error(logMsg)
+        }
+
+        return userPositions.reduce((a, b) => {
+            if (Math.max(a.position_id, b.position_id) === a.position_id) return a
+            else return b
+        })
+    }
+
+    public async getLtvRatiosTable(): Promise<LtvRatios[]> {
+        const table = await this.rpc.get_table_rows({
+            code: this.contractName,
+            scope: this.contractName,
+            table: "ctrltvratios",
+            limit: 10_000
+        })
+        return table.rows
+    }
+
+    public async getPositionLtvRatio(id: number): Promise<LtvRatios | undefined> {
+        const table = await this.rpc.get_table_rows({
+            code: this.contractName,
+            scope: this.contractName,
+            table: "ctrltvratios",
+            table_key: "position_id",
+            lower_bound: id,
+            upper_bound: id
+        })
+        return table.rows[0]
     }
 }

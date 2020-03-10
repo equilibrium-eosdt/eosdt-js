@@ -12,11 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("./utils");
 class LiquidatorContract {
     constructor(connector) {
+        this.posContractName = "eosdtcntract";
+        this.tokenSymbol = "EOS";
         this.rpc = connector.rpc;
         this.api = connector.api;
         this.contractName = "eosdtliqdatr";
     }
-    marginCallAndBuyoutEos(senderName, positionId, eosdtToTransfer, trxMemo, transactionParams) {
+    marginCallAndBuyoutCollat(senderName, positionId, eosdtToTransfer, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const eosdtAssetString = utils_1.amountToAssetString(eosdtToTransfer, "EOSDT");
             const trxParams = utils_1.setTransactionParams(transactionParams);
@@ -24,7 +26,7 @@ class LiquidatorContract {
             const receipt = yield this.api.transact({
                 actions: [
                     {
-                        account: "eosdtcntract",
+                        account: this.posContractName,
                         name: "margincall",
                         authorization,
                         data: { position_id: positionId }
@@ -38,32 +40,6 @@ class LiquidatorContract {
                             to: this.contractName,
                             quantity: eosdtAssetString,
                             memo: trxMemo ? trxMemo : "eosdt-js buyout"
-                        }
-                    }
-                ]
-            }, {
-                blocksBehind: trxParams.blocksBehind,
-                expireSeconds: trxParams.expireSeconds
-            });
-            return receipt;
-        });
-    }
-    transferEos(senderName, amount, trxMemo, transactionParams) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const eosAssetString = utils_1.amountToAssetString(amount, "EOS");
-            const trxParams = utils_1.setTransactionParams(transactionParams);
-            const authorization = [{ actor: senderName, permission: trxParams.permission }];
-            const receipt = yield this.api.transact({
-                actions: [
-                    {
-                        account: "eosio.token",
-                        name: "transfer",
-                        authorization,
-                        data: {
-                            from: senderName,
-                            to: this.contractName,
-                            quantity: eosAssetString,
-                            memo: trxMemo ? trxMemo : "eosdt-js transferEos()"
                         }
                     }
                 ]
@@ -138,10 +114,16 @@ class LiquidatorContract {
             return parameters.bad_debt;
         });
     }
-    getEosBalance() {
+    getCollatBalance() {
         return __awaiter(this, void 0, void 0, function* () {
             const parameters = yield this.getParameters();
-            return parameters.eos_balance;
+            return parameters.collat_balance;
+        });
+    }
+    getNutCollatBalance() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const parameters = yield this.getParameters();
+            return parameters.nut_collat_balance;
         });
     }
     getParameters() {
@@ -150,6 +132,16 @@ class LiquidatorContract {
                 code: this.contractName,
                 scope: this.contractName,
                 table: "parameters"
+            });
+            return table.rows[0];
+        });
+    }
+    getSettings() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.contractName,
+                scope: this.contractName,
+                table: "liqsettings"
             });
             return table.rows[0];
         });
