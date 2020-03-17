@@ -5,25 +5,29 @@ export interface EosdtPosition {
     governance: string;
     collateral: string;
 }
+export declare const positionKeys: string[];
 export interface Referral {
     referral_id: number;
     referral: string;
     staked_amount: string;
 }
+export declare const referralKeys: string[];
 export interface PositionReferral {
     referral_id: number;
     position_id: number;
 }
+export declare const positionReferralKeys: string[];
 export interface TokenRate_deprecated {
     rate: string;
     update: string;
     provablecb1a_price: string;
     provablecb1a_update: string;
-    eosnationdsp_price: string;
-    eosnationdsp_update: string;
+    delphioracle_price: string;
+    delphioracle_update: string;
     equilibriumdsp_price: string;
     equilibriumdsp_update: string;
 }
+export declare const tokenRateKeys_deprecated: string[];
 export interface TokenRate {
     rate: string;
     update: string;
@@ -33,12 +37,15 @@ export interface TokenRate {
     delphioracle_update: string;
     equilibriumdsp_price: string;
     equilibriumdsp_update: string;
+    id: number;
     base: string;
 }
+export declare const tokenRateKeys: string[];
 export interface LtvRatios {
     position_id: number;
     ltv_ratio: string;
 }
+export declare const ltvRatiosKeys: string[];
 export interface EosdtContractSettings {
     setting_id: number;
     global_lock: number;
@@ -67,6 +74,7 @@ export interface EosdtContractSettings {
     collateral_account: string;
     collateral_token: string;
 }
+export declare const contractSettingsKeys: string[];
 export interface EosdtContractParameters {
     parameter_id: number;
     total_collateral: string;
@@ -78,3 +86,4 @@ export interface EosdtContractParameters {
     prev_stake: string;
     eos_staked: string;
 }
+export declare const сontractParametersKeys: string[];

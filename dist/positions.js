@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const positions_contract_1 = require("./interfaces/positions-contract");
 const utils_1 = require("./utils");
 class PositionsContract {
     constructor(connector) {
@@ -98,12 +99,12 @@ class PositionsContract {
             return receipt;
         });
     }
-    createInThreeActions(accountName, collatAmount, eosdtAmount, referralId, transactionParams) {
+    createWhenPositionsExist(accountName, collatAmount, eosdtAmount, referralId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: accountName, permission: trxParams.permission }];
             let createPosAction;
-            if (referralId) {
+            if (referralId !== undefined) {
                 createPosAction = {
                     account: this.contractName,
                     name: "posandrefadd",
@@ -188,6 +189,42 @@ class PositionsContract {
                 expireSeconds: trxParams.expireSeconds
             });
             return receipt;
+        });
+    }
+    paybackAndDelete(maker, positionId, debtAmount, transactionParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const trxParams = utils_1.setTransactionParams(transactionParams);
+            const authorization = [{ actor: maker, permission: trxParams.permission }];
+            if (debtAmount !== undefined) {
+                const eosdtAssetString = utils_1.amountToAssetString(debtAmount, "EOSDT");
+                const receipt = yield this.api.transact({
+                    actions: [
+                        {
+                            account: "eosdtsttoken",
+                            name: "transfer",
+                            authorization,
+                            data: {
+                                to: this.contractName,
+                                from: maker,
+                                quantity: eosdtAssetString,
+                                memo: `position_id:${positionId}`
+                            }
+                        },
+                        {
+                            account: this.contractName,
+                            name: "positiondel",
+                            authorization,
+                            data: { position_id: positionId }
+                        }
+                    ]
+                }, {
+                    blocksBehind: trxParams.blocksBehind,
+                    expireSeconds: trxParams.expireSeconds
+                });
+                return receipt;
+            }
+            const receiptDel = yield this.del(maker, positionId);
+            return receiptDel;
         });
     }
     del(creator, positionId, transactionParams) {
@@ -322,7 +359,6 @@ class PositionsContract {
                         data: {
                             to: this.contractName,
                             from: senderName,
-                            maker: senderName,
                             quantity: eosdtAssetString,
                             memo: `position_id:${positionId}`
                         }
@@ -357,14 +393,14 @@ class PositionsContract {
             return receipt;
         });
     }
-    getContractTokenAmount() {
+    getContractTokenBalance() {
         return __awaiter(this, void 0, void 0, function* () {
             const balance = yield this.rpc.get_currency_balance(this.tokenContract, this.contractName, this.tokenSymbol);
             return utils_1.balanceToNumber(balance);
         });
     }
     /* @deprecated */
-    getContractEosAmount() {
+    getContractEosBalance() {
         return __awaiter(this, void 0, void 0, function* () {
             const balance = yield this.rpc.get_currency_balance("eosio.token", "eosdtcntract", "EOS");
             return utils_1.balanceToNumber(balance);
@@ -377,10 +413,9 @@ class PositionsContract {
                 code: "eosdtorclize",
                 scope: "eosdtorclize",
                 table: "orarates",
-                json: true,
                 limit: 1000
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "rate_deprecated", positions_contract_1.tokenRateKeys_deprecated);
         });
     }
     getRelativeRates() {
@@ -389,10 +424,9 @@ class PositionsContract {
                 code: "eosdtorclize",
                 scope: "eosdtorclize",
                 table: "oraclerates",
-                json: true,
                 limit: 1000
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "rate", positions_contract_1.tokenRateKeys);
         });
     }
     getPositionById(id) {
@@ -405,7 +439,7 @@ class PositionsContract {
                 lower_bound: id,
                 upper_bound: id
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "position", positions_contract_1.positionKeys, true);
         });
     }
     getPositionByMaker(maker) {
@@ -414,7 +448,6 @@ class PositionsContract {
                 code: this.contractName,
                 scope: this.contractName,
                 table: "positions",
-                json: true,
                 limit: 1,
                 table_key: "maker",
                 index_position: "secondary",
@@ -422,7 +455,7 @@ class PositionsContract {
                 lower_bound: maker,
                 upper_bound: maker
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "position", positions_contract_1.positionKeys, true);
         });
     }
     getAllUserPositions(maker) {
@@ -438,7 +471,7 @@ class PositionsContract {
                 lower_bound: maker,
                 upper_bound: maker
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "position", positions_contract_1.positionKeys);
         });
     }
     getParameters() {
@@ -448,7 +481,7 @@ class PositionsContract {
                 scope: this.contractName,
                 table: "parameters"
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "positions parameters", positions_contract_1.сontractParametersKeys);
         });
     }
     getSettings() {
@@ -458,7 +491,7 @@ class PositionsContract {
                 scope: this.contractName,
                 table: "ctrsettings"
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "positions settings", positions_contract_1.contractSettingsKeys);
         });
     }
     addReferral(senderName, nutAmount, transactionParams) {
@@ -517,7 +550,7 @@ class PositionsContract {
                 lower_bound: id,
                 upper_bound: id
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "referral", positions_contract_1.referralKeys, true);
         });
     }
     getAllReferrals() {
@@ -528,7 +561,7 @@ class PositionsContract {
                 table: "ctrreferrals",
                 limit: 10000
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "referral", positions_contract_1.referralKeys);
         });
     }
     getReferralByName(name) {
@@ -547,7 +580,7 @@ class PositionsContract {
                 lower_bound: positionId,
                 upper_bound: positionId
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows, "position referral", positions_contract_1.positionReferralKeys, true);
         });
     }
     getPositionReferralsTable() {
@@ -556,23 +589,52 @@ class PositionsContract {
             const limit = 10000;
             function getTablePart(that) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    return yield that.rpc.get_table_rows({
+                    const table = yield that.rpc.get_table_rows({
                         code: that.contractName,
                         scope: that.contractName,
                         table: "positionrefs",
                         lower_bound: lowerBound,
                         limit
                     });
+                    return utils_1.validateExternalData(table.rows, "position referral", positions_contract_1.positionReferralKeys);
                 });
             }
             const firstRequest = yield getTablePart(this);
-            const result = firstRequest.rows;
+            const result = firstRequest;
             let more = firstRequest.more;
             while (more) {
                 lowerBound = result[result.length - 1].position_id + 1;
                 const moreReferrals = yield getTablePart(this);
-                result.push(...moreReferrals.rows);
+                result.push(...moreReferrals);
                 more = moreReferrals.more;
+            }
+            return result;
+        });
+    }
+    getAllPositions() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let lowerBound = 0;
+            const limit = 10000;
+            function getTablePart(that) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const table = yield that.rpc.get_table_rows({
+                        code: that.contractName,
+                        scope: that.contractName,
+                        table: "positions",
+                        lower_bound: lowerBound,
+                        limit
+                    });
+                    return utils_1.validateExternalData(table.rows, "position", positions_contract_1.positionKeys);
+                });
+            }
+            const firstRequest = yield getTablePart(this);
+            const result = firstRequest;
+            let more = firstRequest.more;
+            while (more) {
+                lowerBound = result[result.length - 1].position_id + 1;
+                const morePositions = yield getTablePart(this);
+                result.push(...morePositions);
+                more = morePositions.more;
             }
             return result;
         });
@@ -587,11 +649,8 @@ class PositionsContract {
     getLatestUserPosition(accountName) {
         return __awaiter(this, void 0, void 0, function* () {
             const userPositions = yield this.getAllUserPositions(accountName);
-            if (userPositions.length === 0) {
-                const logMsg = `${this.getLatestUserPosition.name}(): ` +
-                    `user ${accountName} does not have positions`;
-                throw new Error(logMsg);
-            }
+            if (userPositions.length === 0)
+                return;
             return userPositions.reduce((a, b) => {
                 if (Math.max(a.position_id, b.position_id) === a.position_id)
                     return a;
@@ -608,7 +667,7 @@ class PositionsContract {
                 table: "ctrltvratios",
                 limit: 10000
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "ltv ratio", positions_contract_1.ltvRatiosKeys);
         });
     }
     getPositionLtvRatio(id) {
@@ -621,7 +680,7 @@ class PositionsContract {
                 lower_bound: id,
                 upper_bound: id
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "ltv ratio", positions_contract_1.ltvRatiosKeys, true);
         });
     }
 }

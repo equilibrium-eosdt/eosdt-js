@@ -1,5 +1,9 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const util_1 = __importDefault(require("util"));
 function setTransactionParams(trxParams) {
     const parameters = {
         permission: "active",
@@ -61,3 +65,45 @@ function balanceToNumber(balance) {
     }
 }
 exports.balanceToNumber = balanceToNumber;
+function firstCharToUpper(name) {
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+}
+function logObject(obj) {
+    return util_1.default.inspect(obj, false, null, true);
+}
+function predicate(raw, keys, name) {
+    keys.forEach(key => {
+        if (!raw.hasOwnProperty(key)) {
+            const msg = `${firstCharToUpper(name)} format mismatch: missing property "${key}". ` +
+                `Received object: \n${logObject(raw)}"`;
+            throw new Error(msg);
+        }
+    });
+    const properties = Object.keys(raw);
+    if (properties.length !== keys.length) {
+        const propertiesDiff = properties.filter(prop => !keys.includes(prop));
+        if (propertiesDiff.length !== 0) {
+            const propNames = propertiesDiff.map(p => `"${p}"`).join(", ");
+            let ending = "ies";
+            if (propertiesDiff.length === 1)
+                ending = "y";
+            const msg = `${firstCharToUpper(name)} format mismatch: unknown propert${ending} ` +
+                `${propNames}.\nReceived object: \n${logObject(raw)}"`;
+            throw new Error(msg);
+        }
+    }
+}
+function validateExternalData(data, name, keys, canBeUndefined = false) {
+    if (data === undefined)
+        if (canBeUndefined)
+            return;
+        else
+            throw new Error(`${firstCharToUpper(name)} does not exist`);
+    if (!Array.isArray(data)) {
+        predicate(data, keys, name);
+        return data;
+    }
+    data.forEach((entry) => predicate(entry, keys, name));
+    return data;
+}
+exports.validateExternalData = validateExternalData;

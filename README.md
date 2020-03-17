@@ -37,23 +37,25 @@ Module to manage EOSDT positions. Methods:
 
 -   `create` - creates new position, using specified amount of collateral and issuing specified amount of EOSDT to creator. If `collatAmount` arg is equal to zero, creates an empty position.
 -   `createWithReferral` - same as `create`, but also sets a referral on position.
--   `createInThreeActions` - same as `create`, but used when creator already have positions.
+-   `createWhenPositionsExist` - same as `create`, but used when creator already have positions.
 -   `close` - used to close a position in event of a global shutdown.
 -   `del` - deletes position that has 0 debt.
+-   `paybackAndDelete` - if debt defined burn all available debt on position and delete it. Otherwise delete position.
 -   `give` - transfers position ownership to another account.
 -   `addCollateral` - sends collateral to position to increase it's collateralization.
 -   `deleteCollateral` - returns specified part of used collateral to user if LTV stays above critical.
 -   `generateDebt` - issues additional EOSDT for position if this does not bring LTV below critical.
 -   `burnbackDebt` - repays specified amount of EOSDT decreasing debt.
 -   `marginCall` - called on a position with critical LTV, to perform a margin call.
--   `getContractEosAmount` - returns eosdtcntract EOS balance __deprecated__
--   `getContractTokenAmount` - returns contracts collateral asset balance.
+-   `getContractEosBalance` - returns eosdtcntract EOS balance __deprecated__
+-   `getContractTokenBalance` - returns contracts collateral asset balance.
 -   `getRates` - returns table of current system token prices (rates_deprecated). __deprecated__
 -   `getRelativeRates` - returns table of current system token prices (rates).
 -   `getPositionById` - returns a position object, selecting it by id.
--   `getPositionByMaker` - returns a position object, selecting it by maker name.
+-   `getPositionByMaker` - returns a first position object, selecting it by maker name.
+-   `getLatestUserPosition` - returns latest position (with maximum id value), selecting it by maker name.
 -   `getAllUserPositions` - returns an array of all positions for specified user (up to 100 positions).
--   `getLatestUserPosition` - returns latest position (with maximum id value) for specified user.
+-   `getAllPositions` - returns an array of all positions for all users.
 -   `getLtvRatiosTable` - returns table of current LTV ratios for all positions.
 -   `getPositionLtvRatio` - returns current LTV ratio for position by id.
 -   `getParameters` - returns Positions contract parameters.

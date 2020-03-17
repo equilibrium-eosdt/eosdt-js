@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const liquidator_1 = require("./interfaces/liquidator");
 const utils_1 = require("./utils");
 class LiquidatorContract {
     constructor(connector) {
@@ -133,7 +134,7 @@ class LiquidatorContract {
                 scope: this.contractName,
                 table: "parameters"
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "liquidator parameters", liquidator_1.liquidatorParametersKeys);
         });
     }
     getSettings() {
@@ -143,7 +144,7 @@ class LiquidatorContract {
                 scope: this.contractName,
                 table: "liqsettings"
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "liquidator settings", liquidator_1.liquidatorSettingsKeys);
         });
     }
 }

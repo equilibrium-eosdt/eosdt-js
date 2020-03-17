@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const governance_1 = require("./interfaces/governance");
 const utils_1 = require("./utils");
 class GovernanceContract {
     constructor(connector) {
@@ -278,7 +279,7 @@ class GovernanceContract {
                 lower_bound: accountName,
                 upper_bound: accountName
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "voter info", governance_1.voterInfoKeys, true);
         });
     }
     getVoterInfosTable() {
@@ -289,7 +290,7 @@ class GovernanceContract {
                 scope: this.contractName,
                 limit: 100000
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "voter info", governance_1.voterInfoKeys);
         });
     }
     getVotes() {
@@ -300,7 +301,7 @@ class GovernanceContract {
                 table: "votes",
                 limit: 1000
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "eosdt vote", governance_1.eosdtVoteKeys);
         });
     }
     getVotesForAccount(accountName) {
@@ -308,9 +309,10 @@ class GovernanceContract {
             const table = yield this.rpc.get_table_rows({
                 code: this.contractName,
                 scope: this.contractName,
-                table: "votes"
+                table: "votes",
+                limit: 1000
             });
-            return table.rows.filter((vote) => vote.voter === accountName);
+            return utils_1.validateExternalData(table.rows, "eosdt vote", governance_1.eosdtVoteKeys).filter((vote) => vote.voter === accountName);
         });
     }
     getProposals() {
@@ -321,7 +323,7 @@ class GovernanceContract {
                 table: "proposals",
                 limit: 1000
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "stored proposal", governance_1.storedProposalKeys);
         });
     }
     getBpVotes() {
@@ -332,7 +334,7 @@ class GovernanceContract {
                 table: "bpvotes",
                 limit: 1000
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "bp votes", governance_1.bpVotesKeys);
         });
     }
     getProxyInfo() {
@@ -344,7 +346,7 @@ class GovernanceContract {
                 lower_bound: "eosdtbpproxy",
                 upper_bound: "eosdtbpproxy"
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "eos voter info", governance_1.eosVoterInfoKeys, true);
         });
     }
     getSettings() {
@@ -354,7 +356,7 @@ class GovernanceContract {
                 scope: this.contractName,
                 table: "govsettings"
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "governance settings", governance_1.governanceSettingsKeys);
         });
     }
     getParameters() {
@@ -364,7 +366,7 @@ class GovernanceContract {
                 scope: this.contractName,
                 table: "govparams"
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "governance parameters", governance_1.governanceParametersKeys);
         });
     }
 }

@@ -1,8 +1,8 @@
 import { Api, JsonRpc } from "eosjs"
 import { EosdtConnectorInterface } from "./interfaces/connector"
-import { LiquidatorParameters, LiquidatorSettings } from "./interfaces/liquidator"
+import { LiquidatorParameters, LiquidatorSettings, liquidatorParametersKeys, liquidatorSettingsKeys } from "./interfaces/liquidator"
 import { ITrxParamsArgument } from "./interfaces/transaction"
-import { amountToAssetString, setTransactionParams } from "./utils"
+import { amountToAssetString, setTransactionParams, validateExternalData } from "./utils"
 
 export class LiquidatorContract {
     protected posContractName: string = "eosdtcntract"
@@ -155,7 +155,7 @@ export class LiquidatorContract {
             scope: this.contractName,
             table: "parameters"
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "liquidator parameters", liquidatorParametersKeys)
     }
 
     public async getSettings(): Promise<LiquidatorSettings> {
@@ -164,6 +164,6 @@ export class LiquidatorContract {
             scope: this.contractName,
             table: "liqsettings"
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "liquidator settings", liquidatorSettingsKeys)
     }
 }

@@ -1,5 +1,5 @@
 import { EosdtConnectorInterface } from "./interfaces/connector";
-import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, PositionReferral, Referral, TokenRate, TokenRate_deprecated, LtvRatios } from "./interfaces/positions-contract";
+import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, LtvRatios, PositionReferral, Referral, TokenRate, TokenRate_deprecated } from "./interfaces/positions-contract";
 import { ITrxParamsArgument } from "./interfaces/transaction";
 export declare class PositionsContract {
     protected contractName: string;
@@ -11,8 +11,9 @@ export declare class PositionsContract {
     constructor(connector: EosdtConnectorInterface);
     create(accountName: string, collatAmount: string | number, eosdtAmount: string | number, transactionParams?: ITrxParamsArgument): Promise<any>;
     createWithReferral(accountName: string, collatAmount: string | number, eosdtAmount: string | number, referralId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
-    createInThreeActions(accountName: string, collatAmount: string | number, eosdtAmount: string | number, referralId?: number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    createWhenPositionsExist(accountName: string, collatAmount: string | number, eosdtAmount: string | number, referralId?: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     close(senderAccount: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    paybackAndDelete(maker: string, positionId: number, debtAmount?: string | number, transactionParams?: ITrxParamsArgument): Promise<any>;
     del(creator: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     give(giverAccount: string, receiver: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     addCollateral(senderName: string, amount: string | number, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
@@ -20,10 +21,10 @@ export declare class PositionsContract {
     generateDebt(senderName: string, amount: string | number, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     burnbackDebt(senderName: string, amount: string | number, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     marginCall(senderName: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
-    getContractTokenAmount(): Promise<number>;
-    getContractEosAmount(): Promise<number>;
+    getContractTokenBalance(): Promise<number>;
+    getContractEosBalance(): Promise<number>;
     getRates(): Promise<TokenRate_deprecated[]>;
-    getRelativeRates(): Promise<Array<TokenRate>>;
+    getRelativeRates(): Promise<TokenRate[]>;
     getPositionById(id: number): Promise<EosdtPosition | undefined>;
     getPositionByMaker(maker: string): Promise<EosdtPosition | undefined>;
     getAllUserPositions(maker: string): Promise<EosdtPosition[]>;
@@ -36,6 +37,7 @@ export declare class PositionsContract {
     getReferralByName(name: string): Promise<Referral | undefined>;
     getPositionReferral(positionId: number): Promise<PositionReferral | undefined>;
     getPositionReferralsTable(): Promise<PositionReferral[]>;
+    getAllPositions(): Promise<EosdtPosition[]>;
     getAllReferralPositionsIds(referralId: number): Promise<number[]>;
     getLatestUserPosition(accountName: string): Promise<EosdtPosition | undefined>;
     getLtvRatiosTable(): Promise<LtvRatios[]>;

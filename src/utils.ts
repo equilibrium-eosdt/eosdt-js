@@ -1,3 +1,4 @@
+import util from "util"
 import { ITrxParams, ITrxParamsArgument } from "./interfaces/transaction"
 
 export function setTransactionParams(trxParams?: ITrxParamsArgument): ITrxParams {
@@ -61,4 +62,57 @@ export function balanceToNumber(balance: string[]): number {
             `Arg array: ${balance}`
         throw new Error(logMsg)
     }
+}
+
+function firstCharToUpper(name: string): string {
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()
+}
+
+function logObject(obj: object): string {
+    return util.inspect(obj, false, null, true)
+}
+
+function predicate(raw: object, keys: string[], name: string): void {
+    keys.forEach(key => {
+        if (!raw.hasOwnProperty(key)) {
+            const msg =
+                `${firstCharToUpper(name)} format mismatch: missing property "${key}". ` +
+                `Received object: \n${logObject(raw)}"`
+            throw new Error(msg)
+        }
+    })
+
+    const properties = Object.keys(raw)
+    if (properties.length !== keys.length) {
+        const propertiesDiff = properties.filter(prop => !keys.includes(prop))
+
+        if (propertiesDiff.length !== 0) {
+            const propNames = propertiesDiff.map(p => `"${p}"`).join(", ")
+            let ending = "ies"
+            if (propertiesDiff.length === 1) ending = "y"
+            const msg =
+                `${firstCharToUpper(name)} format mismatch: unknown propert${ending} ` +
+                `${propNames}.\nReceived object: \n${logObject(raw)}"`
+            throw new Error(msg)
+        }
+    }
+}
+
+export function validateExternalData(
+    data: any,
+    name: string,
+    keys: string[],
+    canBeUndefined = false
+): any {
+    if (data === undefined)
+        if (canBeUndefined) return
+        else throw new Error(`${firstCharToUpper(name)} does not exist`)
+
+    if (!Array.isArray(data)) {
+        predicate(data, keys, name)
+        return data
+    }
+
+    data.forEach((entry: any) => predicate(entry, keys, name))
+    return data
 }

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const governance_1 = require("./interfaces/governance");
 const utils_1 = require("./utils");
 class BpManager {
     constructor(connector) {
@@ -24,7 +25,7 @@ class BpManager {
                 table: "govbpparams",
                 limit: 10000
             });
-            return table.rows;
+            return utils_1.validateExternalData(table.rows, "bp position", governance_1.bpPositionKeys);
         });
     }
     getBpPosition(bpName) {
@@ -36,7 +37,7 @@ class BpManager {
                 upper_bound: bpName,
                 lower_bound: bpName
             });
-            return table.rows[0];
+            return utils_1.validateExternalData(table.rows[0], "bp position", governance_1.bpPositionKeys, true);
         });
     }
     registerBlockProducer(bpName, rewardAmount, transactionParams) {

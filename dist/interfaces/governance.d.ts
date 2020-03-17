@@ -7,6 +7,7 @@ export interface StoredProposal {
     expires_at: string;
     proposal_type: number;
 }
+export declare const storedProposalKeys: string[];
 export interface ProposeObject {
     proposer: string;
     name: string;
@@ -15,6 +16,7 @@ export interface ProposeObject {
     expiresAt: Date;
     type: number;
 }
+export declare const proposeObjectKeys: string[];
 export interface EosdtVote {
     id: number;
     proposal_name: string;
@@ -23,6 +25,7 @@ export interface EosdtVote {
     vote: number;
     vote_json: string;
 }
+export declare const eosdtVoteKeys: string[];
 export interface GovernanceSettings {
     setting_id: number;
     position_account: string;
@@ -35,23 +38,26 @@ export interface GovernanceSettings {
     max_bp_votes: number;
     min_vote_stake: string;
     unstake_period: number;
-    bpproxy_account: string;
-    governc_account: string;
     min_reward: string;
     reward_weight: number;
 }
+export declare const governanceSettingsKeys: string[];
 export interface GovernanceParameters {
-    NUT_voting_balance: number;
+    NUT_voting_balance: string;
+    param_id: number;
 }
+export declare const governanceParametersKeys: string[];
 export interface BPVotes {
     producer: string;
     votes: string;
 }
+export declare const bpVotesKeys: string[];
 export interface VoterInfo {
     voter: string;
     voting_amount: string;
     withdrawal_date: string;
 }
+export declare const voterInfoKeys: string[];
 export interface EosVoterInfo {
     owner: string;
     proxy: string;
@@ -64,6 +70,7 @@ export interface EosVoterInfo {
     reserved2: number;
     reserved3: string;
 }
+export declare const eosVoterInfoKeys: string[];
 export interface BpPosition {
     bp_name: string;
     reward_amount: string;
@@ -72,3 +79,4 @@ export interface BpPosition {
     is_active: number;
     active_since: string;
 }
+export declare const bpPositionKeys: string[];

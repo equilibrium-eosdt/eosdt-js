@@ -1,8 +1,8 @@
 import { Api, JsonRpc } from "eosjs"
 import { EosdtConnectorInterface } from "./interfaces/connector"
-import { BpPosition } from "./interfaces/governance"
+import { BpPosition, bpPositionKeys } from "./interfaces/governance"
 import { ITrxParamsArgument } from "./interfaces/transaction"
-import { amountToAssetString, dateToEosDate, setTransactionParams } from "./utils"
+import { amountToAssetString, dateToEosDate, setTransactionParams, validateExternalData } from "./utils"
 
 export class BpManager {
     private contractName: string
@@ -22,7 +22,7 @@ export class BpManager {
             table: "govbpparams",
             limit: 10_000
         })
-        return table.rows
+        return validateExternalData(table.rows, "bp position", bpPositionKeys)
     }
 
     public async getBpPosition(bpName: string): Promise<BpPosition | undefined> {
@@ -33,7 +33,7 @@ export class BpManager {
             upper_bound: bpName,
             lower_bound: bpName
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "bp position", bpPositionKeys, true)
     }
 
     public async registerBlockProducer(

@@ -1,4 +1,7 @@
 "use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 Object.defineProperty(exports, "__esModule", { value: true });
 var balance_1 = require("./balance");
 exports.BalanceGetter = balance_1.BalanceGetter;
@@ -15,3 +18,6 @@ var positions_1 = require("./positions");
 exports.PositionsContract = positions_1.PositionsContract;
 var bp_manager_1 = require("./bp-manager");
 exports.BpManager = bp_manager_1.BpManager;
+__export(require("./interfaces/governance"));
+__export(require("./interfaces/liquidator"));
+__export(require("./interfaces/positions-contract"));

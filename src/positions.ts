@@ -1,17 +1,30 @@
 import { Api, JsonRpc } from "eosjs"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 import {
+    contractSettingsKeys,
     EosdtContractParameters,
     EosdtContractSettings,
     EosdtPosition,
+    LtvRatios,
+    ltvRatiosKeys,
+    positionKeys,
     PositionReferral,
+    positionReferralKeys,
     Referral,
+    referralKeys,
     TokenRate,
+    tokenRateKeys,
+    tokenRateKeys_deprecated,
     TokenRate_deprecated,
-    LtvRatios
+    сontractParametersKeys
 } from "./interfaces/positions-contract"
 import { ITrxParamsArgument } from "./interfaces/transaction"
-import { amountToAssetString, balanceToNumber, setTransactionParams } from "./utils"
+import {
+    amountToAssetString,
+    balanceToNumber,
+    setTransactionParams,
+    validateExternalData
+} from "./utils"
 
 export class PositionsContract {
     protected contractName: string = "eosdtcntract"
@@ -138,7 +151,7 @@ export class PositionsContract {
         return receipt
     }
 
-    public async createInThreeActions(
+    public async createWhenPositionsExist(
         accountName: string,
         collatAmount: string | number,
         eosdtAmount: string | number,
@@ -149,7 +162,7 @@ export class PositionsContract {
         const authorization = [{ actor: accountName, permission: trxParams.permission }]
 
         let createPosAction: any
-        if (referralId) {
+        if (referralId !== undefined) {
             createPosAction = {
                 account: this.contractName,
                 name: "posandrefadd",
@@ -255,6 +268,53 @@ export class PositionsContract {
         )
 
         return receipt
+    }
+
+    public async paybackAndDelete(
+        maker: string,
+        positionId: number,
+        debtAmount?: string | number,
+        transactionParams?: ITrxParamsArgument
+    ): Promise<any> {
+        const trxParams = setTransactionParams(transactionParams)
+        const authorization = [{ actor: maker, permission: trxParams.permission }]
+
+        if (debtAmount !== undefined) {
+            const eosdtAssetString = amountToAssetString(debtAmount, "EOSDT")
+
+            const receipt = await this.api.transact(
+                {
+                    actions: [
+                        {
+                            account: "eosdtsttoken",
+                            name: "transfer",
+                            authorization,
+                            data: {
+                                to: this.contractName,
+                                from: maker,
+                                quantity: eosdtAssetString,
+                                memo: `position_id:${positionId}`
+                            }
+                        },
+                        {
+                            account: this.contractName,
+                            name: "positiondel",
+                            authorization,
+                            data: { position_id: positionId }
+                        }
+                    ]
+                },
+                {
+                    blocksBehind: trxParams.blocksBehind,
+                    expireSeconds: trxParams.expireSeconds
+                }
+            )
+
+            return receipt
+        }
+
+        const receiptDel = await this.del(maker, positionId)
+        return receiptDel
     }
 
     public async del(
@@ -446,7 +506,6 @@ export class PositionsContract {
                         data: {
                             to: this.contractName,
                             from: senderName,
-                            maker: senderName,
                             quantity: eosdtAssetString,
                             memo: `position_id:${positionId}`
                         }
@@ -492,7 +551,7 @@ export class PositionsContract {
         return receipt
     }
 
-    public async getContractTokenAmount(): Promise<number> {
+    public async getContractTokenBalance(): Promise<number> {
         const balance = await this.rpc.get_currency_balance(
             this.tokenContract,
             this.contractName,
@@ -502,7 +561,7 @@ export class PositionsContract {
     }
 
     /* @deprecated */
-    public async getContractEosAmount(): Promise<number> {
+    public async getContractEosBalance(): Promise<number> {
         const balance = await this.rpc.get_currency_balance(
             "eosio.token",
             "eosdtcntract",
@@ -517,22 +576,23 @@ export class PositionsContract {
             code: "eosdtorclize",
             scope: "eosdtorclize",
             table: "orarates",
-            json: true,
             limit: 1000
         })
-        return table.rows
+        return validateExternalData(
+            table.rows,
+            "rate_deprecated",
+            tokenRateKeys_deprecated
+        )
     }
 
-    public async getRelativeRates(): Promise<Array<TokenRate>> {
+    public async getRelativeRates(): Promise<TokenRate[]> {
         const table = await this.rpc.get_table_rows({
             code: "eosdtorclize",
             scope: "eosdtorclize",
             table: "oraclerates",
-            json: true,
             limit: 1000
         })
-        
-        return table.rows
+        return validateExternalData(table.rows, "rate", tokenRateKeys)
     }
 
     public async getPositionById(id: number): Promise<EosdtPosition | undefined> {
@@ -544,7 +604,7 @@ export class PositionsContract {
             lower_bound: id,
             upper_bound: id
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "position", positionKeys, true)
     }
 
     public async getPositionByMaker(maker: string): Promise<EosdtPosition | undefined> {
@@ -552,7 +612,6 @@ export class PositionsContract {
             code: this.contractName,
             scope: this.contractName,
             table: "positions",
-            json: true,
             limit: 1,
             table_key: "maker",
             index_position: "secondary",
@@ -560,7 +619,7 @@ export class PositionsContract {
             lower_bound: maker,
             upper_bound: maker
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "position", positionKeys, true)
     }
 
     public async getAllUserPositions(maker: string): Promise<EosdtPosition[]> {
@@ -575,7 +634,7 @@ export class PositionsContract {
             lower_bound: maker,
             upper_bound: maker
         })
-        return table.rows
+        return validateExternalData(table.rows, "position", positionKeys)
     }
 
     public async getParameters(): Promise<EosdtContractParameters> {
@@ -584,7 +643,11 @@ export class PositionsContract {
             scope: this.contractName,
             table: "parameters"
         })
-        return table.rows[0]
+        return validateExternalData(
+            table.rows[0],
+            "positions parameters",
+            сontractParametersKeys
+        )
     }
 
     public async getSettings(): Promise<EosdtContractSettings> {
@@ -593,7 +656,11 @@ export class PositionsContract {
             scope: this.contractName,
             table: "ctrsettings"
         })
-        return table.rows[0]
+        return validateExternalData(
+            table.rows[0],
+            "positions settings",
+            contractSettingsKeys
+        )
     }
 
     public async addReferral(
@@ -667,7 +734,7 @@ export class PositionsContract {
             lower_bound: id,
             upper_bound: id
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "referral", referralKeys, true)
     }
 
     public async getAllReferrals(): Promise<Referral[]> {
@@ -677,8 +744,7 @@ export class PositionsContract {
             table: "ctrreferrals",
             limit: 10_000
         })
-
-        return table.rows
+        return validateExternalData(table.rows, "referral", referralKeys)
     }
 
     public async getReferralByName(name: string): Promise<Referral | undefined> {
@@ -697,7 +763,12 @@ export class PositionsContract {
             lower_bound: positionId,
             upper_bound: positionId
         })
-        return table.rows[0]
+        return validateExternalData(
+            table.rows,
+            "position referral",
+            positionReferralKeys,
+            true
+        )
     }
 
     public async getPositionReferralsTable(): Promise<PositionReferral[]> {
@@ -705,24 +776,58 @@ export class PositionsContract {
         const limit = 10_000
 
         async function getTablePart(that: any): Promise<any> {
-            return await that.rpc.get_table_rows({
+            const table = await that.rpc.get_table_rows({
                 code: that.contractName,
                 scope: that.contractName,
                 table: "positionrefs",
                 lower_bound: lowerBound,
                 limit
             })
+            return validateExternalData(
+                table.rows,
+                "position referral",
+                positionReferralKeys
+            )
         }
 
         const firstRequest = await getTablePart(this)
-        const result: PositionReferral[] = firstRequest.rows
+        const result: PositionReferral[] = firstRequest
         let more = firstRequest.more
 
         while (more) {
             lowerBound = result[result.length - 1].position_id + 1
             const moreReferrals = await getTablePart(this)
-            result.push(...moreReferrals.rows)
+            result.push(...moreReferrals)
             more = moreReferrals.more
+        }
+
+        return result
+    }
+
+    public async getAllPositions(): Promise<EosdtPosition[]> {
+        let lowerBound = 0
+        const limit = 10_000
+
+        async function getTablePart(that: any): Promise<any> {
+            const table = await that.rpc.get_table_rows({
+                code: that.contractName,
+                scope: that.contractName,
+                table: "positions",
+                lower_bound: lowerBound,
+                limit
+            })
+            return validateExternalData(table.rows, "position", positionKeys)
+        }
+
+        const firstRequest = await getTablePart(this)
+        const result: EosdtPosition[] = firstRequest
+        let more = firstRequest.more
+
+        while (more) {
+            lowerBound = result[result.length - 1].position_id + 1
+            const morePositions = await getTablePart(this)
+            result.push(...morePositions)
+            more = morePositions.more
         }
 
         return result
@@ -739,12 +844,7 @@ export class PositionsContract {
     ): Promise<EosdtPosition | undefined> {
         const userPositions = await this.getAllUserPositions(accountName)
 
-        if (userPositions.length === 0) {
-            const logMsg =
-                `${this.getLatestUserPosition.name}(): ` +
-                `user ${accountName} does not have positions`
-            throw new Error(logMsg)
-        }
+        if (userPositions.length === 0) return
 
         return userPositions.reduce((a, b) => {
             if (Math.max(a.position_id, b.position_id) === a.position_id) return a
@@ -759,7 +859,7 @@ export class PositionsContract {
             table: "ctrltvratios",
             limit: 10_000
         })
-        return table.rows
+        return validateExternalData(table.rows, "ltv ratio", ltvRatiosKeys)
     }
 
     public async getPositionLtvRatio(id: number): Promise<LtvRatios | undefined> {
@@ -771,6 +871,6 @@ export class PositionsContract {
             lower_bound: id,
             upper_bound: id
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "ltv ratio", ltvRatiosKeys, true)
     }
 }

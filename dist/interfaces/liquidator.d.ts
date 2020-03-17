@@ -5,6 +5,7 @@ export interface LiquidatorParameters {
     collat_balance: string;
     nut_collat_balance: string;
 }
+export declare const liquidatorParametersKeys: string[];
 export interface LiquidatorSettings {
     setting_id: number;
     position_account: string;
@@ -14,3 +15,4 @@ export interface LiquidatorSettings {
     gov_return_rate: string;
     set_aside_rate: string;
 }
+export declare const liquidatorSettingsKeys: string[];

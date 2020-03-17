@@ -8,10 +8,22 @@ import {
     ProposeObject,
     StoredProposal,
     VoterInfo,
-    GovernanceParameters
+    GovernanceParameters,
+    voterInfoKeys,
+    eosdtVoteKeys,
+    storedProposalKeys,
+    bpVotesKeys,
+    eosVoterInfoKeys,
+    governanceSettingsKeys,
+    governanceParametersKeys
 } from "./interfaces/governance"
 import { ITrxParamsArgument } from "./interfaces/transaction"
-import { amountToAssetString, dateToEosDate, setTransactionParams } from "./utils"
+import {
+    amountToAssetString,
+    dateToEosDate,
+    setTransactionParams,
+    validateExternalData
+} from "./utils"
 
 export class GovernanceContract {
     private contractName: string
@@ -370,7 +382,7 @@ export class GovernanceContract {
             lower_bound: accountName,
             upper_bound: accountName
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "voter info", voterInfoKeys, true)
     }
 
     public async getVoterInfosTable(): Promise<VoterInfo[]> {
@@ -380,7 +392,7 @@ export class GovernanceContract {
             scope: this.contractName,
             limit: 100_000
         })
-        return table.rows
+        return validateExternalData(table.rows, "voter info", voterInfoKeys)
     }
 
     public async getVotes(): Promise<EosdtVote[]> {
@@ -390,16 +402,19 @@ export class GovernanceContract {
             table: "votes",
             limit: 1000
         })
-        return table.rows
+        return validateExternalData(table.rows, "eosdt vote", eosdtVoteKeys)
     }
 
     public async getVotesForAccount(accountName: string): Promise<EosdtVote[]> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
             scope: this.contractName,
-            table: "votes"
+            table: "votes",
+            limit: 1000
         })
-        return table.rows.filter((vote: EosdtVote) => vote.voter === accountName)
+        return validateExternalData(table.rows, "eosdt vote", eosdtVoteKeys).filter(
+            (vote: EosdtVote) => vote.voter === accountName
+        )
     }
 
     public async getProposals(): Promise<StoredProposal[]> {
@@ -409,7 +424,7 @@ export class GovernanceContract {
             table: "proposals",
             limit: 1000
         })
-        return table.rows
+        return validateExternalData(table.rows, "stored proposal", storedProposalKeys)
     }
 
     public async getBpVotes(): Promise<BPVotes[]> {
@@ -419,7 +434,7 @@ export class GovernanceContract {
             table: "bpvotes",
             limit: 1000
         })
-        return table.rows
+        return validateExternalData(table.rows, "bp votes", bpVotesKeys)
     }
 
     public async getProxyInfo(): Promise<EosVoterInfo | undefined> {
@@ -430,7 +445,7 @@ export class GovernanceContract {
             lower_bound: "eosdtbpproxy",
             upper_bound: "eosdtbpproxy"
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "eos voter info", eosVoterInfoKeys, true)
     }
 
     public async getSettings(): Promise<GovernanceSettings> {
@@ -439,7 +454,7 @@ export class GovernanceContract {
             scope: this.contractName,
             table: "govsettings"
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "governance settings", governanceSettingsKeys)
     }
 
     public async getParameters(): Promise<GovernanceParameters> {
@@ -448,6 +463,6 @@ export class GovernanceContract {
             scope: this.contractName,
             table: "govparams"
         })
-        return table.rows[0]
+        return validateExternalData(table.rows[0], "governance parameters", governanceParametersKeys)
     }
 }
