@@ -37,10 +37,10 @@ exports.governanceSettingsKeys = [
     "max_bp_votes",
     "min_vote_stake",
     "unstake_period",
-    "min_reward",
-    "reward_weight"
+    "reward_weight",
+    "stake_reward"
 ];
-exports.governanceParametersKeys = ["NUT_voting_balance", "param_id"];
+exports.governanceParametersKeys = ["NUT_voting_balance", "param_id", "min_reward"];
 exports.bpVotesKeys = ["producer", "votes"];
 exports.voterInfoKeys = ["voter", "voting_amount", "withdrawal_date"];
 exports.eosVoterInfoKeys = [

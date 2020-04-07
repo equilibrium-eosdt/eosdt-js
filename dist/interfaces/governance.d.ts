@@ -38,12 +38,13 @@ export interface GovernanceSettings {
     max_bp_votes: number;
     min_vote_stake: string;
     unstake_period: number;
-    min_reward: string;
     reward_weight: number;
+    stake_reward: number;
 }
 export declare const governanceSettingsKeys: string[];
 export interface GovernanceParameters {
     NUT_voting_balance: string;
+    min_reward: string;
     param_id: number;
 }
 export declare const governanceParametersKeys: string[];

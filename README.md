@@ -47,9 +47,9 @@ Module to manage EOSDT positions. Methods:
 -   `generateDebt` - issues additional EOSDT for position if this does not bring LTV below critical.
 -   `burnbackDebt` - repays specified amount of EOSDT decreasing debt.
 -   `marginCall` - called on a position with critical LTV, to perform a margin call.
--   `getContractEosBalance` - returns eosdtcntract EOS balance __deprecated__
+-   `getContractEosBalance` - returns eosdtcntract EOS balance **deprecated**
 -   `getContractTokenBalance` - returns contracts collateral asset balance.
--   `getRates` - returns table of current system token prices (rates_deprecated). __deprecated__
+-   `getRates` - returns table of current system token prices (rates_deprecated). **deprecated**
 -   `getRelativeRates` - returns table of current system token prices (rates).
 -   `getPositionById` - returns a position object, selecting it by id.
 -   `getPositionByMaker` - returns a first position object, selecting it by maker name.

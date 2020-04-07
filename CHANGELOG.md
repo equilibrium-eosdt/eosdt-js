@@ -2,11 +2,20 @@
 
 All notable changes will be documented in this file.
 
+#### [0.7.21] - 2020-03-30
+
+-   Update to support governance changes
+
+-   `Governance` updated interfaces:
+    -   `GovernanceParameters`: new parameter `min_reward`,
+    -   `GovernanceSettings` removed setting `min_reward`, added `stake_reward`
+
 #### [0.7.2] - 2020-03-12
 
 -   Update with validation and interfaces fix
 
 -   `Positions` methods renamed:
+
     -   `createInThreeActions` renamed to `createWhenPositionsExist`
     -   `getContractTokenAmount` renamed to `getContractTokenBalance`
     -   `getContractEosAmount` renamed to `getContractEosBalance`
@@ -20,20 +29,22 @@ All notable changes will be documented in this file.
 -   Update to validate data extracted from blockchain. Some new methods added
 
 -   `Positions` added methods:
+
     -   `getAllPositions` - returns an array of all positions for all users.
     -   `paybackAndDelete` - if debt defined burn all available debt on position and delete it. Otherwise delete position.
 
 -   `Positions` updated interface `TokenRate_deprecated`: fields `eosnationdsp_price`, `eosnationdsp_update` renamed to `delphioracle_price`, `delphioracle_update`
 
 -   `Governance` updated interfaces:
-    -   `GovernanceParameters`: changed `NUT_voting_balance` type from number to string 
+    -   `GovernanceParameters`: changed `NUT_voting_balance` type from number to string
     -   `GovernanceSettings`: removed settings `bpproxy_account`, `governc_account`
 
 #### [0.7] - 2020-03-06
 
 -   Update to support multicollateral contract changes
 
--   `Positions` added methods: 
+-   `Positions` added methods:
+
     -   `createInThreeActions` - create position when creator already have positions.
     -   `getPositionByMaker` - returns a first position object, selecting it by maker name.
     -   `getLatestUserPosition` - returns latest position (with maximum id value), selecting it by maker name.
@@ -43,18 +54,22 @@ All notable changes will be documented in this file.
 -   `Positions` interface `TokenRate` renamed to `TokenRate_deprecated`
 
 -   `Positions` new interfaces:
+
     -   `TokenRate`
     -   `LtvRatios`
 
 -   `Positions` new settings in interface `EosdtContractSettings`:
+
     -   `collateral_account`
     -   `collateral_token`
 
 -   `Liquidator` added methods:
+
     -   `getSettings` - returns liquidator contract settings.
     -   `getNutCollatBalance` - returns amount of nut_collateral on liquidator contract balance.
 
 -   `Liquidator` updated methods:
+
     -   `marginCallAndBuyoutCollat` instead of `marginCallAndBuyoutEos`
     -   `getCollatBalance` instead of `getEosBalance`
     -   `transferEos` removed
@@ -64,10 +79,11 @@ All notable changes will be documented in this file.
 -   `Liquidator` new interface: `LiquidatorSettings`
 
 -   `Governance` added methods:
+
     -   `getParameters` - returns Governance contract parameters.
     -   `getVotesForAccount` - returns an array with all votes for voter, selecting it by name.
 
--   `Governance` updated interface `GovernanceSettings`: `eosdtcntract_account` renamed to `position_account` 
+-   `Governance` updated interface `GovernanceSettings`: `eosdtcntract_account` renamed to `position_account`
 
 -   `Governance` new interface `GovernanceParameters`
 
@@ -82,6 +98,7 @@ All notable changes will be documented in this file.
 #### [0.6.37] - 2019-11-20
 
 -   Added `BpManager` with following methods to help manage block producers positions
+
     -   `getBpPosition()`
     -   `getAllBpPositions()`
     -   `registerBlockProducer()`
@@ -90,6 +107,7 @@ All notable changes will be documented in this file.
     -   `depositEos()`
 
 -   `Governance`: new settings in interface `GovernanceSettings`
+
     -   `min_reward`
     -   `reward_weight`
 

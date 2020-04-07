@@ -66,8 +66,8 @@ export interface GovernanceSettings {
     max_bp_votes: number // EOS type: uint32
     min_vote_stake: string // EOS type: asset
     unstake_period: number // EOS type: uint32
-    min_reward: string // EOS type: asset
     reward_weight: number // EOS type: float64
+    stake_reward: number // EOS type: float64
 }
 
 export const governanceSettingsKeys = [
@@ -82,15 +82,16 @@ export const governanceSettingsKeys = [
     "max_bp_votes",
     "min_vote_stake",
     "unstake_period",
-    "min_reward",
-    "reward_weight"
+    "reward_weight",
+    "stake_reward"
 ]
 
 export interface GovernanceParameters {
     NUT_voting_balance: string // EOS type: asset
+    min_reward: string // EOS type: asset
     param_id: number // EOS type: uint64
 }
-export const governanceParametersKeys = ["NUT_voting_balance", "param_id"]
+export const governanceParametersKeys = ["NUT_voting_balance", "param_id", "min_reward"]
 
 export interface BPVotes {
     producer: string // EOS type: name
