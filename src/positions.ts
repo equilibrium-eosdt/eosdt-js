@@ -1,6 +1,7 @@
 import { Api, JsonRpc } from "eosjs"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 import {
+    contractParametersKeys,
     contractSettingsKeys,
     EosdtContractParameters,
     EosdtContractSettings,
@@ -13,10 +14,7 @@ import {
     Referral,
     referralKeys,
     TokenRate,
-    tokenRateKeys,
-    tokenRateKeys_deprecated,
-    TokenRate_deprecated,
-    сontractParametersKeys
+    tokenRateKeys
 } from "./interfaces/positions-contract"
 import { ITrxParamsArgument } from "./interfaces/transaction"
 import {
@@ -570,22 +568,7 @@ export class PositionsContract {
         return balanceToNumber(balance)
     }
 
-    /* @deprecated */
-    public async getRates(): Promise<TokenRate_deprecated[]> {
-        const table = await this.rpc.get_table_rows({
-            code: "eosdtorclize",
-            scope: "eosdtorclize",
-            table: "orarates",
-            limit: 1000
-        })
-        return validateExternalData(
-            table.rows,
-            "rate_deprecated",
-            tokenRateKeys_deprecated
-        )
-    }
-
-    public async getRelativeRates(): Promise<TokenRate[]> {
+    public async getRates(): Promise<TokenRate[]> {
         const table = await this.rpc.get_table_rows({
             code: "eosdtorclize",
             scope: "eosdtorclize",
@@ -593,6 +576,14 @@ export class PositionsContract {
             limit: 1000
         })
         return validateExternalData(table.rows, "rate", tokenRateKeys)
+    }
+
+    public async getRelativeRates(): Promise<TokenRate[]> {
+        const warning =
+            `[WARNING] PositionsContract.getRelativeRates() is deprecated and will be removed ` +
+            `soon. It is currently an alias for PositionsContract.getRates(). Use it instead`
+        console.error(warning)
+        return this.getRates()
     }
 
     public async getPositionById(id: number): Promise<EosdtPosition | undefined> {
@@ -646,7 +637,7 @@ export class PositionsContract {
         return validateExternalData(
             table.rows[0],
             "positions parameters",
-            сontractParametersKeys
+            contractParametersKeys
         )
     }
 
@@ -749,7 +740,7 @@ export class PositionsContract {
 
     public async getReferralByName(name: string): Promise<Referral | undefined> {
         const table = await this.getAllReferrals()
-        return table.find(row => row.referral === name)
+        return table.find((row) => row.referral === name)
     }
 
     public async getPositionReferral(
@@ -835,8 +826,8 @@ export class PositionsContract {
 
     public async getAllReferralPositionsIds(referralId: number): Promise<number[]> {
         return (await this.getPositionReferralsTable())
-            .filter(refPos => refPos.referral_id === referralId)
-            .map(refInfo => refInfo.position_id)
+            .filter((refPos) => refPos.referral_id === referralId)
+            .map((refInfo) => refInfo.position_id)
     }
 
     public async getLatestUserPosition(

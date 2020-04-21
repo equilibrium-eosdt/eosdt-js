@@ -1,5 +1,5 @@
 import { EosdtConnectorInterface } from "./interfaces/connector";
-import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, LtvRatios, PositionReferral, Referral, TokenRate, TokenRate_deprecated } from "./interfaces/positions-contract";
+import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, LtvRatios, PositionReferral, Referral, TokenRate } from "./interfaces/positions-contract";
 import { ITrxParamsArgument } from "./interfaces/transaction";
 export declare class PositionsContract {
     protected contractName: string;
@@ -23,7 +23,7 @@ export declare class PositionsContract {
     marginCall(senderName: string, positionId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     getContractTokenBalance(): Promise<number>;
     getContractEosBalance(): Promise<number>;
-    getRates(): Promise<TokenRate_deprecated[]>;
+    getRates(): Promise<TokenRate[]>;
     getRelativeRates(): Promise<TokenRate[]>;
     getPositionById(id: number): Promise<EosdtPosition | undefined>;
     getPositionByMaker(maker: string): Promise<EosdtPosition | undefined>;

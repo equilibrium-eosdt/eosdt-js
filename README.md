@@ -118,6 +118,10 @@ Methods to get Liquidator contract parameters and exchange EOS and EOSDT in case
 -   `getParameters` - returns all liquidator contract parameters.
 -   `getSettings` - returns liquidator contract settings.
 
+### Savings rate
+
+`SavingsRateContract` is used to work with `eosdtsavings` EOS contract. It can be instantiated with `EosdtConnector` method `getSavingsRate()`. Each method of `SavingsRateContract` has a JSDoc description.
+
 ### Balances
 
 Module to get account's balances of EOSDT, EOS and NUT. Methods:

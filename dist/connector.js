@@ -10,9 +10,10 @@ const text_encoding_1 = require("text-encoding");
 const _1 = require(".");
 const balance_1 = require("./balance");
 const positions_1 = require("./positions");
+const savings_rate_1 = require("./savings-rate");
 class EosdtConnector {
     constructor(nodeAddress, privateKeys) {
-        const fetch = node_fetch_1.default; // Workaroung to avoid incompatibility of fetch types in 'eosjs' and 'node-fetch'
+        const fetch = node_fetch_1.default; // Workaround to avoid incompatibility of fetch types in 'eosjs' and 'node-fetch'
         this.rpc = new eosjs_1.JsonRpc(nodeAddress, { fetch });
         const signatureProvider = new eosjs_jssig_1.JsSignatureProvider(privateKeys);
         this.api = new eosjs_1.Api({
@@ -33,6 +34,12 @@ class EosdtConnector {
     }
     getBalances() {
         return new balance_1.BalanceGetter(this);
+    }
+    /**
+     * Creates a wrapper for Savings Rate contract
+     */
+    getSavingsRate() {
+        return new savings_rate_1.SavingsRateContract(this);
     }
 }
 exports.EosdtConnector = EosdtConnector;

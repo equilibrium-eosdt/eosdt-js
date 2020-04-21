@@ -14,5 +14,6 @@ exports.liquidatorSettingsKeys = [
     "auction_price",
     "burn_rate",
     "gov_return_rate",
-    "set_aside_rate"
+    "set_aside_rate",
+    "savings_rate"
 ];

@@ -9,16 +9,6 @@ exports.positionKeys = [
 ];
 exports.referralKeys = ["referral_id", "referral", "staked_amount"];
 exports.positionReferralKeys = ["referral_id", "position_id"];
-exports.tokenRateKeys_deprecated = [
-    "rate",
-    "update",
-    "provablecb1a_price",
-    "provablecb1a_update",
-    "delphioracle_price",
-    "delphioracle_update",
-    "equilibriumdsp_price",
-    "equilibriumdsp_update"
-];
 exports.tokenRateKeys = [
     "rate",
     "update",
@@ -58,9 +48,10 @@ exports.contractSettingsKeys = [
     "referral_min_stake",
     "referral_ratio",
     "collateral_account",
-    "collateral_token"
+    "collateral_token",
+    "savings_account"
 ];
-exports.сontractParametersKeys = [
+exports.contractParametersKeys = [
     "parameter_id",
     "total_collateral",
     "total_debt",

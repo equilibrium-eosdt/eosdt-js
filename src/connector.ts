@@ -5,13 +5,14 @@ import { TextDecoder, TextEncoder } from "text-encoding"
 import { GovernanceContract, LiquidatorContract } from "."
 import { BalanceGetter } from "./balance"
 import { PositionsContract } from "./positions"
+import { SavingsRateContract } from "./savings-rate"
 
 export class EosdtConnector {
     public readonly rpc: JsonRpc
     public readonly api: Api
 
     constructor(nodeAddress: string, privateKeys: string[]) {
-        const fetch: any = Fetch // Workaroung to avoid incompatibility of fetch types in 'eosjs' and 'node-fetch'
+        const fetch: any = Fetch // Workaround to avoid incompatibility of fetch types in 'eosjs' and 'node-fetch'
         this.rpc = new JsonRpc(nodeAddress, { fetch })
         const signatureProvider = new JsSignatureProvider(privateKeys)
         this.api = new Api({
@@ -36,5 +37,12 @@ export class EosdtConnector {
 
     public getBalances(): BalanceGetter {
         return new BalanceGetter(this)
+    }
+
+    /**
+     * Creates a wrapper for Savings Rate contract
+     */
+    public getSavingsRate(): SavingsRateContract {
+        return new SavingsRateContract(this)
     }
 }

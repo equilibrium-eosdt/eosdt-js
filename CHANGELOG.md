@@ -2,6 +2,19 @@
 
 All notable changes will be documented in this file.
 
+#### [0.8.0] - 2020-04-20
+
+-   Added `SavingsRateContract` wrapper. It is used to interact with contract `eosdtsavings`:
+    -   `stake` and `unstake` methods to stake EOSDT to contract
+    -   `getParameters` to get contract total discounted balance
+    -   `getSettings` to get contract settings
+    -   3 position getters to get information about staked EOSDT (all stakes/unstakes of a user are represented with a position)
+-   Added method `getSavingsRateCont` to `EosdtConnector`. It returns an instance of `SavingsRateContract`
+-   Liquidator and Positions contracts settings updated to include Savings Rate settings.
+-   Package exports specified. All internal exports removed
+-   Interface `TokenRate_deprecated` removed
+-   Previously deprecated `Positions` method `getRates` now works the same as `getRelativeRates` and they both return table `oraclerates` of the contract `eosdtorclize`. Method `getRelativeRates` would be removed in future updates, please, use `getRates`.
+
 #### [0.7.21] - 2020-03-30
 
 -   Update to support governance changes
@@ -111,12 +124,12 @@ All notable changes will be documented in this file.
     -   `min_reward`
     -   `reward_weight`
 
--   `PostionsContract` method `getPositionReferralsTable()` fixed for big ids
+-   `PositionsContract` method `getPositionReferralsTable()` fixed for big ids
 
 #### [0.6.2] - 2019-10-11
 
--   `PostionsContract.createEmptyPosition()` - removed. To create empty position, use `create()` or `createWithReferral()` with `eosAmount` equal to zero
--   `PostionsContract`: added methods to work with referrals :
+-   `PositionsContract.createEmptyPosition()` - removed. To create empty position, use `create()` or `createWithReferral()` with `eosAmount` equal to zero
+-   `PositionsContract`: added methods to work with referrals :
     -   `addReferral()`
     -   `deleteReferral()`
     -   `getReferralById()`

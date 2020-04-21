@@ -5,7 +5,6 @@ export interface LiquidatorParameters {
     collat_balance: string // EOS type: asset
     nut_collat_balance: string // EOS type: asset
 }
-
 export const liquidatorParametersKeys = [
     "parameter_id",
     "surplus_debt",
@@ -22,8 +21,8 @@ export interface LiquidatorSettings {
     burn_rate: string // EOS type: float64
     gov_return_rate: string // EOS type: float64
     set_aside_rate: string // EOS type: float64
+    savings_rate: string // EOS type: float64
 }
-
 export const liquidatorSettingsKeys = [
     "setting_id",
     "position_account",
@@ -31,5 +30,6 @@ export const liquidatorSettingsKeys = [
     "auction_price",
     "burn_rate",
     "gov_return_rate",
-    "set_aside_rate"
+    "set_aside_rate",
+    "savings_rate"
 ]

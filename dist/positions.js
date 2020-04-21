@@ -406,19 +406,7 @@ class PositionsContract {
             return utils_1.balanceToNumber(balance);
         });
     }
-    /* @deprecated */
     getRates() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const table = yield this.rpc.get_table_rows({
-                code: "eosdtorclize",
-                scope: "eosdtorclize",
-                table: "orarates",
-                limit: 1000
-            });
-            return utils_1.validateExternalData(table.rows, "rate_deprecated", positions_contract_1.tokenRateKeys_deprecated);
-        });
-    }
-    getRelativeRates() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
                 code: "eosdtorclize",
@@ -427,6 +415,14 @@ class PositionsContract {
                 limit: 1000
             });
             return utils_1.validateExternalData(table.rows, "rate", positions_contract_1.tokenRateKeys);
+        });
+    }
+    getRelativeRates() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const warning = `[WARNING] PositionsContract.getRelativeRates() is deprecated and will be removed ` +
+                `soon. It is currently an alias for PositionsContract.getRates(). Use it instead`;
+            console.error(warning);
+            return this.getRates();
         });
     }
     getPositionById(id) {
@@ -481,7 +477,7 @@ class PositionsContract {
                 scope: this.contractName,
                 table: "parameters"
             });
-            return utils_1.validateExternalData(table.rows[0], "positions parameters", positions_contract_1.сontractParametersKeys);
+            return utils_1.validateExternalData(table.rows[0], "positions parameters", positions_contract_1.contractParametersKeys);
         });
     }
     getSettings() {
@@ -567,7 +563,7 @@ class PositionsContract {
     getReferralByName(name) {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.getAllReferrals();
-            return table.find(row => row.referral === name);
+            return table.find((row) => row.referral === name);
         });
     }
     getPositionReferral(positionId) {
@@ -642,8 +638,8 @@ class PositionsContract {
     getAllReferralPositionsIds(referralId) {
         return __awaiter(this, void 0, void 0, function* () {
             return (yield this.getPositionReferralsTable())
-                .filter(refPos => refPos.referral_id === referralId)
-                .map(refInfo => refInfo.position_id);
+                .filter((refPos) => refPos.referral_id === referralId)
+                .map((refInfo) => refInfo.position_id);
         });
     }
     getLatestUserPosition(accountName) {

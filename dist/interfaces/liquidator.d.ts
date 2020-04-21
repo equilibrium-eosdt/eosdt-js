@@ -14,5 +14,6 @@ export interface LiquidatorSettings {
     burn_rate: string;
     gov_return_rate: string;
     set_aside_rate: string;
+    savings_rate: string;
 }
 export declare const liquidatorSettingsKeys: string[];

@@ -17,17 +17,6 @@ export interface PositionReferral {
     position_id: number;
 }
 export declare const positionReferralKeys: string[];
-export interface TokenRate_deprecated {
-    rate: string;
-    update: string;
-    provablecb1a_price: string;
-    provablecb1a_update: string;
-    delphioracle_price: string;
-    delphioracle_update: string;
-    equilibriumdsp_price: string;
-    equilibriumdsp_update: string;
-}
-export declare const tokenRateKeys_deprecated: string[];
 export interface TokenRate {
     rate: string;
     update: string;
@@ -73,6 +62,7 @@ export interface EosdtContractSettings {
     referral_ratio: string;
     collateral_account: string;
     collateral_token: string;
+    savings_account: string;
 }
 export declare const contractSettingsKeys: string[];
 export interface EosdtContractParameters {
@@ -86,4 +76,4 @@ export interface EosdtContractParameters {
     prev_stake: string;
     eos_staked: string;
 }
-export declare const сontractParametersKeys: string[];
+export declare const contractParametersKeys: string[];
