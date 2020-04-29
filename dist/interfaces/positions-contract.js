@@ -1,12 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.positionKeys = [
-    "position_id",
-    "maker",
-    "outstanding",
-    "governance",
-    "collateral"
-];
+const basic_positions_contract_1 = require("./basic-positions-contract");
+exports.positionKeys = [...basic_positions_contract_1.basicPositionKeys, "governance"];
 exports.referralKeys = ["referral_id", "referral", "staked_amount"];
 exports.positionReferralKeys = ["referral_id", "position_id"];
 exports.tokenRateKeys = [
@@ -22,6 +17,13 @@ exports.tokenRateKeys = [
     "base"
 ];
 exports.ltvRatiosKeys = ["position_id", "ltv_ratio"];
+exports.eosdtPosParametersKeys = [
+    ...basic_positions_contract_1.basicEosdtPosParametersKeys,
+    "governance_rate",
+    "prev_vote",
+    "prev_stake",
+    "eos_staked"
+];
 exports.contractSettingsKeys = [
     "setting_id",
     "global_lock",
@@ -50,15 +52,4 @@ exports.contractSettingsKeys = [
     "collateral_account",
     "collateral_token",
     "savings_account"
-];
-exports.contractParametersKeys = [
-    "parameter_id",
-    "total_collateral",
-    "total_debt",
-    "stability_rate",
-    "governance_rate",
-    "prev_date",
-    "prev_vote",
-    "prev_stake",
-    "eos_staked"
 ];

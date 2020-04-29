@@ -20,7 +20,8 @@ export class SavingsRateContract {
     private api: Api
 
     /**
-     * A wrapper class to invoke actions of Equilibrium Savings Rate contract
+     * Instantiates SavingsRateContract
+     * @param connector EosdtConnector (see `README` section `Usage`)
      */
     constructor(connector: EosdtConnectorInterface) {
         this.rpc = connector.rpc
@@ -29,6 +30,11 @@ export class SavingsRateContract {
 
     /**
      * Transfers EOSDT from user to Savings Rate contract
+     * @param {string} senderName
+     * @param {string | number} eosdtAmount
+     * @param {string} [trxMemo]
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
      */
     public async stake(
         senderName: string,
@@ -66,6 +72,10 @@ export class SavingsRateContract {
 
     /**
      * Returns EOSDT from Savings Rate contract to account balance
+     * @param {string} toAccount
+     * @param {string | number} eosdtAmount
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
      */
     public async unstake(
         toAccount: string,
@@ -99,7 +109,7 @@ export class SavingsRateContract {
     }
 
     /**
-     * @returns An array of all positions on Savings Rate contract
+     * @returns {Promise<object[]>} An array of all positions on Savings Rate contract
      */
     public async getAllPositions(): Promise<SRPosition[]> {
         let lowerBound = 0
@@ -131,7 +141,7 @@ export class SavingsRateContract {
     }
 
     /**
-     * @returns A Savings Rate position object with given id
+     * @returns {Promise<object | undefined>} A Savings Rate position object with given id
      */
     public async getPositionById(id: number): Promise<SRPosition | undefined> {
         const table = await this.rpc.get_table_rows({
@@ -146,7 +156,7 @@ export class SavingsRateContract {
     }
 
     /**
-     * @returns Array of all positions objects, created by the maker
+     * @returns {Promise<object[]>} Array of all positions objects, created by the maker
      */
     public async getUserPositions(maker: string): Promise<SRPosition[]> {
         const table = await this.rpc.get_table_rows({
@@ -164,7 +174,7 @@ export class SavingsRateContract {
     }
 
     /**
-     * @returns Positions contract parameters
+     * @returns {Promise<object>} Positions contract parameters
      */
     public async getParameters(): Promise<SRContractParams> {
         const table = await this.rpc.get_table_rows({
@@ -172,15 +182,11 @@ export class SavingsRateContract {
             scope: this.name,
             table: "savparams"
         })
-        return validateExternalData(
-            table.rows[0],
-            "SR contract parameters",
-            srContractParamsKeys
-        )
+        return validateExternalData(table.rows[0], "SR contract parameters", srContractParamsKeys)
     }
 
     /**
-     * @returns Positions contract settings
+     * @returns {Promise<object>} Positions contract settings
      */
     public async getSettings(): Promise<SRContractSettings> {
         const table = await this.rpc.get_table_rows({
@@ -188,10 +194,6 @@ export class SavingsRateContract {
             scope: this.name,
             table: "savsettings"
         })
-        return validateExternalData(
-            table.rows[0],
-            "SR contract settings",
-            srContractSettingsKeys
-        )
+        return validateExternalData(table.rows[0], "SR contract settings", srContractSettingsKeys)
     }
 }

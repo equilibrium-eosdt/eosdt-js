@@ -33,6 +33,9 @@ function amountToAssetString(amount, assetSymbol, customDecimals) {
     if (assetSymbol === "EOS") {
         decimals = 4;
     }
+    else if (assetSymbol === "PBTC") {
+        decimals = 8;
+    }
     else if (assetSymbol === "EOSDT" || assetSymbol === "NUT") {
         decimals = 9;
     }
@@ -72,7 +75,7 @@ function logObject(obj) {
     return util_1.default.inspect(obj, false, null, true);
 }
 function predicate(raw, keys, name) {
-    keys.forEach(key => {
+    keys.forEach((key) => {
         if (!raw.hasOwnProperty(key)) {
             const msg = `${firstCharToUpper(name)} format mismatch: missing property "${key}". ` +
                 `Received object: \n${logObject(raw)}"`;
@@ -81,9 +84,9 @@ function predicate(raw, keys, name) {
     });
     const properties = Object.keys(raw);
     if (properties.length !== keys.length) {
-        const propertiesDiff = properties.filter(prop => !keys.includes(prop));
+        const propertiesDiff = properties.filter((prop) => !keys.includes(prop));
         if (propertiesDiff.length !== 0) {
-            const propNames = propertiesDiff.map(p => `"${p}"`).join(", ");
+            const propNames = propertiesDiff.map((p) => `"${p}"`).join(", ");
             let ending = "ies";
             if (propertiesDiff.length === 1)
                 ending = "y";

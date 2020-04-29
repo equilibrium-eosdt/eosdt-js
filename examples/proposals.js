@@ -5,7 +5,7 @@ async function main() {
     // Change node address here. This one will connect you to Jungle testnet node
     const nodeAddress = "http://jungle2.cryptolions.io:80"
 
-    // Change or add private keys used to sign transactions here. This one is from Jungle 
+    // Change or add private keys used to sign transactions here. This one is from Jungle
     // testnet account "exampleaccnt"
     const privateKeys = ["5JEVy6QujTsFzxWtBbQrG53vkszRybabE4wSyA2Tg1uZFEeVPks"]
     const accountName = "exampleaccnt"
@@ -33,7 +33,7 @@ async function main() {
     // Logging all proposals
     console.log(`Proposal created: \n`, await governance.getProposals())
 
-    // Expiring a proposal and stooping voting on it. Expiration date changes to 
+    // Expiring a proposal and stooping voting on it. Expiration date changes to
     // time of this method execution.
     await governance.expire("test proposal", accountName)
     console.log(`Proposal expired: \n`, await governance.getProposals())
@@ -43,4 +43,3 @@ async function main() {
 
     // await governance.applyChanges("test proposal", accountName)
 }
-

@@ -1,11 +1,12 @@
 {
     "name": "@eosdt/eosdt-js",
-    "version": "0.8.0",
+    "version": "0.9.2",
     "description": "JS library to execute EOSDT contracts methods",
     "main": "./dist/index.js",
     "scripts": {
         "build": "tsc --build",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build:doc": "jsdoc2md  --template readme.hbs --files ./src/*.ts --configure ./jsdoc2md.json > ./README.md"
     },
     "author": "Equilibrium",
     "license": "MIT",
@@ -17,6 +18,15 @@
         "text-encoding": "^0.7.0"
     },
     "devDependencies": {
+        "@babel/cli": "^7.8.4",
+        "@babel/core": "^7.9.0",
+        "@babel/plugin-proposal-class-properties": "^7.8.3",
+        "@babel/plugin-proposal-numeric-separator": "^7.8.3",
+        "@babel/preset-env": "^7.9.5",
+        "@babel/preset-typescript": "^7.9.0",
+        "jsdoc-babel": "^0.5.0",
+        "jsdoc-to-markdown": "^5.0.3",
+        "prettier": "2.0.2",
         "typescript": "^3.6.4"
     },
     "repository": {

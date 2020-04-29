@@ -2,20 +2,20 @@ import { Api, JsonRpc } from "eosjs"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 import {
     BPVotes,
+    bpVotesKeys,
     EosdtVote,
+    eosdtVoteKeys,
     EosVoterInfo,
+    eosVoterInfoKeys,
+    GovernanceParameters,
+    governanceParametersKeys,
     GovernanceSettings,
+    governanceSettingsKeys,
     ProposeObject,
     StoredProposal,
-    VoterInfo,
-    GovernanceParameters,
-    voterInfoKeys,
-    eosdtVoteKeys,
     storedProposalKeys,
-    bpVotesKeys,
-    eosVoterInfoKeys,
-    governanceSettingsKeys,
-    governanceParametersKeys
+    VoterInfo,
+    voterInfoKeys
 } from "./interfaces/governance"
 import { ITrxParamsArgument } from "./interfaces/transaction"
 import {
@@ -25,17 +25,37 @@ import {
     validateExternalData
 } from "./utils"
 
+/**
+ * A class to work with EOSDT Governance contract (`eosdtgovernc`)
+ */
 export class GovernanceContract {
     private contractName: string
     private rpc: JsonRpc
     private api: Api
 
+    /**
+     * Creates an instance of `GovernanceContract`
+     * @param connector EosdtConnector (see `README` section `Usage`)
+     */
     constructor(connector: EosdtConnectorInterface) {
         this.rpc = connector.rpc
         this.api = connector.api
         this.contractName = "eosdtgovernc"
     }
 
+    /**
+     * Creates a proposal
+     * @param {object} proposal
+     * @param {string} proposal.proposer
+     * @param {string} proposal.name
+     * @param {string} proposal.title
+     * @param {string} proposal.json
+     * @param {Date} proposal.expiresAt
+     * @param {number} proposal.type
+     * @param {string} senderName
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async propose(
         proposal: ProposeObject,
         senderName: string,
@@ -71,6 +91,13 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * Expires an active proposal
+     * @param {string} proposalName
+     * @param {string} senderName
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async expire(
         proposalName: string,
         senderName: string,
@@ -99,6 +126,14 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * Applies proposed changes. At least 51% of all issued NUT tokens must vote, at least 55%
+     * of votes must be for proposal
+     * @param {string} proposalName
+     * @param {string} senderName
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async applyChanges(
         proposalName: string,
         senderName: string,
@@ -127,6 +162,14 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * Removes specified amount of votes from an expired proposal. If 0 votes left, removes proposal
+     * @param {string} proposalName
+     * @param {number} deletedVotes
+     * @param {string} senderName
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async cleanProposal(
         proposalName: string,
         deletedVotes: number,
@@ -159,13 +202,22 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * Sends NUT tokens to contract, staking them and allowing to vote for block producers and for
+     * proposals
+     * @param {string} senderName
+     * @param {string | number} nutsAmount
+     * @param {string} [trxMemo]
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async stake(
         senderName: string,
-        nutAmount: string | number,
+        nutsAmount: string | number,
         trxMemo?: string,
         transactionParams?: ITrxParamsArgument
     ): Promise<any> {
-        const nutAssetString = amountToAssetString(nutAmount, "NUT")
+        const nutAssetString = amountToAssetString(nutsAmount, "NUT")
         const trxParams = setTransactionParams(transactionParams)
         const authorization = [{ actor: senderName, permission: trxParams.permission }]
 
@@ -194,6 +246,13 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * Unstakes NUT tokens to user's balance
+     * @param {string | number} nutAmount
+     * @param {string} voterName
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async unstake(
         nutAmount: string | number,
         voterName: string,
@@ -226,6 +285,15 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * Vote for or against a proposal
+     * @param {string} proposalName
+     * @param {number} vote Vote `1` as "yes", `0` or any other number as "no"
+     * @param {string} voterName
+     * @param {string} voteJson
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async vote(
         proposalName: string,
         vote: number,
@@ -261,6 +329,13 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * Removes all user votes from a proposal
+     * @param {string} proposalName
+     * @param {string} voterName
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async unvote(
         proposalName: string,
         voterName: string,
@@ -292,6 +367,13 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * Votes with staked NUTs for block producers
+     * @param {string} voterName
+     * @param {string[]} producers
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async voteForBlockProducers(
         voterName: string,
         producers: string[],
@@ -325,6 +407,14 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * Stakes NUTs and votes for BPs in one transaction
+     * @param {string} voterName
+     * @param {string | number} nutAmount
+     * @param {string[]} producers
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     public async stakeAndVoteForBlockProducers(
         voterName: string,
         nutAmount: string | number,
@@ -374,6 +464,10 @@ export class GovernanceContract {
         return receipt
     }
 
+    /**
+     * @returns {Promise<object | undefined>} Amount of NUTs staked by account in Governance
+     * contract and their unstake date
+     */
     public async getVoterInfo(accountName: string): Promise<VoterInfo | undefined> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
@@ -385,6 +479,9 @@ export class GovernanceContract {
         return validateExternalData(table.rows[0], "voter info", voterInfoKeys, true)
     }
 
+    /**
+     * @returns {Promise<object[]>} Table of information on accounts that staked NUT
+     */
     public async getVoterInfosTable(): Promise<VoterInfo[]> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
@@ -395,16 +492,22 @@ export class GovernanceContract {
         return validateExternalData(table.rows, "voter info", voterInfoKeys)
     }
 
+    /**
+     * @returns {Promise<object[]>} An array with all Governance contract votes (up to 10000)
+     */
     public async getVotes(): Promise<EosdtVote[]> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
             scope: this.contractName,
             table: "votes",
-            limit: 1000
+            limit: 10_000
         })
         return validateExternalData(table.rows, "eosdt vote", eosdtVoteKeys)
     }
 
+    /**
+     * @returns {Promise<object[]>} All account votes
+     */
     public async getVotesForAccount(accountName: string): Promise<EosdtVote[]> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
@@ -417,16 +520,23 @@ export class GovernanceContract {
         )
     }
 
+    /**
+     * @returns {Promise<object[]>} An array with all Governance contract proposals (up to 10000)
+     */
     public async getProposals(): Promise<StoredProposal[]> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
             scope: this.contractName,
             table: "proposals",
-            limit: 1000
+            limit: 10_000
         })
         return validateExternalData(table.rows, "stored proposal", storedProposalKeys)
     }
 
+    /**
+     * @returns {Promise<object[]>} Array of objects, containing block producers names and
+     * amount of NUT votes for them
+     */
     public async getBpVotes(): Promise<BPVotes[]> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
@@ -437,6 +547,9 @@ export class GovernanceContract {
         return validateExternalData(table.rows, "bp votes", bpVotesKeys)
     }
 
+    /**
+     * @returns {Promise<object | undefined>} Voter info for `eosdtbpproxy`
+     */
     public async getProxyInfo(): Promise<EosVoterInfo | undefined> {
         const table = await this.rpc.get_table_rows({
             code: "eosio",
@@ -448,6 +561,9 @@ export class GovernanceContract {
         return validateExternalData(table.rows[0], "eos voter info", eosVoterInfoKeys, true)
     }
 
+    /**
+     * @returns {Promise<object>} Governance contract settings
+     */
     public async getSettings(): Promise<GovernanceSettings> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
@@ -457,12 +573,19 @@ export class GovernanceContract {
         return validateExternalData(table.rows[0], "governance settings", governanceSettingsKeys)
     }
 
+    /**
+     * @returns {Promise<object>} Governance contract parameters
+     */
     public async getParameters(): Promise<GovernanceParameters> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
             scope: this.contractName,
             table: "govparams"
         })
-        return validateExternalData(table.rows[0], "governance parameters", governanceParametersKeys)
+        return validateExternalData(
+            table.rows[0],
+            "governance parameters",
+            governanceParametersKeys
+        )
     }
 }

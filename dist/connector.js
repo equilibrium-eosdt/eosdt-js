@@ -9,11 +9,21 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 const text_encoding_1 = require("text-encoding");
 const _1 = require(".");
 const balance_1 = require("./balance");
-const positions_1 = require("./positions");
+const basic_positions_1 = require("./basic-positions");
+const main_positions_1 = require("./main-positions");
 const savings_rate_1 = require("./savings-rate");
+/**
+ * A connector object, used to build classes to work with EOSDT ecosystem contracts
+ */
 class EosdtConnector {
+    /**
+     * A connector object, used to build classes to work with EOSDT ecosystem contracts
+     * @param {string} nodeAddress URL of blockchain node, used to send transactions
+     * @param {string[]} privateKeys Array of private keys used to sign transactions
+     */
     constructor(nodeAddress, privateKeys) {
-        const fetch = node_fetch_1.default; // Workaround to avoid incompatibility of fetch types in 'eosjs' and 'node-fetch'
+        // Workaround to avoid incompatibility of fetch types in 'eosjs' and 'node-fetch'
+        const fetch = node_fetch_1.default;
         this.rpc = new eosjs_1.JsonRpc(nodeAddress, { fetch });
         const signatureProvider = new eosjs_jssig_1.JsSignatureProvider(privateKeys);
         this.api = new eosjs_1.Api({
@@ -23,23 +33,48 @@ class EosdtConnector {
             textEncoder: new text_encoding_1.TextEncoder()
         });
     }
+    /**
+     * Creates class to work with basic positions contract (non-EOS collateral)
+     * @param {string} collateralToken Currently "PBTC" only
+     * @returns Instance of `BasicPositionsContract`
+     */
+    getBasicPositions(collateralToken) {
+        return new basic_positions_1.BasicPositionsContract(this, collateralToken);
+    }
+    /**
+     * Creates a class to work with EOS-collateral positions contract (`eosdtcntract`)
+     */
     getPositions() {
-        return new positions_1.PositionsContract(this);
+        return new main_positions_1.PositionsContract(this);
     }
-    getLiquidator() {
-        return new _1.LiquidatorContract(this);
-    }
-    getGovernance() {
-        return new _1.GovernanceContract(this);
-    }
-    getBalances() {
-        return new balance_1.BalanceGetter(this);
+    /**
+     * Creates a class to work with specified liquidator contract
+     * @param {string=} [collateralToken] "EOS" of "PBTC"
+     * @returns Instance of `LiquidatorContract`
+     */
+    getLiquidator(collateralToken = "EOS") {
+        return new _1.LiquidatorContract(this, collateralToken);
     }
     /**
      * Creates a wrapper for Savings Rate contract
+     * @returns Instance of `SavingsRateContract`
      */
-    getSavingsRate() {
+    getSavingsRateCont() {
         return new savings_rate_1.SavingsRateContract(this);
+    }
+    /**
+     * Instantiates `GovernanceContract` - a wrapper to work with `eosdtgovernc`
+     * @returns Instance of `GovernanceContract`
+     */
+    getGovernance() {
+        return new _1.GovernanceContract(this);
+    }
+    /**
+     * Instantiates a simple class to read blockchain balances
+     * @returns Instance of `BalanceGetter`
+     */
+    getBalances() {
+        return new balance_1.BalanceGetter(this);
     }
 }
 exports.EosdtConnector = EosdtConnector;

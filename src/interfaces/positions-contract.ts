@@ -1,17 +1,14 @@
-export interface EosdtPosition {
-    position_id: number // EOS type: uint64
-    maker: string // EOS type: name
-    outstanding: string // EOS type: asset
+import {
+    BasicEosdtPosition,
+    BasicEosdtPosParameters,
+    basicEosdtPosParametersKeys,
+    basicPositionKeys
+} from "./basic-positions-contract"
+
+export interface EosdtPosition extends BasicEosdtPosition {
     governance: string // EOS type: asset
-    collateral: string // EOS type: float64
 }
-export const positionKeys = [
-    "position_id",
-    "maker",
-    "outstanding",
-    "governance",
-    "collateral"
-]
+export const positionKeys = [...basicPositionKeys, "governance"]
 
 export interface Referral {
     referral_id: number // EOS type: uint64
@@ -56,6 +53,20 @@ export interface LtvRatios {
     ltv_ratio: string // EOS type: float64
 }
 export const ltvRatiosKeys = ["position_id", "ltv_ratio"]
+
+export interface EosdtContractParameters extends BasicEosdtPosParameters {
+    governance_rate: string // EOS type: float64
+    prev_vote: string // EOS type: time_point_sec
+    prev_stake: string // EOS type: time_point_sec
+    eos_staked: string // EOS type: asset
+}
+export const eosdtPosParametersKeys = [
+    ...basicEosdtPosParametersKeys,
+    "governance_rate",
+    "prev_vote",
+    "prev_stake",
+    "eos_staked"
+]
 
 export interface EosdtContractSettings {
     setting_id: number // EOS type: uint64
@@ -119,27 +130,4 @@ export const contractSettingsKeys = [
     "collateral_account",
     "collateral_token",
     "savings_account"
-]
-
-export interface EosdtContractParameters {
-    parameter_id: number // EOS type: uint64
-    total_collateral: string // EOS type: float64
-    total_debt: string // EOS type: asset
-    stability_rate: string // EOS type: float64
-    governance_rate: string // EOS type: float64
-    prev_date: string // EOS type: time_point_sec
-    prev_vote: string // EOS type: time_point_sec
-    prev_stake: string // EOS type: time_point_sec
-    eos_staked: string // EOS type: asset
-}
-export const contractParametersKeys = [
-    "parameter_id",
-    "total_collateral",
-    "total_debt",
-    "stability_rate",
-    "governance_rate",
-    "prev_date",
-    "prev_vote",
-    "prev_stake",
-    "eos_staked"
 ]

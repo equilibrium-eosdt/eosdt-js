@@ -5,7 +5,7 @@ async function main() {
     // Change node address here. This one will connect you to Jungle testnet node
     const nodeAddress = "http://jungle2.cryptolions.io:80"
 
-    // Change or add private keys used to sign transactions here. This one is from Jungle 
+    // Change or add private keys used to sign transactions here. This one is from Jungle
     // testnet account "exampleaccnt"
     const privateKeys = ["5JEVy6QujTsFzxWtBbQrG53vkszRybabE4wSyA2Tg1uZFEeVPks"]
     const accountName = "exampleaccnt"
@@ -17,12 +17,12 @@ async function main() {
 
     const governance = connector.getGovernance()
 
-    // Transfering 2 NUT tokens to use them in voting. Tokens can be unstaked and 
-    // transferred back after 3 days wait period (votes, using these tokens must be 
+    // Transfering 2 NUT tokens to use them in voting. Tokens can be unstaked and
+    // transferred back after 3 days wait period (votes, using these tokens must be
     // cancelled first)
     await governance.stake(accountName, 2)
 
-    // Voting whith 2 NUT tokens for proposal with name "test proposal". Vote "1" for 
+    // Voting whith 2 NUT tokens for proposal with name "test proposal". Vote "1" for
     // proposal and any other number to vote against it. You vote with all your staked tokens
     await governance.vote("test proposal", 1, accountName, "")
     console.log(`Voted successfully, all votes: \n`, await governance.getVotes())

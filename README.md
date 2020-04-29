@@ -1,5 +1,7 @@
 # EOSDT JS
 
+[![view on npm](http://img.shields.io/npm/v/@eosdt/eosdt-js)](https://www.npmjs.com/package/@eosdt/eosdt-js)
+
 A JavaScript library to execute EOSDT contracts methods.
 
 ## Usage
@@ -10,7 +12,7 @@ Install the module using NPM:
 $ npm install @eosdt/eosdt-js
 ```
 
-Use service module `Connector` to initiate one of four functional modules (`Positions`, `Governance`, `Liquidator` or `Balances`). `Connector` uses EOS node address and an array of private keys. Transactions would be signed with given keys and sent to blockchain through given node.
+Use service module `Connector` to initiate one of functional modules. `Connector` uses EOS node address and an array of private keys. Transactions would be signed with given keys and sent to blockchain through given node.
 
 ```Javascript
 const { EosdtConnector } = require("@eosdt/eosdt-js")
@@ -19,254 +21,1327 @@ const nodeAddress = "http://node-address.example.com:80"
 
 const connector = new EosdtConnector(nodeAddress, ["private-key-1", "private-key-2"])
 
-const positions = connector.getPositions()
+const eosPositions = connector.getPositions()
+const eosLiquidator = connector.getLiquidator()
+
+const pbtcPositions = connector.getBasicPositions("PBTC")
+const pbtcLiquidator = connector.getLiquidator("PBTC")
+
 const governance = connector.getGovernance()
-const liquidator = connector.getLiquidator()
 const balances = connector.getBalances()
+const savings = connector.getSavingsRate()
 ```
 
-## Modules
+Fore more code examples, checkout `examples` folder.
 
-### Connector
+# Modules documentation
 
-Creates a connector object, used to initiate functional modules and invoke their methods.
+<a name="ITrxParamsArgument"></a>
 
-### Positions
+## ITrxParamsArgument
 
-Module to manage EOSDT positions. Methods:
+<p>This object is used as optional argument in each method that sends actions to blockchain. Use it to manage transaction and action parameters.</p>
+<p>This object has following properties:</p>
 
--   `create` - creates new position, using specified amount of collateral and issuing specified amount of EOSDT to creator. If `collatAmount` arg is equal to zero, creates an empty position.
--   `createWithReferral` - same as `create`, but also sets a referral on position.
--   `createWhenPositionsExist` - same as `create`, but used when creator already have positions.
--   `close` - used to close a position in event of a global shutdown.
--   `del` - deletes position that has 0 debt.
--   `paybackAndDelete` - if debt defined burn all available debt on position and delete it. Otherwise delete position.
--   `give` - transfers position ownership to another account.
--   `addCollateral` - sends collateral to position to increase it's collateralization.
--   `deleteCollateral` - returns specified part of used collateral to user if LTV stays above critical.
--   `generateDebt` - issues additional EOSDT for position if this does not bring LTV below critical.
--   `burnbackDebt` - repays specified amount of EOSDT decreasing debt.
--   `marginCall` - called on a position with critical LTV, to perform a margin call.
--   `getContractEosBalance` - returns eosdtcntract EOS balance **deprecated**
--   `getContractTokenBalance` - returns contracts collateral asset balance.
--   `getRates` - returns table of current system token prices (rates_deprecated). **deprecated**
--   `getRelativeRates` - returns table of current system token prices (rates).
--   `getPositionById` - returns a position object, selecting it by id.
--   `getPositionByMaker` - returns a first position object, selecting it by maker name.
--   `getLatestUserPosition` - returns latest position (with maximum id value), selecting it by maker name.
--   `getAllUserPositions` - returns an array of all positions for specified user (up to 100 positions).
--   `getAllPositions` - returns an array of all positions for all users.
--   `getLtvRatiosTable` - returns table of current LTV ratios for all positions.
--   `getPositionLtvRatio` - returns current LTV ratio for position by id.
--   `getParameters` - returns Positions contract parameters.
--   `getSettings` - return Positions contract settings.
--   `addReferral` - creates new referral, staking given amount of NUT. Rejects when amount is less then `referral_min_stake` in positions contract settings.
--   `deleteReferral` - removes referral and unstakes that referral's NUT.
--   `getReferralById` - returns a referral object, selecting it by referral id.
--   `getReferralByName` - returns a referral object, selecting it by referral name.
--   `getAllReferrals` - returns table of existing referrals.
--   `getPositionReferral` - returns referral of a given position (`undefined` if none exists).
--   `getPositionReferralsTable` - returns an array of positions ids and those positions referrals.
--   `getAllReferralPositionsIds` - returns an array of positions with given referral id.
+| Property        | Type                | Description                                                       |
+| --------------- | ------------------- | ----------------------------------------------------------------- |
+| [permission]    | <code>string</code> | <p>Name of permission, <code>active</code> is used by default</p> |
+| [blocksBehind]  | <code>number</code> | <p>Default value is <code>3</code></p>                            |
+| [expireSeconds] | <code>number</code> | <p>Default value is <code>60</code></p>                           |
 
-### Governance
+## Classes
 
-Governance methods help manage the system: create proposals to change system parameters, vote on them and stake NUT tokens for voting. Methods:
+<dl>
+<dt><a href="#BalanceGetter">BalanceGetter</a></dt>
+<dd><p>Module to get account's balances of EOSDT, EOS, PBTC and NUT</p></dd>
+<dt><a href="#BasicPositionsContract">BasicPositionsContract</a></dt>
+<dd><p>Module to manage EOSDT positions with non-EOS collateral</p></dd>
+<dt><a href="#BpManager">BpManager</a></dt>
+<dd><p>Class for EOSDT Governance actions, related to block producers management</p></dd>
+<dt><a href="#EosdtConnector">EosdtConnector</a></dt>
+<dd><p>A connector object, used to build classes to work with EOSDT ecosystem contracts</p></dd>
+<dt><a href="#GovernanceContract">GovernanceContract</a></dt>
+<dd><p>A class to work with EOSDT Governance contract (<code>eosdtgovernc</code>)</p></dd>
+<dt><a href="#LiquidatorContract">LiquidatorContract</a></dt>
+<dd><p>A class to work with EOSDT Liquidator contract. Creates EOS liquidator by default</p></dd>
+<dt><a href="#PositionsContract">PositionsContract</a></dt>
+<dd><p>Module to manage EOS-collateral positions (on contract <code>eosdtcntract</code>). It is inherited from
+<code>BasicPositionsContract</code> and includes all it's methods.</p></dd>
+<dt><a href="#SavingsRateContract">SavingsRateContract</a></dt>
+<dd><p>A wrapper class to invoke actions of Equilibrium Savings Rate contract</p></dd>
+</dl>
 
--   `propose` - creates a proposal.
--   `expire` - expires an active proposal.
--   `applyChanges` - apply proposed changes (at least 51% of all issued NUT tokens must vote, at least 55% of votes must be positive).
--   `cleanProposal` - remove specified amount of votes from an expired proposal. If 0 votes left, removes proposal.
--   `stake` - sends NUT tokens to contract, staking them and allowing to vote on proposals.
--   `unstake` - unstakes NUT tokens, returning them to user and lowering amount of available votes.
--   `vote` - vote for or against a proposal. Vote `1` as "yes", `0` or any other number as "no".
--   `unvote` - removes all user votes from a proposal.
--   `voteForBlockProducers` - voting with staked NUTs for specified block producers.
--   `stakeAndVoteForBlockProducers` - stakes NUT and votes for BPs in one transaction.
--   `getVoterInfo` - returns amount of NUTs staked by account in EOSDT Governance contract and their unstake date.
--   `getVoterInfosTable` - returns the whole table of information on accounts that staked NUT
--   `getVotes` - returns an array with all votes (up to 1000).
--   `getVotesForAccount` - returns an array with all votes for voter, selecting it by name.
--   `getProposals` - returns an array with all proposals (up to 1000).
--   `getBpVotes` - returns array of block producers names and amount of NUT votes for them.
--   `getProxyInfo` - returns voter info for `eosdtbpproxy`.
--   `getSettings` - returns Governance contract settings.
--   `getParameters` - returns Governance contract parameters.
+<a name="BalanceGetter"></a>
 
-### Bp manager
+## BalanceGetter
 
-Governance account methods for block producers to manage their voting positions: register, change reward amount, deposit EOS, unregister.
+<p>Module to get account's balances of EOSDT, EOS, PBTC and NUT</p>
 
--   `getBpPosition` - returns information about registered block producer.
--   `getAllBpPositions` - returns an array of objects, that contain information about registered block producers.
--   `registerBlockProducer` - registers a block producer in BP voting reward program.
--   `changeBlockProducerReward` - changes amount of EOS reward payed out by block producer.
--   `unRegisterBlockProducer` - make block producer position inactive.
--   `depositEos` - deposit EOS to block producer position.
+**Kind**: global class
 
-### Liquidator
+-   [BalanceGetter](#BalanceGetter)
+    -   [new BalanceGetter(connector)](#new_BalanceGetter_new)
+    -   [.getEos(account)](#BalanceGetter+getEos) ⇒ <code>Promise.&lt;number&gt;</code>
+    -   [.getEosdt(account)](#BalanceGetter+getEosdt) ⇒ <code>Promise.&lt;number&gt;</code>
+    -   [.getNut(account)](#BalanceGetter+getNut) ⇒ <code>Promise.&lt;number&gt;</code>
+    -   [.getPbtc(account)](#BalanceGetter+getPbtc) ⇒ <code>Promise.&lt;number&gt;</code>
 
-Methods to get Liquidator contract parameters and exchange EOS and EOSDT in case of global shutdown.
+<a name="new_BalanceGetter_new"></a>
 
--   `marginCallAndBuyoutCollat` - performs margin call on a position and transfers specified amount of EOSDT to buyout freed collateral.
--   `transferEosdt` - sends EOSDT to liquidator contract. It is used to cancel bad debt and buyout liquidator collateral with discount.
--   `transferNut` - sends NUT tokens to liquidator contract. With memo "EOS" it is used to buyout EOS intended to be bought for NUT tokens (parameter "nut_collat_balance"). With memo "EOSDT" it is used to buyout EOSDT intended to be bought for NUT tokens (parameter "surplus_debt").
--   `getSurplusDebt` - returns amount of system surplus debt.
--   `getBadDebt` - returns amount of system bad debt.
--   `getCollatBalance` - returns amount of collateral on liquidator contract balance.
--   `getNutCollatBalance` - returns amount of nut_collateral on liquidator contract balance.
--   `getParameters` - returns all liquidator contract parameters.
--   `getSettings` - returns liquidator contract settings.
+### new BalanceGetter(connector)
 
-### Savings rate
+<p>Creates instance of <code>BalanceGetter</code></p>
 
-`SavingsRateContract` is used to work with `eosdtsavings` EOS contract. It can be instantiated with `EosdtConnector` method `getSavingsRate()`. Each method of `SavingsRateContract` has a JSDoc description.
+| Param     | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| connector | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
 
-### Balances
+<a name="BalanceGetter+getEos"></a>
 
-Module to get account's balances of EOSDT, EOS and NUT. Methods:
+### balanceGetter.getEos(account) ⇒ <code>Promise.&lt;number&gt;</code>
 
--   `getNut` - returns NUT balance of account
--   `getEosdt` - returns EOSDT balance of account
--   `getEos` - returns EOS balance of account
+**Kind**: instance method of [<code>BalanceGetter</code>](#BalanceGetter)  
+**Returns**: <code>Promise.&lt;number&gt;</code> - <p>EOS balance of account</p>
 
-## Examples
+| Param   | Type                | Description         |
+| ------- | ------------------- | ------------------- |
+| account | <code>string</code> | <p>Account name</p> |
 
-You can find working example scripts in module directory `examples`.
+<a name="BalanceGetter+getEosdt"></a>
 
-### Connecting to blockchain
+### balanceGetter.getEosdt(account) ⇒ <code>Promise.&lt;number&gt;</code>
 
-This code block is required for any other example to work.
+**Kind**: instance method of [<code>BalanceGetter</code>](#BalanceGetter)  
+**Returns**: <code>Promise.&lt;number&gt;</code> - <p>EOSDT balance of account</p>
 
-```Javascript
-const { EosdtConnector } = require("@eosdt/eosdt-js")
+| Param   | Type                | Description         |
+| ------- | ------------------- | ------------------- |
+| account | <code>string</code> | <p>Account name</p> |
 
-// Change node address here. This one will connect you to Jungle testnet node
-const nodeAddress = "http://jungle2.cryptolions.io:80"
+<a name="BalanceGetter+getNut"></a>
 
-// Change or add private keys used to sign transactions here. This one is from Jungle
-// testnet account "exampleaccnt"
-const privateKeys = ["5JEVy6QujTsFzxWtBbQrG53vkszRybabE4wSyA2Tg1uZFEeVPks"]
-const accountName = "exampleaccnt"
+### balanceGetter.getNut(account) ⇒ <code>Promise.&lt;number&gt;</code>
 
-const connector = new EosdtConnector(nodeAddress, privateKeys)
+**Kind**: instance method of [<code>BalanceGetter</code>](#BalanceGetter)  
+**Returns**: <code>Promise.&lt;number&gt;</code> - <p>NUT balance of account</p>
 
-// This code logs current block number and lets us know that connection
-// has been  established.
-const currentBlockNumber = (await connector.rpc.get_info()).head_block_num
-console.log(`Connected to blockchain, current block number is: ${currentBlockNumber}`)
+| Param   | Type                | Description         |
+| ------- | ------------------- | ------------------- |
+| account | <code>string</code> | <p>Account name</p> |
 
-// Getting objects with all methods
-const positions = connector.getPositions()
-const governance = connector.getGovernance()
-const liquidator = connector.getLiquidator()
-const balances = connector.getBalances()
-```
+<a name="BalanceGetter+getPbtc"></a>
 
-### Position operations
+### balanceGetter.getPbtc(account) ⇒ <code>Promise.&lt;number&gt;</code>
 
-Creating position, adding collateral, issuing additional debt then returning it, returning collateral from position and closing it.
+**Kind**: instance method of [<code>BalanceGetter</code>](#BalanceGetter)  
+**Returns**: <code>Promise.&lt;number&gt;</code> - <p>PBTC balance of account</p>
 
-```Javascript
-// Creating a position to issue 2 EOSDT for 1.5 EOS collateral
-// ATTENTION: this will throw if a user already has a position
-await positions.create(accountName, 1.5, 2)
+| Param   | Type                | Description         |
+| ------- | ------------------- | ------------------- |
+| account | <code>string</code> | <p>Account name</p> |
 
-// Getting last user position
-const allUserPositions = await positions.getAllUserPositions(accountName)
-const lastUserPosition = allUserPositions[allUserPositions.length - 1]
-const positionId = lastUserPosition.position_id
-console.log("Position created:", lastUserPosition)
+<a name="BasicPositionsContract"></a>
 
-// Adding 1.6 EOS collateral to position
-await positions.addCollateral(accountName, 1.6, positionId)
+## BasicPositionsContract
 
-let updatedPosition = await positions.getPositionById(positionId)
-console.log("Position collateral increased: ", updatedPosition)
+<p>Module to manage EOSDT positions with non-EOS collateral</p>
 
-// Issuing additional 2.15 EOSDT of debt
-await positions.generateDebt(accountName, 2.15, positionId)
+**Kind**: global class
 
-updatedPosition = await positions.getPositionById(positionId)
-console.log("Position outstanding and governance debts increased: ", updatedPosition)
+-   [BasicPositionsContract](#BasicPositionsContract)
+    -   [new BasicPositionsContract(connector, tokenSymbol)](#new_BasicPositionsContract_new)
+    -   [.create(accountName, collatAmount, eosdtAmount, [transactionParams])](#BasicPositionsContract+create) ⇒ <code>Promise</code>
+    -   [.createWhenPositionsExist(accountName, collatAmount, eosdtAmount, [referralId], [transactionParams])](#BasicPositionsContract+createWhenPositionsExist) ⇒ <code>Promise</code>
+    -   [.give(giverAccount, receiver, positionId, [transactionParams])](#BasicPositionsContract+give) ⇒ <code>Promise</code>
+    -   [.addCollateral(senderName, amount, positionId, [transactionParams])](#BasicPositionsContract+addCollateral) ⇒ <code>Promise</code>
+    -   [.deleteCollateral(senderName, amount, positionId, [transactionParams])](#BasicPositionsContract+deleteCollateral) ⇒ <code>Promise</code>
+    -   [.generateDebt(senderName, amount, positionId, [transactionParams])](#BasicPositionsContract+generateDebt) ⇒ <code>Promise</code>
+    -   [.burnbackDebt(senderName, amount, positionId, [transactionParams])](#BasicPositionsContract+burnbackDebt) ⇒ <code>Promise</code>
+    -   [.addCollatAndDebt(senderName, addedCollatAmount, generatedDebtAmount, positionId, [transactionParams])](#BasicPositionsContract+addCollatAndDebt) ⇒ <code>Promise</code>
+    -   [.pbtcDelCollatAndRedeem(senderName, amount, positionId, btcAddress, [transactionParams])](#BasicPositionsContract+pbtcDelCollatAndRedeem) ⇒ <code>Promise</code>
+    -   [.marginCall(senderName, positionId, [transactionParams])](#BasicPositionsContract+marginCall) ⇒ <code>Promise</code>
+    -   [.del(creator, positionId, [transactionParams])](#BasicPositionsContract+del) ⇒ <code>Promise</code>
+    -   [.paybackAndDelete(maker, debtAmount, positionId, [transactionParams])](#BasicPositionsContract+paybackAndDelete) ⇒ <code>Promise</code>
+    -   [.close(senderAccount, positionId, [transactionParams])](#BasicPositionsContract+close) ⇒ <code>Promise</code>
+    -   [.getContractTokenBalance()](#BasicPositionsContract+getContractTokenBalance) ⇒ <code>Promise.&lt;number&gt;</code>
+    -   [.getRates()](#BasicPositionsContract+getRates) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getLtvRatiosTable()](#BasicPositionsContract+getLtvRatiosTable) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getPositionLtvRatio(id)](#BasicPositionsContract+getPositionLtvRatio) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getPositionById(id)](#BasicPositionsContract+getPositionById) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getPositionByMaker(maker)](#BasicPositionsContract+getPositionByMaker) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getAllUserPositions(maker)](#BasicPositionsContract+getAllUserPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getAllPositions()](#BasicPositionsContract+getAllPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getLatestUserPosition(accountName)](#BasicPositionsContract+getLatestUserPosition) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getParameters()](#BasicPositionsContract+getParameters) ⇒ <code>Promise.&lt;object&gt;</code>
+    -   [.getSettings()](#BasicPositionsContract+getSettings) ⇒ <code>Promise.&lt;object&gt;</code>
 
-// Returning 6 EOSDT to Positions contract. All excessive tokens will be returned to
-// user. Appropriate amount of NUT tokens will be withdrawn from user balance. User
-// required to have NUT tokens to burn debt.
-await positions.burnbackDebt(accountName, 6, positionId)
+<a name="new_BasicPositionsContract_new"></a>
 
-updatedPosition = await positions.getPositionById(positionId)
-console.log("Position debt decreased: ", updatedPosition)
+### new BasicPositionsContract(connector, tokenSymbol)
 
-// Returning 1.35 EOS of collateral to user (partial collateral return). If there is
-// debt still left, user cannot return more collateral than required for position
-// to have LTV above critical
-await positions.deleteCollateral(accountName, 1.35, positionId)
+<p>Creates an instance of <code>BasicPositionsContract</code></p>
 
-updatedPosition = await positions.getPositionById(positionId)
-console.log("Position collateral decreased: ", updatedPosition)
+| Param       | Type                | Description                                                                |
+| ----------- | ------------------- | -------------------------------------------------------------------------- |
+| connector   |                     | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
+| tokenSymbol | <code>string</code> | <p>Currently only &quot;PBTC&quot;</p>                                     |
 
-// Deleting position and returning all collateral to user. Would only work, if
-// position has zero debts.
-await positions.del(accountName, positionId)
+<a name="BasicPositionsContract+create"></a>
 
-updatedPosition = await positions.getPositionById(positionId)
-console.log("Position deleted, excess EOS returned to user, position must now be undefined: ",
-  updatedPosition)
-```
+### basicPositionsContract.create(accountName, collatAmount, eosdtAmount, [transactionParams]) ⇒ <code>Promise</code>
 
-### Proposals management
+<p>Creates new position, using specified amount of collateral and issuing specified amount
+of EOSDT to creator. If <code>collatAmount</code> argument is equal to zero, creates an empty position.</p>
 
-Creating, expiring and applying a proposal.
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
 
-```Javascript
-const proposalJson = `{"eosdtcntract.critical_ltv":1.4,"eosdtcntract.stability_fee":0.086,"reserved":"Update production contracts to v2.1"}`
-const expirationDate = "2019-06-30T23:59:59"
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| accountName         | <code>string</code>                        | <p>Creator's account name</p>                                                |
+| collatAmount        | <code>string</code> \| <code>number</code> | <p>Amount of collateral tokens to transfer to position</p>                   |
+| eosdtAmount         | <code>string</code> \| <code>number</code> | <p>EOSDT amount to issue</p>                                                 |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
 
-// Creating a proposal for users to vote
-await governance.propose("test proposal", "Test proposal title", proposalJson, expirationDate, accountName)
+<a name="BasicPositionsContract+createWhenPositionsExist"></a>
 
-// Logging all proposals
-console.log(`Proposal created: \n`, await governance.getProposals())
+### basicPositionsContract.createWhenPositionsExist(accountName, collatAmount, eosdtAmount, [referralId], [transactionParams]) ⇒ <code>Promise</code>
 
-// Expiring a proposal and stooping voting on it. Expiration date changes to
-// time of this method execution.
-await governance.expire("test proposal", accountName)
-console.log(`Proposal expired: \n`, await governance.getProposals())
+<p>Same as <code>create</code>, but used when creator already have positions</p>
 
-// If your proposal is expired, has 55% "yes" votes and 51% of all NUT tokens
-// voted - you can apply changes from this proposal to system
-await governance.applyChanges("test proposal", accountName)
-```
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
 
-### Voting
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| accountName         | <code>string</code>                        | <p>Creator's account</p>                                                     |
+| collatAmount        | <code>string</code> \| <code>number</code> | <p>Amount of collateral tokens to transfer to position</p>                   |
+| eosdtAmount         | <code>string</code> \| <code>number</code> | <p>EOSDT amount to issue</p>                                                 |
+| [referralId]        | <code>number</code>                        | <p>Referral id. Only works with EOS positions</p>                            |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
 
-Staking NUT tokens to vote for and against proposals.
+<a name="BasicPositionsContract+give"></a>
 
-```Javascript
-// Transferring 2 NUT tokens to use them in voting. Tokens can be unstaked and
-// transferred back after 3 days wait period (votes, using these tokens must be
-// cancelled first)
-await governance.stake(accountName, 2)
+### basicPositionsContract.give(giverAccount, receiver, positionId, [transactionParams]) ⇒ <code>Promise</code>
 
-// Voting with 2 NUT tokens for proposal with name "test proposal". Vote "1" for
-// proposal and any other number to vote against it. You vote with all staked tokens
-await governance.vote("test proposal", 1, accountName)
-console.log(`Voted successfully, all votes: \n`, await governance.getVotes())
+<p>Transfers position ownership to another account</p>
 
-// Cancelling vote for proposal with name "test proposal"
-await governance.unvote("test proposal", accountName)
-console.log(`Voted cancelled, all votes: \n`, await governance.getVotes())
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
 
-// Unstaking NUT tokens to get them back on user's balance
-await governance.unstake(2, accountName)
-```
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| giverAccount        | <code>string</code> | <p>Account name</p>                                                          |
+| receiver            | <code>string</code> | <p>Account name</p>                                                          |
+| positionId          | <code>number</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
 
-### Balances operations
+<a name="BasicPositionsContract+addCollateral"></a>
 
-Getting balances of EOS, EOSDT or NUT
+### basicPositionsContract.addCollateral(senderName, amount, positionId, [transactionParams]) ⇒ <code>Promise</code>
 
-```Javascript
-// Getting amount of EOS available on user's balance
-await balances.getEos(accountName)
-```
+<p>Sends collateral to position to increase it's collateralization.</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        | <p>Account name</p>                                                          |
+| amount              | <code>string</code> \| <code>number</code> | <p>Amount of added collateral</p>                                            |
+| positionId          | <code>number</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+deleteCollateral"></a>
+
+### basicPositionsContract.deleteCollateral(senderName, amount, positionId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Returns collateral from position, LTV must remain above critical for this action to work</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        | <p>Account name</p>                                                          |
+| amount              | <code>string</code> \| <code>number</code> |                                                                              |
+| positionId          | <code>number</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+generateDebt"></a>
+
+### basicPositionsContract.generateDebt(senderName, amount, positionId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Issues additional EOSDT if this does not bring position LTV below critical.</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        | <p>Account name</p>                                                          |
+| amount              | <code>string</code> \| <code>number</code> | <p>Not more than 4 significant decimals</p>                                  |
+| positionId          | <code>number</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+burnbackDebt"></a>
+
+### basicPositionsContract.burnbackDebt(senderName, amount, positionId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Transfers EOSDT to position to burn debt. Excess debt would be refunded to user account</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        | <p>Account name</p>                                                          |
+| amount              | <code>string</code> \| <code>number</code> | <p>Not more than 4 significant decimals</p>                                  |
+| positionId          | <code>number</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+addCollatAndDebt"></a>
+
+### basicPositionsContract.addCollatAndDebt(senderName, addedCollatAmount, generatedDebtAmount, positionId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Transfers collateral tokens to position and generates EOSDT debt</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        | <p>Account name</p>                                                          |
+| addedCollatAmount   | <code>string</code> \| <code>number</code> |                                                                              |
+| generatedDebtAmount | <code>string</code> \| <code>number</code> |                                                                              |
+| positionId          | <code>number</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+pbtcDelCollatAndRedeem"></a>
+
+### basicPositionsContract.pbtcDelCollatAndRedeem(senderName, amount, positionId, btcAddress, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Withdraws specified amount of PBTC tokens from position and redeems that PBTCs</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        | <p>Account name</p>                                                          |
+| amount              | <code>string</code> \| <code>number</code> |                                                                              |
+| positionId          | <code>number</code>                        |                                                                              |
+| btcAddress          | <code>string</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+marginCall"></a>
+
+### basicPositionsContract.marginCall(senderName, positionId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Called on a position with critical LTV to perform a margin call</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code> | <p>Account name</p>                                                          |
+| positionId          | <code>number</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+del"></a>
+
+### basicPositionsContract.del(creator, positionId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Deletes position that has 0 debt.</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| creator             | <code>string</code> | <p>Account name</p>                                                          |
+| positionId          | <code>number</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+paybackAndDelete"></a>
+
+### basicPositionsContract.paybackAndDelete(maker, debtAmount, positionId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Burns debt on position and deletes it. Debt must be = 0 to delete position. Excess debt
+would be refunded to user account</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| maker               | <code>string</code>                        | <p>Account name</p>                                                          |
+| debtAmount          | <code>string</code> \| <code>number</code> | <p>Must be &gt; than position debt</p>                                       |
+| positionId          | <code>number</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+close"></a>
+
+### basicPositionsContract.close(senderAccount, positionId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Used to close a position in an event of global shutdown.</p>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| senderAccount       | <code>string</code> | <p>Account name</p>                                                          |
+| positionId          | <code>number</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BasicPositionsContract+getContractTokenBalance"></a>
+
+### basicPositionsContract.getContractTokenBalance() ⇒ <code>Promise.&lt;number&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;number&gt;</code> - <p>Contract's collateral asset balance.</p>  
+<a name="BasicPositionsContract+getRates"></a>
+
+### basicPositionsContract.getRates() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Table of current system token prices (rates)</p>  
+<a name="BasicPositionsContract+getLtvRatiosTable"></a>
+
+### basicPositionsContract.getLtvRatiosTable() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Table of current LTV ratios for all positions.</p>  
+<a name="BasicPositionsContract+getPositionLtvRatio"></a>
+
+### basicPositionsContract.getPositionLtvRatio(id) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>Current LTV ratio for position by id</p>
+
+| Param | Type                | Description        |
+| ----- | ------------------- | ------------------ |
+| id    | <code>number</code> | <p>Position id</p> |
+
+<a name="BasicPositionsContract+getPositionById"></a>
+
+### basicPositionsContract.getPositionById(id) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>A position object</p>
+
+| Param | Type                | Description        |
+| ----- | ------------------- | ------------------ |
+| id    | <code>number</code> | <p>Position id</p> |
+
+<a name="BasicPositionsContract+getPositionByMaker"></a>
+
+### basicPositionsContract.getPositionByMaker(maker) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>Position object - first position that belongs to
+maker account</p>
+
+| Param | Type                | Description         |
+| ----- | ------------------- | ------------------- |
+| maker | <code>string</code> | <p>Account name</p> |
+
+<a name="BasicPositionsContract+getAllUserPositions"></a>
+
+### basicPositionsContract.getAllUserPositions(maker) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Array of all positions objects, created by the maker</p>
+
+| Param | Type                | Description         |
+| ----- | ------------------- | ------------------- |
+| maker | <code>string</code> | <p>Account name</p> |
+
+<a name="BasicPositionsContract+getAllPositions"></a>
+
+### basicPositionsContract.getAllPositions() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>An array of all positions created on this contract</p>  
+<a name="BasicPositionsContract+getLatestUserPosition"></a>
+
+### basicPositionsContract.getLatestUserPosition(accountName) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>Position object - position of the account with
+maximum id value</p>
+
+| Param       | Type                |
+| ----------- | ------------------- |
+| accountName | <code>string</code> |
+
+<a name="BasicPositionsContract+getParameters"></a>
+
+### basicPositionsContract.getParameters() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Positions contract parameters</p>  
+<a name="BasicPositionsContract+getSettings"></a>
+
+### basicPositionsContract.getSettings() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Positions contract settings</p>  
+<a name="BpManager"></a>
+
+## BpManager
+
+<p>Class for EOSDT Governance actions, related to block producers management</p>
+
+**Kind**: global class
+
+-   [BpManager](#BpManager)
+    -   [new BpManager(connector)](#new_BpManager_new)
+    -   [.getAllBpPositions()](#BpManager+getAllBpPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getBpPosition()](#BpManager+getBpPosition) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.registerBlockProducer(bpName, rewardAmount, [transactionParams])](#BpManager+registerBlockProducer) ⇒ <code>Promise</code>
+    -   [.changeBlockProducerReward(bpName, rewardAmount, [transactionParams])](#BpManager+changeBlockProducerReward) ⇒ <code>Promise</code>
+    -   [.unregisterBlockProducer(bpName, [transactionParams])](#BpManager+unregisterBlockProducer) ⇒ <code>Promise</code>
+    -   [.depositEos(fromAccount, bpName, eosAmount, [transactionParams])](#BpManager+depositEos) ⇒ <code>Promise</code>
+
+<a name="new_BpManager_new"></a>
+
+### new BpManager(connector)
+
+<p>Creates instance of <code>BpManager</code></p>
+
+| Param     | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| connector | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
+
+<a name="BpManager+getAllBpPositions"></a>
+
+### bpManager.getAllBpPositions() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>BpManager</code>](#BpManager)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>An array of objects, that contain information about
+registered block producers</p>  
+<a name="BpManager+getBpPosition"></a>
+
+### bpManager.getBpPosition() ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>BpManager</code>](#BpManager)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>Object with information about a registered block
+producer</p>  
+<a name="BpManager+registerBlockProducer"></a>
+
+### bpManager.registerBlockProducer(bpName, rewardAmount, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Registers a block producer in BP voting reward program</p>
+
+**Kind**: instance method of [<code>BpManager</code>](#BpManager)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| bpName              | <code>string</code> | <p>Account name</p>                                                          |
+| rewardAmount        | <code>number</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BpManager+changeBlockProducerReward"></a>
+
+### bpManager.changeBlockProducerReward(bpName, rewardAmount, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Changes amount of EOS reward payed by block producer</p>
+
+**Kind**: instance method of [<code>BpManager</code>](#BpManager)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| bpName              | <code>string</code> | <p>Account name</p>                                                          |
+| rewardAmount        | <code>number</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BpManager+unregisterBlockProducer"></a>
+
+### bpManager.unregisterBlockProducer(bpName, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Deactivates block producer</p>
+
+**Kind**: instance method of [<code>BpManager</code>](#BpManager)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| bpName              | <code>string</code> | <p>Account name</p>                                                          |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="BpManager+depositEos"></a>
+
+### bpManager.depositEos(fromAccount, bpName, eosAmount, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Deposit EOS into block producer Governance account to pay reward. Any account can deposit
+EOS for a block producer</p>
+
+**Kind**: instance method of [<code>BpManager</code>](#BpManager)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| fromAccount         | <code>string</code>                        | <p>Paying account name</p>                                                   |
+| bpName              | <code>string</code>                        |                                                                              |
+| eosAmount           | <code>number</code> \| <code>string</code> |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="EosdtConnector"></a>
+
+## EosdtConnector
+
+<p>A connector object, used to build classes to work with EOSDT ecosystem contracts</p>
+
+**Kind**: global class
+
+-   [EosdtConnector](#EosdtConnector)
+    -   [new EosdtConnector(nodeAddress, privateKeys)](#new_EosdtConnector_new)
+    -   [.getBasicPositions(collateralToken)](#EosdtConnector+getBasicPositions) ⇒
+    -   [.getPositions()](#EosdtConnector+getPositions)
+    -   [.getLiquidator([collateralToken])](#EosdtConnector+getLiquidator) ⇒
+    -   [.getSavingsRateCont()](#EosdtConnector+getSavingsRateCont) ⇒
+    -   [.getGovernance()](#EosdtConnector+getGovernance) ⇒
+    -   [.getBalances()](#EosdtConnector+getBalances) ⇒
+
+<a name="new_EosdtConnector_new"></a>
+
+### new EosdtConnector(nodeAddress, privateKeys)
+
+<p>A connector object, used to build classes to work with EOSDT ecosystem contracts</p>
+
+| Param       | Type                              | Description                                              |
+| ----------- | --------------------------------- | -------------------------------------------------------- |
+| nodeAddress | <code>string</code>               | <p>URL of blockchain node, used to send transactions</p> |
+| privateKeys | <code>Array.&lt;string&gt;</code> | <p>Array of private keys used to sign transactions</p>   |
+
+<a name="EosdtConnector+getBasicPositions"></a>
+
+### eosdtConnector.getBasicPositions(collateralToken) ⇒
+
+<p>Creates class to work with basic positions contract (non-EOS collateral)</p>
+
+**Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
+**Returns**: <p>Instance of <code>BasicPositionsContract</code></p>
+
+| Param           | Type                | Description                            |
+| --------------- | ------------------- | -------------------------------------- |
+| collateralToken | <code>string</code> | <p>Currently &quot;PBTC&quot; only</p> |
+
+<a name="EosdtConnector+getPositions"></a>
+
+### eosdtConnector.getPositions()
+
+<p>Creates a class to work with EOS-collateral positions contract (<code>eosdtcntract</code>)</p>
+
+**Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
+<a name="EosdtConnector+getLiquidator"></a>
+
+### eosdtConnector.getLiquidator([collateralToken]) ⇒
+
+<p>Creates a class to work with specified liquidator contract</p>
+
+**Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
+**Returns**: <p>Instance of <code>LiquidatorContract</code></p>
+
+| Param             | Type                | Default                      | Description                                |
+| ----------------- | ------------------- | ---------------------------- | ------------------------------------------ |
+| [collateralToken] | <code>string</code> | <code>&quot;EOS&quot;</code> | <p>&quot;EOS&quot; of &quot;PBTC&quot;</p> |
+
+<a name="EosdtConnector+getSavingsRateCont"></a>
+
+### eosdtConnector.getSavingsRateCont() ⇒
+
+<p>Creates a wrapper for Savings Rate contract</p>
+
+**Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
+**Returns**: <p>Instance of <code>SavingsRateContract</code></p>  
+<a name="EosdtConnector+getGovernance"></a>
+
+### eosdtConnector.getGovernance() ⇒
+
+<p>Instantiates <code>GovernanceContract</code> - a wrapper to work with <code>eosdtgovernc</code></p>
+
+**Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
+**Returns**: <p>Instance of <code>GovernanceContract</code></p>  
+<a name="EosdtConnector+getBalances"></a>
+
+### eosdtConnector.getBalances() ⇒
+
+<p>Instantiates a simple class to read blockchain balances</p>
+
+**Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
+**Returns**: <p>Instance of <code>BalanceGetter</code></p>  
+<a name="GovernanceContract"></a>
+
+## GovernanceContract
+
+<p>A class to work with EOSDT Governance contract (<code>eosdtgovernc</code>)</p>
+
+**Kind**: global class
+
+-   [GovernanceContract](#GovernanceContract)
+    -   [new GovernanceContract(connector)](#new_GovernanceContract_new)
+    -   [.propose(proposal, senderName, [transactionParams])](#GovernanceContract+propose) ⇒ <code>Promise</code>
+    -   [.expire(proposalName, senderName, [transactionParams])](#GovernanceContract+expire) ⇒ <code>Promise</code>
+    -   [.applyChanges(proposalName, senderName, [transactionParams])](#GovernanceContract+applyChanges) ⇒ <code>Promise</code>
+    -   [.cleanProposal(proposalName, deletedVotes, senderName, [transactionParams])](#GovernanceContract+cleanProposal) ⇒ <code>Promise</code>
+    -   [.stake(senderName, nutsAmount, [trxMemo], [transactionParams])](#GovernanceContract+stake) ⇒ <code>Promise</code>
+    -   [.unstake(nutAmount, voterName, [transactionParams])](#GovernanceContract+unstake) ⇒ <code>Promise</code>
+    -   [.vote(proposalName, vote, voterName, voteJson, [transactionParams])](#GovernanceContract+vote) ⇒ <code>Promise</code>
+    -   [.unvote(proposalName, voterName, [transactionParams])](#GovernanceContract+unvote) ⇒ <code>Promise</code>
+    -   [.voteForBlockProducers(voterName, producers, [transactionParams])](#GovernanceContract+voteForBlockProducers) ⇒ <code>Promise</code>
+    -   [.stakeAndVoteForBlockProducers(voterName, nutAmount, producers, [transactionParams])](#GovernanceContract+stakeAndVoteForBlockProducers) ⇒ <code>Promise</code>
+    -   [.getVoterInfo()](#GovernanceContract+getVoterInfo) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getVoterInfosTable()](#GovernanceContract+getVoterInfosTable) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getVotes()](#GovernanceContract+getVotes) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getVotesForAccount()](#GovernanceContract+getVotesForAccount) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getProposals()](#GovernanceContract+getProposals) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getBpVotes()](#GovernanceContract+getBpVotes) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getProxyInfo()](#GovernanceContract+getProxyInfo) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getSettings()](#GovernanceContract+getSettings) ⇒ <code>Promise.&lt;object&gt;</code>
+    -   [.getParameters()](#GovernanceContract+getParameters) ⇒ <code>Promise.&lt;object&gt;</code>
+
+<a name="new_GovernanceContract_new"></a>
+
+### new GovernanceContract(connector)
+
+<p>Creates an instance of <code>GovernanceContract</code></p>
+
+| Param     | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| connector | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
+
+<a name="GovernanceContract+propose"></a>
+
+### governanceContract.propose(proposal, senderName, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Creates a proposal</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| proposal            | <code>object</code> |                                                                              |
+| proposal.proposer   | <code>string</code> |                                                                              |
+| proposal.name       | <code>string</code> |                                                                              |
+| proposal.title      | <code>string</code> |                                                                              |
+| proposal.json       | <code>string</code> |                                                                              |
+| proposal.expiresAt  | <code>Date</code>   |                                                                              |
+| proposal.type       | <code>number</code> |                                                                              |
+| senderName          | <code>string</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="GovernanceContract+expire"></a>
+
+### governanceContract.expire(proposalName, senderName, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Expires an active proposal</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| proposalName        | <code>string</code> |                                                                              |
+| senderName          | <code>string</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="GovernanceContract+applyChanges"></a>
+
+### governanceContract.applyChanges(proposalName, senderName, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Applies proposed changes. At least 51% of all issued NUT tokens must vote, at least 55%
+of votes must be for proposal</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| proposalName        | <code>string</code> |                                                                              |
+| senderName          | <code>string</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="GovernanceContract+cleanProposal"></a>
+
+### governanceContract.cleanProposal(proposalName, deletedVotes, senderName, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Removes specified amount of votes from an expired proposal. If 0 votes left, removes proposal</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| proposalName        | <code>string</code> |                                                                              |
+| deletedVotes        | <code>number</code> |                                                                              |
+| senderName          | <code>string</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="GovernanceContract+stake"></a>
+
+### governanceContract.stake(senderName, nutsAmount, [trxMemo], [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Sends NUT tokens to contract, staking them and allowing to vote for block producers and for
+proposals</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        |                                                                              |
+| nutsAmount          | <code>string</code> \| <code>number</code> |                                                                              |
+| [trxMemo]           | <code>string</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="GovernanceContract+unstake"></a>
+
+### governanceContract.unstake(nutAmount, voterName, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Unstakes NUT tokens to user's balance</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| nutAmount           | <code>string</code> \| <code>number</code> |                                                                              |
+| voterName           | <code>string</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="GovernanceContract+vote"></a>
+
+### governanceContract.vote(proposalName, vote, voterName, voteJson, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Vote for or against a proposal</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                                         |
+| ------------------- | ------------------- | --------------------------------------------------------------------------------------------------- |
+| proposalName        | <code>string</code> |                                                                                                     |
+| vote                | <code>number</code> | <p>Vote <code>1</code> as &quot;yes&quot;, <code>0</code> or any other number as &quot;no&quot;</p> |
+| voterName           | <code>string</code> |                                                                                                     |
+| voteJson            | <code>string</code> |                                                                                                     |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p>                        |
+
+<a name="GovernanceContract+unvote"></a>
+
+### governanceContract.unvote(proposalName, voterName, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Removes all user votes from a proposal</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| proposalName        | <code>string</code> |                                                                              |
+| voterName           | <code>string</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="GovernanceContract+voteForBlockProducers"></a>
+
+### governanceContract.voteForBlockProducers(voterName, producers, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Votes with staked NUTs for block producers</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                              | Description                                                                  |
+| ------------------- | --------------------------------- | ---------------------------------------------------------------------------- |
+| voterName           | <code>string</code>               |                                                                              |
+| producers           | <code>Array.&lt;string&gt;</code> |                                                                              |
+| [transactionParams] | <code>object</code>               | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="GovernanceContract+stakeAndVoteForBlockProducers"></a>
+
+### governanceContract.stakeAndVoteForBlockProducers(voterName, nutAmount, producers, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Stakes NUTs and votes for BPs in one transaction</p>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| voterName           | <code>string</code>                        |                                                                              |
+| nutAmount           | <code>string</code> \| <code>number</code> |                                                                              |
+| producers           | <code>Array.&lt;string&gt;</code>          |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="GovernanceContract+getVoterInfo"></a>
+
+### governanceContract.getVoterInfo() ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>Amount of NUTs staked by account in Governance
+contract and their unstake date</p>  
+<a name="GovernanceContract+getVoterInfosTable"></a>
+
+### governanceContract.getVoterInfosTable() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Table of information on accounts that staked NUT</p>  
+<a name="GovernanceContract+getVotes"></a>
+
+### governanceContract.getVotes() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>An array with all Governance contract votes (up to 10000)</p>  
+<a name="GovernanceContract+getVotesForAccount"></a>
+
+### governanceContract.getVotesForAccount() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>All account votes</p>  
+<a name="GovernanceContract+getProposals"></a>
+
+### governanceContract.getProposals() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>An array with all Governance contract proposals (up to 10000)</p>  
+<a name="GovernanceContract+getBpVotes"></a>
+
+### governanceContract.getBpVotes() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Array of objects, containing block producers names and
+amount of NUT votes for them</p>  
+<a name="GovernanceContract+getProxyInfo"></a>
+
+### governanceContract.getProxyInfo() ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>Voter info for <code>eosdtbpproxy</code></p>  
+<a name="GovernanceContract+getSettings"></a>
+
+### governanceContract.getSettings() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Governance contract settings</p>  
+<a name="GovernanceContract+getParameters"></a>
+
+### governanceContract.getParameters() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>GovernanceContract</code>](#GovernanceContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Governance contract parameters</p>  
+<a name="LiquidatorContract"></a>
+
+## LiquidatorContract
+
+<p>A class to work with EOSDT Liquidator contract. Creates EOS liquidator by default</p>
+
+**Kind**: global class
+
+-   [LiquidatorContract](#LiquidatorContract)
+    -   [new LiquidatorContract(connector)](#new_LiquidatorContract_new)
+    -   [.marginCallAndBuyoutCollat(senderName, positionId, eosdtToTransfer, [trxMemo], [transactionParams])](#LiquidatorContract+marginCallAndBuyoutCollat) ⇒ <code>Promise</code>
+    -   [.transferEosdt(senderName, eosdtAmount, [trxMemo], [transactionParams])](#LiquidatorContract+transferEosdt) ⇒ <code>Promise</code>
+    -   [.transferNut(senderName, nutAmount, trxMemo, [transactionParams])](#LiquidatorContract+transferNut) ⇒ <code>Promise</code>
+    -   [.getSurplusDebt()](#LiquidatorContract+getSurplusDebt) ⇒ <code>Promise.&lt;string&gt;</code>
+    -   [.getBadDebt()](#LiquidatorContract+getBadDebt) ⇒ <code>Promise.&lt;string&gt;</code>
+    -   [.getCollatBalance()](#LiquidatorContract+getCollatBalance) ⇒ <code>Promise.&lt;string&gt;</code>
+    -   [.getNutCollatBalance()](#LiquidatorContract+getNutCollatBalance) ⇒ <code>Promise.&lt;string&gt;</code>
+    -   [.getParameters()](#LiquidatorContract+getParameters) ⇒ <code>Promise.&lt;object&gt;</code>
+    -   [.getSettings()](#LiquidatorContract+getSettings) ⇒ <code>Promise.&lt;object&gt;</code>
+
+<a name="new_LiquidatorContract_new"></a>
+
+### new LiquidatorContract(connector)
+
+<p>Instantiates <code>LiquidatorContract</code></p>
+
+| Param     | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| connector | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
+
+<a name="LiquidatorContract+marginCallAndBuyoutCollat"></a>
+
+### liquidatorContract.marginCallAndBuyoutCollat(senderName, positionId, eosdtToTransfer, [trxMemo], [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Performs margin call on a position and transfers specified amount of EOSDT to liquidator
+to buyout freed collateral</p>
+
+**Kind**: instance method of [<code>LiquidatorContract</code>](#LiquidatorContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        |                                                                              |
+| positionId          | <code>number</code>                        |                                                                              |
+| eosdtToTransfer     | <code>string</code> \| <code>number</code> |                                                                              |
+| [trxMemo]           | <code>string</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="LiquidatorContract+transferEosdt"></a>
+
+### liquidatorContract.transferEosdt(senderName, eosdtAmount, [trxMemo], [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Sends EOSDT to liquidator contract. Used to cancel bad debt and buyout liquidator
+collateral with discount</p>
+
+**Kind**: instance method of [<code>LiquidatorContract</code>](#LiquidatorContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        |                                                                              |
+| eosdtAmount         | <code>string</code> \| <code>number</code> |                                                                              |
+| [trxMemo]           | <code>string</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="LiquidatorContract+transferNut"></a>
+
+### liquidatorContract.transferNut(senderName, nutAmount, trxMemo, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Sends NUT tokens to liquidator contract. Send token symbol in memo to buyout collateral
+asset (liquidator parameter <code>nut_collat_balance</code>). With memo &quot;EOSDT&quot; it is used to
+buyout EOSDT (liquidator parameter <code>surplus_debt</code>)</p>
+
+**Kind**: instance method of [<code>LiquidatorContract</code>](#LiquidatorContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        |                                                                              |
+| nutAmount           | <code>string</code> \| <code>number</code> |                                                                              |
+| trxMemo             | <code>string</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="LiquidatorContract+getSurplusDebt"></a>
+
+### liquidatorContract.getSurplusDebt() ⇒ <code>Promise.&lt;string&gt;</code>
+
+**Kind**: instance method of [<code>LiquidatorContract</code>](#LiquidatorContract)  
+**Returns**: <code>Promise.&lt;string&gt;</code> - <p>Amount of system surplus debt</p>  
+<a name="LiquidatorContract+getBadDebt"></a>
+
+### liquidatorContract.getBadDebt() ⇒ <code>Promise.&lt;string&gt;</code>
+
+**Kind**: instance method of [<code>LiquidatorContract</code>](#LiquidatorContract)  
+**Returns**: <code>Promise.&lt;string&gt;</code> - <p>Amount of system bad debt</p>  
+<a name="LiquidatorContract+getCollatBalance"></a>
+
+### liquidatorContract.getCollatBalance() ⇒ <code>Promise.&lt;string&gt;</code>
+
+**Kind**: instance method of [<code>LiquidatorContract</code>](#LiquidatorContract)  
+**Returns**: <code>Promise.&lt;string&gt;</code> - <p>Amount of collateral on liquidator contract balance</p>  
+<a name="LiquidatorContract+getNutCollatBalance"></a>
+
+### liquidatorContract.getNutCollatBalance() ⇒ <code>Promise.&lt;string&gt;</code>
+
+**Kind**: instance method of [<code>LiquidatorContract</code>](#LiquidatorContract)  
+**Returns**: <code>Promise.&lt;string&gt;</code> - <p>Amount of NUT collateral on liquidator</p>  
+<a name="LiquidatorContract+getParameters"></a>
+
+### liquidatorContract.getParameters() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>LiquidatorContract</code>](#LiquidatorContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Liquidator contract parameters object</p>  
+<a name="LiquidatorContract+getSettings"></a>
+
+### liquidatorContract.getSettings() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>LiquidatorContract</code>](#LiquidatorContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Liquidator contract settings object</p>  
+<a name="PositionsContract"></a>
+
+## PositionsContract
+
+<p>Module to manage EOS-collateral positions (on contract <code>eosdtcntract</code>). It is inherited from
+<code>BasicPositionsContract</code> and includes all it's methods.</p>
+
+**Kind**: global class
+
+-   [PositionsContract](#PositionsContract)
+    -   [new PositionsContract(connector)](#new_PositionsContract_new)
+    -   [.createWithReferral(accountName, collatAmount, eosdtAmount, referralId, [transactionParams])](#PositionsContract+createWithReferral) ⇒ <code>Promise</code>
+    -   [.getPositionById(id)](#PositionsContract+getPositionById) ⇒ <code>Promise.&lt;object&gt;</code>
+    -   [.getPositionByMaker(maker)](#PositionsContract+getPositionByMaker) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getAllUserPositions(maker)](#PositionsContract+getAllUserPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getAllPositions()](#PositionsContract+getAllPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getLatestUserPosition()](#PositionsContract+getLatestUserPosition) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getParameters()](#PositionsContract+getParameters) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getSettings()](#PositionsContract+getSettings) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.addReferral(senderName, nutAmount, [transactionParams])](#PositionsContract+addReferral) ⇒ <code>Promise</code>
+    -   [.deleteReferral(senderName, referralId, [transactionParams])](#PositionsContract+deleteReferral) ⇒ <code>Promise</code>
+    -   [.getReferralById(id)](#PositionsContract+getReferralById) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getAllReferrals()](#PositionsContract+getAllReferrals) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getReferralByName(name)](#PositionsContract+getReferralByName) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getPositionReferral(positionId)](#PositionsContract+getPositionReferral) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getPositionReferralsTable()](#PositionsContract+getPositionReferralsTable) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getAllReferralPositionsIds()](#PositionsContract+getAllReferralPositionsIds) ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
+
+<a name="new_PositionsContract_new"></a>
+
+### new PositionsContract(connector)
+
+<p>Creates an instance of PositionsContract</p>
+
+| Param     | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| connector | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
+
+<a name="PositionsContract+createWithReferral"></a>
+
+### positionsContract.createWithReferral(accountName, collatAmount, eosdtAmount, referralId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Same as basic position <code>create</code>, but also sets a referral id</p>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| accountName         | <code>string</code>                        | <p>Creator's account name</p>                                                |
+| collatAmount        | <code>string</code> \| <code>number</code> | <p>Amount of collateral tokens to transfer to position</p>                   |
+| eosdtAmount         | <code>string</code> \| <code>number</code> | <p>EOSDT amount to issue</p>                                                 |
+| referralId          | <code>number</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="PositionsContract+getPositionById"></a>
+
+### positionsContract.getPositionById(id) ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>A position object</p>
+
+| Param | Type                |
+| ----- | ------------------- |
+| id    | <code>number</code> |
+
+<a name="PositionsContract+getPositionByMaker"></a>
+
+### positionsContract.getPositionByMaker(maker) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>Position object - first position that belongs to
+maker account</p>
+
+| Param | Type                | Description         |
+| ----- | ------------------- | ------------------- |
+| maker | <code>string</code> | <p>Account name</p> |
+
+<a name="PositionsContract+getAllUserPositions"></a>
+
+### positionsContract.getAllUserPositions(maker) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Array of all positions objects, created by the maker</p>
+
+| Param | Type                | Description         |
+| ----- | ------------------- | ------------------- |
+| maker | <code>string</code> | <p>Account name</p> |
+
+<a name="PositionsContract+getAllPositions"></a>
+
+### positionsContract.getAllPositions() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>An array of all positions created on this contract</p>  
+<a name="PositionsContract+getLatestUserPosition"></a>
+
+### positionsContract.getLatestUserPosition() ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>Position object - position of the account with
+maximum id value</p>  
+<a name="PositionsContract+getParameters"></a>
+
+### positionsContract.getParameters() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Positions contract parameters</p>  
+<a name="PositionsContract+getSettings"></a>
+
+### positionsContract.getSettings() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Positions contract settings</p>  
+<a name="PositionsContract+addReferral"></a>
+
+### positionsContract.addReferral(senderName, nutAmount, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Creates new referral, staking given amount of NUT tokens. Rejects when amount is less then
+<code>referral_min_stake</code> in positions contract settings.</p>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        |                                                                              |
+| nutAmount           | <code>string</code> \| <code>number</code> |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="PositionsContract+deleteReferral"></a>
+
+### positionsContract.deleteReferral(senderName, referralId, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Removes referral and unstakes that referral's NUTs</p>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code> |                                                                              |
+| referralId          | <code>number</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="PositionsContract+getReferralById"></a>
+
+### positionsContract.getReferralById(id) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>An object with information about referral</p>
+
+| Param | Type                |
+| ----- | ------------------- |
+| id    | <code>number</code> |
+
+<a name="PositionsContract+getAllReferrals"></a>
+
+### positionsContract.getAllReferrals() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Table of existing referrals</p>  
+<a name="PositionsContract+getReferralByName"></a>
+
+### positionsContract.getReferralByName(name) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>An object with information about referral</p>
+
+| Param | Type                | Description         |
+| ----- | ------------------- | ------------------- |
+| name  | <code>string</code> | <p>Account name</p> |
+
+<a name="PositionsContract+getPositionReferral"></a>
+
+### positionsContract.getPositionReferral(positionId) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>Returns referral information object if position
+with given id has a referral</p>
+
+| Param      | Type                |
+| ---------- | ------------------- |
+| positionId | <code>number</code> |
+
+<a name="PositionsContract+getPositionReferralsTable"></a>
+
+### positionsContract.getPositionReferralsTable() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>An array of objects, containing positions ids and those
+positions referrals ids</p>  
+<a name="PositionsContract+getAllReferralPositionsIds"></a>
+
+### positionsContract.getAllReferralPositionsIds() ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
+
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;number&gt;&gt;</code> - <p>An array of position objects with given referral id</p>  
+<a name="SavingsRateContract"></a>
+
+## SavingsRateContract
+
+<p>A wrapper class to invoke actions of Equilibrium Savings Rate contract</p>
+
+**Kind**: global class
+
+-   [SavingsRateContract](#SavingsRateContract)
+    -   [new SavingsRateContract(connector)](#new_SavingsRateContract_new)
+    -   [.stake(senderName, eosdtAmount, [trxMemo], [transactionParams])](#SavingsRateContract+stake) ⇒ <code>Promise</code>
+    -   [.unstake(toAccount, eosdtAmount, [transactionParams])](#SavingsRateContract+unstake) ⇒ <code>Promise</code>
+    -   [.getAllPositions()](#SavingsRateContract+getAllPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getPositionById()](#SavingsRateContract+getPositionById) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+    -   [.getUserPositions()](#SavingsRateContract+getUserPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getParameters()](#SavingsRateContract+getParameters) ⇒ <code>Promise.&lt;object&gt;</code>
+    -   [.getSettings()](#SavingsRateContract+getSettings) ⇒ <code>Promise.&lt;object&gt;</code>
+
+<a name="new_SavingsRateContract_new"></a>
+
+### new SavingsRateContract(connector)
+
+<p>Instantiates SavingsRateContract</p>
+
+| Param     | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| connector | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
+
+<a name="SavingsRateContract+stake"></a>
+
+### savingsRateContract.stake(senderName, eosdtAmount, [trxMemo], [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Transfers EOSDT from user to Savings Rate contract</p>
+
+**Kind**: instance method of [<code>SavingsRateContract</code>](#SavingsRateContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        |                                                                              |
+| eosdtAmount         | <code>string</code> \| <code>number</code> |                                                                              |
+| [trxMemo]           | <code>string</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="SavingsRateContract+unstake"></a>
+
+### savingsRateContract.unstake(toAccount, eosdtAmount, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Returns EOSDT from Savings Rate contract to account balance</p>
+
+**Kind**: instance method of [<code>SavingsRateContract</code>](#SavingsRateContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| toAccount           | <code>string</code>                        |                                                                              |
+| eosdtAmount         | <code>string</code> \| <code>number</code> |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="SavingsRateContract+getAllPositions"></a>
+
+### savingsRateContract.getAllPositions() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>SavingsRateContract</code>](#SavingsRateContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>An array of all positions on Savings Rate contract</p>  
+<a name="SavingsRateContract+getPositionById"></a>
+
+### savingsRateContract.getPositionById() ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
+
+**Kind**: instance method of [<code>SavingsRateContract</code>](#SavingsRateContract)  
+**Returns**: <code>Promise.&lt;(object\|undefined)&gt;</code> - <p>A Savings Rate position object with given id</p>  
+<a name="SavingsRateContract+getUserPositions"></a>
+
+### savingsRateContract.getUserPositions() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>SavingsRateContract</code>](#SavingsRateContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Array of all positions objects, created by the maker</p>  
+<a name="SavingsRateContract+getParameters"></a>
+
+### savingsRateContract.getParameters() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>SavingsRateContract</code>](#SavingsRateContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Positions contract parameters</p>  
+<a name="SavingsRateContract+getSettings"></a>
+
+### savingsRateContract.getSettings() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>SavingsRateContract</code>](#SavingsRateContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Positions contract settings</p>
+
+---
+
+&copy; 2019-2020 Equilibrium

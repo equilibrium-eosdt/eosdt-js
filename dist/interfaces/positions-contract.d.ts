@@ -1,9 +1,6 @@
-export interface EosdtPosition {
-    position_id: number;
-    maker: string;
-    outstanding: string;
+import { BasicEosdtPosition, BasicEosdtPosParameters } from "./basic-positions-contract";
+export interface EosdtPosition extends BasicEosdtPosition {
     governance: string;
-    collateral: string;
 }
 export declare const positionKeys: string[];
 export interface Referral {
@@ -35,6 +32,13 @@ export interface LtvRatios {
     ltv_ratio: string;
 }
 export declare const ltvRatiosKeys: string[];
+export interface EosdtContractParameters extends BasicEosdtPosParameters {
+    governance_rate: string;
+    prev_vote: string;
+    prev_stake: string;
+    eos_staked: string;
+}
+export declare const eosdtPosParametersKeys: string[];
 export interface EosdtContractSettings {
     setting_id: number;
     global_lock: number;
@@ -65,15 +69,3 @@ export interface EosdtContractSettings {
     savings_account: string;
 }
 export declare const contractSettingsKeys: string[];
-export interface EosdtContractParameters {
-    parameter_id: number;
-    total_collateral: string;
-    total_debt: string;
-    stability_rate: string;
-    governance_rate: string;
-    prev_date: string;
-    prev_vote: string;
-    prev_stake: string;
-    eos_staked: string;
-}
-export declare const contractParametersKeys: string[];

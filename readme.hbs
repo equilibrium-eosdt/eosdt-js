@@ -1,0 +1,56 @@
+# EOSDT JS
+
+[![view on npm](http://img.shields.io/npm/v/@eosdt/eosdt-js)](https://www.npmjs.com/package/@eosdt/eosdt-js)
+
+A JavaScript library to execute EOSDT contracts methods.
+
+## Usage
+
+Install the module using NPM:
+
+```bash
+$ npm install @eosdt/eosdt-js
+```
+
+Use service module `Connector` to initiate one of functional modules. `Connector` uses EOS node address and an array of private keys. Transactions would be signed with given keys and sent to blockchain through given node.
+
+```Javascript
+const { EosdtConnector } = require("@eosdt/eosdt-js")
+
+const nodeAddress = "http://node-address.example.com:80"
+
+const connector = new EosdtConnector(nodeAddress, ["private-key-1", "private-key-2"])
+
+const eosPositions = connector.getPositions()
+const eosLiquidator = connector.getLiquidator()
+
+const pbtcPositions = connector.getBasicPositions("PBTC")
+const pbtcLiquidator = connector.getLiquidator("PBTC")
+
+const governance = connector.getGovernance()
+const balances = connector.getBalances()
+const savings = connector.getSavingsRate()
+```
+
+Fore more code examples, checkout `examples` folder.
+
+# Modules documentation
+
+<a name="ITrxParamsArgument"></a>
+
+## ITrxParamsArgument
+
+<p>This object is used as optional argument in each method that sends actions to blockchain. Use it to manage transaction and action parameters.</p>
+<p>This object has following properties:</p>
+
+| Property         | Type                | Description                                                          |
+| ---------------- | ------------------- | -------------------------------------------------------------------- |
+| [permission]     | <code>string</code> | <p>Name of permission, <code>active</code> is used by default</p>    |
+| [blocksBehind]   | <code>number</code> | <p>Default value is <code>3</code></p>                               |
+| [expireSeconds]  | <code>number</code> | <p>Default value is <code>60</code></p>                              |
+
+{{>main}}
+
+* * *
+
+&copy; 2019-2020 Equilibrium

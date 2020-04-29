@@ -7,7 +7,6 @@ export interface StoredProposal {
     expires_at: string // EOS type: time_point_sec
     proposal_type: number // EOS type: uint8
 }
-
 export const storedProposalKeys = [
     "proposal_name",
     "proposer",
@@ -26,15 +25,7 @@ export interface ProposeObject {
     expiresAt: Date
     type: number
 }
-
-export const proposeObjectKeys = [
-    "proposer",
-    "name",
-    "title",
-    "json",
-    "expiresAt",
-    "type"
-]
+export const proposeObjectKeys = ["proposer", "name", "title", "json", "expiresAt", "type"]
 
 export interface EosdtVote {
     id: number // EOS type: uint64
@@ -44,15 +35,7 @@ export interface EosdtVote {
     vote: number // EOS type: uint8
     vote_json: string // EOS type: string
 }
-
-export const eosdtVoteKeys = [
-    "id",
-    "proposal_name",
-    "updated_at",
-    "voter",
-    "vote",
-    "vote_json"
-]
+export const eosdtVoteKeys = ["id", "proposal_name", "updated_at", "voter", "vote", "vote_json"]
 
 export interface GovernanceSettings {
     setting_id: number // EOS type: uint64
@@ -69,7 +52,6 @@ export interface GovernanceSettings {
     reward_weight: number // EOS type: float64
     stake_reward: number // EOS type: float64
 }
-
 export const governanceSettingsKeys = [
     "setting_id",
     "position_account",
@@ -97,7 +79,6 @@ export interface BPVotes {
     producer: string // EOS type: name
     votes: string // EOS type: asset
 }
-
 export const bpVotesKeys = ["producer", "votes"]
 
 export interface VoterInfo {
@@ -105,7 +86,6 @@ export interface VoterInfo {
     voting_amount: string // EOS type: asset (NUT)
     withdrawal_date: string // EOS type: time_point_sec
 }
-
 export const voterInfoKeys = ["voter", "voting_amount", "withdrawal_date"]
 
 export interface EosVoterInfo {
@@ -120,7 +100,6 @@ export interface EosVoterInfo {
     reserved2: number // EOS type: uint32
     reserved3: string // EOS type: asset
 }
-
 export const eosVoterInfoKeys = [
     "owner",
     "proxy",
@@ -142,7 +121,6 @@ export interface BpPosition {
     is_active: number // EOS type: bool
     active_since: string // EOS type: time_point_sec
 }
-
 export const bpPositionKeys = [
     "bp_name",
     "reward_amount",

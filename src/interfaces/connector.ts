@@ -1,4 +1,4 @@
-import { JsonRpc, Api } from "eosjs"
+import { Api, JsonRpc } from "eosjs"
 
 export interface EosdtConnectorInterface {
     rpc: JsonRpc

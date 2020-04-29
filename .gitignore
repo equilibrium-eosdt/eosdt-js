@@ -1,2 +1,5 @@
 /node_modules
+/tests/config.ts
+/examples/*/config.js
+/examples/*/*/config.js
 /.vscode

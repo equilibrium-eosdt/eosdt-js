@@ -2,6 +2,23 @@
 
 All notable changes will be documented in this file.
 
+#### [0.9.2] - 2020-04-28 - PBTC collateral positions
+
+-   Positions contracts wrappers split into 2 different classes:
+    -   `BasicPositionsContract` - used for non-EOS collateral positions management. Currently only for PBTC collateral contract `eosdtpbtcpos`. Can be initiated directly of through `EosdtConnector`.
+    -   `PositionsContract` - used for positions contract `eosdtcntract`. It is backward compatible. `PositionsContract` extends `BasicPositionsContract` and includes all it's methods.
+-   Method `addCollatAndDebt` added to positions contracts wrapper classes.
+-   Liquidator wrapper class now can be initiated with `collateralToken` argument. `EOS` is used by default. If you use `PBTC` it would work with PBTC-based liquidator (contract `eosdtpbtcliq`)
+-   `PositionsContract` and `BasicPositionsContract` method `create` now works with O EOSDT
+-   Added TypeScript interfaces for contract `BasicPositionsContract`:
+    -   BasicEosdtPosition
+    -   BasicEosdtPosSettings
+    -   BasicEosdtPosParameters
+-   Removed `PositionsContract` deprecated method `getContractEosBalance`. Use `getContractTokenBalance` instead
+-   `PositionsContract` method `getRates` now works with updated rates object (TS interface TokenRate), method `getRelativeRates` is now deprecated and works as an alias of `getRates`
+-   Deprecated interface `TokenRate_deprecated` removed
+-   Readme now has detailed documentation
+
 #### [0.8.0] - 2020-04-20
 
 -   Added `SavingsRateContract` wrapper. It is used to interact with contract `eosdtsavings`:
@@ -17,7 +34,7 @@ All notable changes will be documented in this file.
 
 #### [0.7.21] - 2020-03-30
 
--   Update to support governance changes
+-   Updated to support governance changes
 
 -   `Governance` updated interfaces:
     -   `GovernanceParameters`: new parameter `min_reward`,

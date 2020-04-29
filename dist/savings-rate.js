@@ -16,7 +16,8 @@ const utils_1 = require("./utils");
  */
 class SavingsRateContract {
     /**
-     * A wrapper class to invoke actions of Equilibrium Savings Rate contract
+     * Instantiates SavingsRateContract
+     * @param connector EosdtConnector (see `README` section `Usage`)
      */
     constructor(connector) {
         this.name = "eosdtsavings";
@@ -25,6 +26,11 @@ class SavingsRateContract {
     }
     /**
      * Transfers EOSDT from user to Savings Rate contract
+     * @param {string} senderName
+     * @param {string | number} eosdtAmount
+     * @param {string} [trxMemo]
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
      */
     stake(senderName, eosdtAmount, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -54,6 +60,10 @@ class SavingsRateContract {
     }
     /**
      * Returns EOSDT from Savings Rate contract to account balance
+     * @param {string} toAccount
+     * @param {string | number} eosdtAmount
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
      */
     unstake(toAccount, eosdtAmount, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -80,7 +90,7 @@ class SavingsRateContract {
         });
     }
     /**
-     * @returns An array of all positions on Savings Rate contract
+     * @returns {Promise<object[]>} An array of all positions on Savings Rate contract
      */
     getAllPositions() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -109,7 +119,7 @@ class SavingsRateContract {
         });
     }
     /**
-     * @returns A Savings Rate position object with given id
+     * @returns {Promise<object | undefined>} A Savings Rate position object with given id
      */
     getPositionById(id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -125,7 +135,7 @@ class SavingsRateContract {
         });
     }
     /**
-     * @returns Array of all positions objects, created by the maker
+     * @returns {Promise<object[]>} Array of all positions objects, created by the maker
      */
     getUserPositions(maker) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -144,7 +154,7 @@ class SavingsRateContract {
         });
     }
     /**
-     * @returns Positions contract parameters
+     * @returns {Promise<object>} Positions contract parameters
      */
     getParameters() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -157,7 +167,7 @@ class SavingsRateContract {
         });
     }
     /**
-     * @returns Positions contract settings
+     * @returns {Promise<object>} Positions contract settings
      */
     getSettings() {
         return __awaiter(this, void 0, void 0, function* () {

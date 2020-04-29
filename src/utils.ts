@@ -31,14 +31,13 @@ export function amountToAssetString(
     let decimals
     if (assetSymbol === "EOS") {
         decimals = 4
+    } else if (assetSymbol === "PBTC") {
+        decimals = 8
     } else if (assetSymbol === "EOSDT" || assetSymbol === "NUT") {
         decimals = 9
     } else if (customDecimals) {
         decimals = customDecimals
-    } else
-        throw new Error(
-            `${amountToAssetString.name}(): unknown interface symbol ${assetSymbol}`
-        )
+    } else throw new Error(`${amountToAssetString.name}(): unknown interface symbol ${assetSymbol}`)
 
     return `${amount.toFixed(decimals)} ${assetSymbol}`
 }
@@ -73,7 +72,7 @@ function logObject(obj: object): string {
 }
 
 function predicate(raw: object, keys: string[], name: string): void {
-    keys.forEach(key => {
+    keys.forEach((key) => {
         if (!raw.hasOwnProperty(key)) {
             const msg =
                 `${firstCharToUpper(name)} format mismatch: missing property "${key}". ` +
@@ -84,10 +83,10 @@ function predicate(raw: object, keys: string[], name: string): void {
 
     const properties = Object.keys(raw)
     if (properties.length !== keys.length) {
-        const propertiesDiff = properties.filter(prop => !keys.includes(prop))
+        const propertiesDiff = properties.filter((prop) => !keys.includes(prop))
 
         if (propertiesDiff.length !== 0) {
-            const propNames = propertiesDiff.map(p => `"${p}"`).join(", ")
+            const propNames = propertiesDiff.map((p) => `"${p}"`).join(", ")
             let ending = "ies"
             if (propertiesDiff.length === 1) ending = "y"
             const msg =

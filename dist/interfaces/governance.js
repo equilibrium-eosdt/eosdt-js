@@ -9,22 +9,8 @@ exports.storedProposalKeys = [
     "expires_at",
     "proposal_type"
 ];
-exports.proposeObjectKeys = [
-    "proposer",
-    "name",
-    "title",
-    "json",
-    "expiresAt",
-    "type"
-];
-exports.eosdtVoteKeys = [
-    "id",
-    "proposal_name",
-    "updated_at",
-    "voter",
-    "vote",
-    "vote_json"
-];
+exports.proposeObjectKeys = ["proposer", "name", "title", "json", "expiresAt", "type"];
+exports.eosdtVoteKeys = ["id", "proposal_name", "updated_at", "voter", "vote", "vote_json"];
 exports.governanceSettingsKeys = [
     "setting_id",
     "position_account",

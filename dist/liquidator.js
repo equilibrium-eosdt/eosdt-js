@@ -9,16 +9,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const config_1 = require("./config");
 const liquidator_1 = require("./interfaces/liquidator");
 const utils_1 = require("./utils");
+/**
+ * A class to work with EOSDT Liquidator contract. Creates EOS liquidator by default
+ */
 class LiquidatorContract {
-    constructor(connector) {
-        this.posContractName = "eosdtcntract";
-        this.tokenSymbol = "EOS";
+    /**
+     * Instantiates `LiquidatorContract`
+     *  @param connector EosdtConnector (see `README` section `Usage`)
+     */
+    constructor(connector, collateralToken = "EOS") {
         this.rpc = connector.rpc;
         this.api = connector.api;
-        this.contractName = "eosdtliqdatr";
+        this.tokenSymbol = collateralToken;
+        this.contractName = config_1.LIQUIDATOR_CONTRACTS[collateralToken];
+        this.posContractName = config_1.POSITION_CONTRACTS[collateralToken];
     }
+    /**
+     * Performs margin call on a position and transfers specified amount of EOSDT to liquidator
+     * to buyout freed collateral
+     * @param {string} senderName
+     * @param {number} positionId
+     * @param {string | number} eosdtToTransfer
+     * @param {string} [trxMemo]
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     marginCallAndBuyoutCollat(senderName, positionId, eosdtToTransfer, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const eosdtAssetString = utils_1.amountToAssetString(eosdtToTransfer, "EOSDT");
@@ -51,6 +69,15 @@ class LiquidatorContract {
             return receipt;
         });
     }
+    /**
+     * Sends EOSDT to liquidator contract. Used to cancel bad debt and buyout liquidator
+     * collateral with discount
+     * @param {string} senderName
+     * @param {string | number} eosdtAmount
+     * @param {string} [trxMemo]
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     transferEosdt(senderName, eosdtAmount, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
@@ -77,6 +104,16 @@ class LiquidatorContract {
             return receipt;
         });
     }
+    /**
+     * Sends NUT tokens to liquidator contract. Send token symbol in memo to buyout collateral
+     * asset (liquidator parameter `nut_collat_balance`). With memo "EOSDT" it is used to
+     * buyout EOSDT (liquidator parameter `surplus_debt`)
+     * @param {string} senderName
+     * @param {string | number} nutAmount
+     * @param {string} trxMemo
+     * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
+     * @returns {Promise} Promise of transaction receipt
+     */
     transferNut(senderName, nutAmount, trxMemo, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const nutAssetString = utils_1.amountToAssetString(nutAmount, "NUT");
@@ -103,30 +140,45 @@ class LiquidatorContract {
             return receipt;
         });
     }
+    /**
+     * @returns {Promise<string>} Amount of system surplus debt
+     */
     getSurplusDebt() {
         return __awaiter(this, void 0, void 0, function* () {
             const parameters = yield this.getParameters();
             return parameters.surplus_debt;
         });
     }
+    /**
+     * @returns {Promise<string>} Amount of system bad debt
+     */
     getBadDebt() {
         return __awaiter(this, void 0, void 0, function* () {
             const parameters = yield this.getParameters();
             return parameters.bad_debt;
         });
     }
+    /**
+     * @returns {Promise<string>} Amount of collateral on liquidator contract balance
+     */
     getCollatBalance() {
         return __awaiter(this, void 0, void 0, function* () {
             const parameters = yield this.getParameters();
             return parameters.collat_balance;
         });
     }
+    /**
+     * @returns {Promise<string>} Amount of NUT collateral on liquidator
+     */
     getNutCollatBalance() {
         return __awaiter(this, void 0, void 0, function* () {
             const parameters = yield this.getParameters();
             return parameters.nut_collat_balance;
         });
     }
+    /**
+     * @returns {Promise<object>} Liquidator contract parameters object
+     */
     getParameters() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
@@ -137,6 +189,9 @@ class LiquidatorContract {
             return utils_1.validateExternalData(table.rows[0], "liquidator parameters", liquidator_1.liquidatorParametersKeys);
         });
     }
+    /**
+     * @returns {Promise<object>} Liquidator contract settings object
+     */
     getSettings() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
