@@ -1,5 +1,5 @@
 import { Api, JsonRpc } from "eosjs";
-import { BasicEosdtPosition, BasicEosdtPosParameters, BasicEosdtPosSettings } from "./interfaces/basic-positions-contract";
+import { BasicEosdtPosition, BasicEosdtPosParameters, PosContractSettings } from "./interfaces/basic-positions-contract";
 import { EosdtConnectorInterface } from "./interfaces/connector";
 import { LtvRatios, TokenRate } from "./interfaces/positions-contract";
 import { ITrxParamsArgument } from "./interfaces/transaction";
@@ -23,8 +23,8 @@ export declare class BasicPositionsContract {
      */
     constructor(connector: EosdtConnectorInterface, tokenSymbol: string);
     /**
-     * Creates new position, using specified amount of collateral and issuing specified amount
-     * of EOSDT to creator. If `collatAmount` argument is equal to zero, creates an empty position.
+     * Creates new position, sending specified amount of collateral and issuing specified amount
+     * of EOSDT to creator.
      *
      * @param {string} accountName Creator's account name
      * @param {string | number} collatAmount Amount of collateral tokens to transfer to position
@@ -32,18 +32,14 @@ export declare class BasicPositionsContract {
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
      * @returns {Promise} Promise of transaction receipt
      */
-    create(accountName: string, collatAmount: string | number, eosdtAmount: string | number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    newPosition(accountName: string, collatAmount: string | number, eosdtAmount: string | number, transactionParams?: ITrxParamsArgument): Promise<any>;
     /**
-     * Same as `create`, but used when creator already have positions
+     * Creates new position with 0 debt and collateral
      *
-     * @param {string} accountName Creator's account
-     * @param {string | number} collatAmount Amount of collateral tokens to transfer to position
-     * @param {string | number} eosdtAmount EOSDT amount to issue
-     * @param {number} [referralId] Referral id. Only works with EOS positions
+     * @param {string} maker Account to create position for
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
-     * @returns {Promise} Promise of transaction receipt
      */
-    createWhenPositionsExist(accountName: string, collatAmount: string | number, eosdtAmount: string | number, referralId?: number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    newEmptyPosition(maker: string, transactionParams?: ITrxParamsArgument): Promise<any>;
     /**
      * Transfers position ownership to another account
      * @param {string} giverAccount Account name
@@ -195,5 +191,5 @@ export declare class BasicPositionsContract {
     /**
      * @returns {Promise<object>} Positions contract settings
      */
-    getSettings(): Promise<BasicEosdtPosSettings>;
+    getSettings(): Promise<PosContractSettings>;
 }

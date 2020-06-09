@@ -24,13 +24,14 @@ export declare class BpManager {
      */
     getBpPosition(bpName: string): Promise<BpPosition | undefined>;
     /**
-     * Registers a block producer in BP voting reward program
+     * Registers a block producer in BP voting reward program via EOS transfer. Transferred EOS
+     * is added to BP reward balance
      * @param {string} bpName Account name
-     * @param {number} rewardAmount
+     * @param {number} depositedAmount EOS amount to transfer
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
      * @returns {Promise} Promise of transaction receipt
      */
-    registerBlockProducer(bpName: string, rewardAmount: number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    registerBlockProducer(bpName: string, depositedAmount: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     /**
      * Changes amount of EOS reward payed by block producer
      * @param {string} bpName Account name

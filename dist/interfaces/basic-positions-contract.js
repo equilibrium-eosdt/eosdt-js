@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.basicPositionKeys = ["position_id", "maker", "outstanding", "collateral"];
-exports.basicEosdtPosSettingsKeys = [
+exports.posContractSettingsKeys = [
     "setting_id",
     "global_lock",
     "time_shift",
@@ -28,7 +28,8 @@ exports.basicEosdtPosSettingsKeys = [
     "referral_ratio",
     "collateral_account",
     "collateral_token",
-    "savings_account"
+    "savings_account",
+    "min_pos"
 ];
 exports.basicEosdtPosParametersKeys = [
     "parameter_id",

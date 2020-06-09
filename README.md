@@ -150,8 +150,8 @@ Fore more code examples, checkout `examples` folder.
 
 -   [BasicPositionsContract](#BasicPositionsContract)
     -   [new BasicPositionsContract(connector, tokenSymbol)](#new_BasicPositionsContract_new)
-    -   [.create(accountName, collatAmount, eosdtAmount, [transactionParams])](#BasicPositionsContract+create) ⇒ <code>Promise</code>
-    -   [.createWhenPositionsExist(accountName, collatAmount, eosdtAmount, [referralId], [transactionParams])](#BasicPositionsContract+createWhenPositionsExist) ⇒ <code>Promise</code>
+    -   [.newPosition(accountName, collatAmount, eosdtAmount, [transactionParams])](#BasicPositionsContract+newPosition) ⇒ <code>Promise</code>
+    -   [.newEmptyPosition(maker, [transactionParams])](#BasicPositionsContract+newEmptyPosition)
     -   [.give(giverAccount, receiver, positionId, [transactionParams])](#BasicPositionsContract+give) ⇒ <code>Promise</code>
     -   [.addCollateral(senderName, amount, positionId, [transactionParams])](#BasicPositionsContract+addCollateral) ⇒ <code>Promise</code>
     -   [.deleteCollateral(senderName, amount, positionId, [transactionParams])](#BasicPositionsContract+deleteCollateral) ⇒ <code>Promise</code>
@@ -186,12 +186,12 @@ Fore more code examples, checkout `examples` folder.
 | connector   |                     | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
 | tokenSymbol | <code>string</code> | <p>Currently only &quot;PBTC&quot;</p>                                     |
 
-<a name="BasicPositionsContract+create"></a>
+<a name="BasicPositionsContract+newPosition"></a>
 
-### basicPositionsContract.create(accountName, collatAmount, eosdtAmount, [transactionParams]) ⇒ <code>Promise</code>
+### basicPositionsContract.newPosition(accountName, collatAmount, eosdtAmount, [transactionParams]) ⇒ <code>Promise</code>
 
-<p>Creates new position, using specified amount of collateral and issuing specified amount
-of EOSDT to creator. If <code>collatAmount</code> argument is equal to zero, creates an empty position.</p>
+<p>Creates new position, sending specified amount of collateral and issuing specified amount
+of EOSDT to creator.</p>
 
 **Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
 **Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
@@ -203,22 +203,18 @@ of EOSDT to creator. If <code>collatAmount</code> argument is equal to zero, cre
 | eosdtAmount         | <code>string</code> \| <code>number</code> | <p>EOSDT amount to issue</p>                                                 |
 | [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
 
-<a name="BasicPositionsContract+createWhenPositionsExist"></a>
+<a name="BasicPositionsContract+newEmptyPosition"></a>
 
-### basicPositionsContract.createWhenPositionsExist(accountName, collatAmount, eosdtAmount, [referralId], [transactionParams]) ⇒ <code>Promise</code>
+### basicPositionsContract.newEmptyPosition(maker, [transactionParams])
 
-<p>Same as <code>create</code>, but used when creator already have positions</p>
+<p>Creates new position with 0 debt and collateral</p>
 
-**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
-**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)
 
-| Param               | Type                                       | Description                                                                  |
-| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
-| accountName         | <code>string</code>                        | <p>Creator's account</p>                                                     |
-| collatAmount        | <code>string</code> \| <code>number</code> | <p>Amount of collateral tokens to transfer to position</p>                   |
-| eosdtAmount         | <code>string</code> \| <code>number</code> | <p>EOSDT amount to issue</p>                                                 |
-| [referralId]        | <code>number</code>                        | <p>Referral id. Only works with EOS positions</p>                            |
-| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| maker               | <code>string</code> | <p>Account to create position for</p>                                        |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
 
 <a name="BasicPositionsContract+give"></a>
 
@@ -501,7 +497,7 @@ maximum id value</p>
     -   [new BpManager(connector)](#new_BpManager_new)
     -   [.getAllBpPositions()](#BpManager+getAllBpPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
     -   [.getBpPosition()](#BpManager+getBpPosition) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
-    -   [.registerBlockProducer(bpName, rewardAmount, [transactionParams])](#BpManager+registerBlockProducer) ⇒ <code>Promise</code>
+    -   [.registerBlockProducer(bpName, depositedAmount, [transactionParams])](#BpManager+registerBlockProducer) ⇒ <code>Promise</code>
     -   [.changeBlockProducerReward(bpName, rewardAmount, [transactionParams])](#BpManager+changeBlockProducerReward) ⇒ <code>Promise</code>
     -   [.unregisterBlockProducer(bpName, [transactionParams])](#BpManager+unregisterBlockProducer) ⇒ <code>Promise</code>
     -   [.depositEos(fromAccount, bpName, eosAmount, [transactionParams])](#BpManager+depositEos) ⇒ <code>Promise</code>
@@ -532,9 +528,10 @@ registered block producers</p>
 producer</p>  
 <a name="BpManager+registerBlockProducer"></a>
 
-### bpManager.registerBlockProducer(bpName, rewardAmount, [transactionParams]) ⇒ <code>Promise</code>
+### bpManager.registerBlockProducer(bpName, depositedAmount, [transactionParams]) ⇒ <code>Promise</code>
 
-<p>Registers a block producer in BP voting reward program</p>
+<p>Registers a block producer in BP voting reward program via EOS transfer. Transferred EOS
+is added to BP reward balance</p>
 
 **Kind**: instance method of [<code>BpManager</code>](#BpManager)  
 **Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
@@ -542,7 +539,7 @@ producer</p>
 | Param               | Type                | Description                                                                  |
 | ------------------- | ------------------- | ---------------------------------------------------------------------------- |
 | bpName              | <code>string</code> | <p>Account name</p>                                                          |
-| rewardAmount        | <code>number</code> |                                                                              |
+| depositedAmount     | <code>number</code> | <p>EOS amount to transfer</p>                                                |
 | [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
 
 <a name="BpManager+changeBlockProducerReward"></a>
@@ -1065,14 +1062,13 @@ buyout EOSDT (liquidator parameter <code>surplus_debt</code>)</p>
 
 -   [PositionsContract](#PositionsContract)
     -   [new PositionsContract(connector)](#new_PositionsContract_new)
-    -   [.createWithReferral(accountName, collatAmount, eosdtAmount, referralId, [transactionParams])](#PositionsContract+createWithReferral) ⇒ <code>Promise</code>
+    -   [.newEmptyPositionWithRef(maker, referralId, [transactionParams])](#PositionsContract+newEmptyPositionWithRef)
     -   [.getPositionById(id)](#PositionsContract+getPositionById) ⇒ <code>Promise.&lt;object&gt;</code>
     -   [.getPositionByMaker(maker)](#PositionsContract+getPositionByMaker) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
     -   [.getAllUserPositions(maker)](#PositionsContract+getAllUserPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
     -   [.getAllPositions()](#PositionsContract+getAllPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
     -   [.getLatestUserPosition()](#PositionsContract+getLatestUserPosition) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
     -   [.getParameters()](#PositionsContract+getParameters) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
-    -   [.getSettings()](#PositionsContract+getSettings) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
     -   [.addReferral(senderName, nutAmount, [transactionParams])](#PositionsContract+addReferral) ⇒ <code>Promise</code>
     -   [.deleteReferral(senderName, referralId, [transactionParams])](#PositionsContract+deleteReferral) ⇒ <code>Promise</code>
     -   [.getReferralById(id)](#PositionsContract+getReferralById) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
@@ -1092,22 +1088,19 @@ buyout EOSDT (liquidator parameter <code>surplus_debt</code>)</p>
 | --------- | -------------------------------------------------------------------------- |
 | connector | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
 
-<a name="PositionsContract+createWithReferral"></a>
+<a name="PositionsContract+newEmptyPositionWithRef"></a>
 
-### positionsContract.createWithReferral(accountName, collatAmount, eosdtAmount, referralId, [transactionParams]) ⇒ <code>Promise</code>
+### positionsContract.newEmptyPositionWithRef(maker, referralId, [transactionParams])
 
-<p>Same as basic position <code>create</code>, but also sets a referral id</p>
+<p>Creates position that has a referral. Position would have 0 collateral and 0 debt</p>
 
-**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
-**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)
 
-| Param               | Type                                       | Description                                                                  |
-| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
-| accountName         | <code>string</code>                        | <p>Creator's account name</p>                                                |
-| collatAmount        | <code>string</code> \| <code>number</code> | <p>Amount of collateral tokens to transfer to position</p>                   |
-| eosdtAmount         | <code>string</code> \| <code>number</code> | <p>EOSDT amount to issue</p>                                                 |
-| referralId          | <code>number</code>                        |                                                                              |
-| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| maker               | <code>string</code> | <p>Account to create position for</p>                                        |
+| referralId          | <code>number</code> | <p>Id of a referral</p>                                                      |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
 
 <a name="PositionsContract+getPositionById"></a>
 
@@ -1162,12 +1155,6 @@ maximum id value</p>
 
 **Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
 **Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Positions contract parameters</p>  
-<a name="PositionsContract+getSettings"></a>
-
-### positionsContract.getSettings() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
-
-**Kind**: instance method of [<code>PositionsContract</code>](#PositionsContract)  
-**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Positions contract settings</p>  
 <a name="PositionsContract+addReferral"></a>
 
 ### positionsContract.addReferral(senderName, nutAmount, [transactionParams]) ⇒ <code>Promise</code>

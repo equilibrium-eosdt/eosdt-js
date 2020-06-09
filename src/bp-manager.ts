@@ -52,15 +52,16 @@ export class BpManager {
     }
 
     /**
-     * Registers a block producer in BP voting reward program
+     * Registers a block producer in BP voting reward program via EOS transfer. Transferred EOS
+     * is added to BP reward balance
      * @param {string} bpName Account name
-     * @param {number} rewardAmount
+     * @param {number} depositedAmount EOS amount to transfer
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
      * @returns {Promise} Promise of transaction receipt
      */
     public async registerBlockProducer(
         bpName: string,
-        rewardAmount: number,
+        depositedAmount: number,
         transactionParams?: ITrxParamsArgument
     ): Promise<any> {
         const trxParams = setTransactionParams(transactionParams)
@@ -68,12 +69,14 @@ export class BpManager {
             {
                 actions: [
                     {
-                        account: this.contractName,
-                        name: "bpregister",
+                        account: "eosio.token",
+                        name: "transfer",
                         authorization: [{ actor: bpName, permission: trxParams.permission }],
                         data: {
-                            bp_name: bpName,
-                            reward_amount: amountToAssetString(rewardAmount, "EOS")
+                            from: bpName,
+                            to: this.contractName,
+                            quantity: amountToAssetString(depositedAmount, "EOS"),
+                            memo: ""
                         }
                     }
                 ]

@@ -1,6 +1,6 @@
 import { BasicPositionsContract } from "./basic-positions";
 import { EosdtConnectorInterface } from "./interfaces/connector";
-import { EosdtContractParameters, EosdtContractSettings, EosdtPosition, PositionReferral, Referral } from "./interfaces/positions-contract";
+import { EosdtContractParameters, EosdtPosition, PositionReferral, Referral } from "./interfaces/positions-contract";
 import { ITrxParamsArgument } from "./interfaces/transaction";
 /**
  * Module to manage EOS-collateral positions (on contract `eosdtcntract`). It is inherited from
@@ -13,16 +13,13 @@ export declare class PositionsContract extends BasicPositionsContract {
      */
     constructor(connector: EosdtConnectorInterface);
     /**
-     * Same as basic position `create`, but also sets a referral id
+     * Creates position that has a referral. Position would have 0 collateral and 0 debt
      *
-     * @param {string} accountName Creator's account name
-     * @param {string | number} collatAmount Amount of collateral tokens to transfer to position
-     * @param {string | number} eosdtAmount EOSDT amount to issue
-     * @param {number} referralId
+     * @param {string} maker Account to create position for
+     * @param {number} referralId Id of a referral
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
-     * @returns {Promise} Promise of transaction receipt
      */
-    createWithReferral(accountName: string, collatAmount: string | number, eosdtAmount: string | number, referralId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
+    newEmptyPositionWithRef(maker: string, referralId: number, transactionParams?: ITrxParamsArgument): Promise<any>;
     /**
      * @param {number} id
      * @returns {Promise<object>} A position object
@@ -52,10 +49,6 @@ export declare class PositionsContract extends BasicPositionsContract {
      * @returns {Promise<object[]>} Positions contract parameters
      */
     getParameters(): Promise<EosdtContractParameters>;
-    /**
-     * @returns {Promise<object[]>} Positions contract settings
-     */
-    getSettings(): Promise<EosdtContractSettings>;
     /**
      * Creates new referral, staking given amount of NUT tokens. Rejects when amount is less then
      * `referral_min_stake` in positions contract settings.

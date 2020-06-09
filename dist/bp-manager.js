@@ -56,24 +56,27 @@ class BpManager {
         });
     }
     /**
-     * Registers a block producer in BP voting reward program
+     * Registers a block producer in BP voting reward program via EOS transfer. Transferred EOS
+     * is added to BP reward balance
      * @param {string} bpName Account name
-     * @param {number} rewardAmount
+     * @param {number} depositedAmount EOS amount to transfer
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
      * @returns {Promise} Promise of transaction receipt
      */
-    registerBlockProducer(bpName, rewardAmount, transactionParams) {
+    registerBlockProducer(bpName, depositedAmount, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const receipt = yield this.api.transact({
                 actions: [
                     {
-                        account: this.contractName,
-                        name: "bpregister",
+                        account: "eosio.token",
+                        name: "transfer",
                         authorization: [{ actor: bpName, permission: trxParams.permission }],
                         data: {
-                            bp_name: bpName,
-                            reward_amount: utils_1.amountToAssetString(rewardAmount, "EOS")
+                            from: bpName,
+                            to: this.contractName,
+                            quantity: utils_1.amountToAssetString(depositedAmount, "EOS"),
+                            memo: ""
                         }
                     }
                 ]

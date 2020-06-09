@@ -5,7 +5,7 @@ export interface BasicEosdtPosition {
     collateral: string;
 }
 export declare const basicPositionKeys: string[];
-export interface BasicEosdtPosSettings {
+export interface PosContractSettings {
     setting_id: number;
     global_lock: number;
     time_shift: number;
@@ -33,8 +33,9 @@ export interface BasicEosdtPosSettings {
     collateral_account: string;
     collateral_token: string;
     savings_account: string;
+    min_pos: string;
 }
-export declare const basicEosdtPosSettingsKeys: string[];
+export declare const posContractSettingsKeys: string[];
 export interface BasicEosdtPosParameters {
     parameter_id: number;
     total_collateral: string;

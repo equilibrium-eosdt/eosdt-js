@@ -25,51 +25,29 @@ class PositionsContract extends basic_positions_1.BasicPositionsContract {
         super(connector, "EOS");
     }
     /**
-     * Same as basic position `create`, but also sets a referral id
+     * Creates position that has a referral. Position would have 0 collateral and 0 debt
      *
-     * @param {string} accountName Creator's account name
-     * @param {string | number} collatAmount Amount of collateral tokens to transfer to position
-     * @param {string | number} eosdtAmount EOSDT amount to issue
-     * @param {number} referralId
+     * @param {string} maker Account to create position for
+     * @param {number} referralId Id of a referral
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
-     * @returns {Promise} Promise of transaction receipt
      */
-    createWithReferral(accountName, collatAmount, eosdtAmount, referralId, transactionParams) {
+    newEmptyPositionWithRef(maker, referralId, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const trxParams = utils_1.setTransactionParams(transactionParams);
-            const authorization = [{ actor: accountName, permission: trxParams.permission }];
-            // Creates a new empty position
-            const actions = [];
-            actions.push({
-                account: this.contractName,
-                name: "posandrefadd",
-                authorization,
-                data: {
-                    referral_id: referralId,
-                    maker: accountName
-                }
-            });
-            // Sends collateral and generates EOSDT if collatAmount > 0
-            if (typeof collatAmount === "string")
-                collatAmount = parseFloat(collatAmount);
-            if (collatAmount > 0) {
-                const collatAssetString = utils_1.amountToAssetString(collatAmount, this.tokenSymbol, this.decimals);
-                if (typeof eosdtAmount === "string")
-                    eosdtAmount = parseFloat(eosdtAmount);
-                const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
-                actions.push({
-                    account: this.tokenContract,
-                    name: "transfer",
-                    authorization,
-                    data: {
-                        from: accountName,
-                        to: this.contractName,
-                        quantity: collatAssetString,
-                        memo: eosdtAssetString === "0.000000000 EOSDT" ? "" : eosdtAssetString
+            const authorization = [{ actor: maker, permission: trxParams.permission }];
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "posandrefadd",
+                        authorization,
+                        data: {
+                            maker,
+                            referral_id: referralId
+                        }
                     }
-                });
-            }
-            const receipt = yield this.api.transact({ actions }, {
+                ]
+            }, {
                 blocksBehind: trxParams.blocksBehind,
                 expireSeconds: trxParams.expireSeconds
             });
@@ -147,17 +125,13 @@ class PositionsContract extends basic_positions_1.BasicPositionsContract {
             return _super.getParameters.call(this);
         });
     }
-    /**
-     * @returns {Promise<object[]>} Positions contract settings
-     */
-    getSettings() {
-        const _super = Object.create(null, {
-            getSettings: { get: () => super.getSettings }
-        });
-        return __awaiter(this, void 0, void 0, function* () {
-            return _super.getSettings.call(this);
-        });
-    }
+    // FIX
+    // /**
+    //  * @returns {Promise<object[]>} Positions contract settings
+    //  */
+    // public async getSettings(): Promise<EosdtContractSettings> {
+    //     return super.getSettings() as Promise<EosdtContractSettings>
+    // }
     /**
      * Creates new referral, staking given amount of NUT tokens. Rejects when amount is less then
      * `referral_min_stake` in positions contract settings.

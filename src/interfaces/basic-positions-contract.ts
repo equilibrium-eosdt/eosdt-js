@@ -6,7 +6,7 @@ export interface BasicEosdtPosition {
 }
 export const basicPositionKeys = ["position_id", "maker", "outstanding", "collateral"]
 
-export interface BasicEosdtPosSettings {
+export interface PosContractSettings {
     setting_id: number // EOS type: uint64
     global_lock: number // EOS type: uint8
     time_shift: number // EOS type: uint64
@@ -39,8 +39,10 @@ export interface BasicEosdtPosSettings {
     collateral_account: string // EOS type: name
     collateral_token: string // EOS type: symbol
     savings_account: string // EOS type: name
+
+    min_pos: string // EOS type: asset
 }
-export const basicEosdtPosSettingsKeys = [
+export const posContractSettingsKeys = [
     "setting_id",
     "global_lock",
     "time_shift",
@@ -67,7 +69,8 @@ export const basicEosdtPosSettingsKeys = [
     "referral_ratio",
     "collateral_account",
     "collateral_token",
-    "savings_account"
+    "savings_account",
+    "min_pos"
 ]
 
 export interface BasicEosdtPosParameters {

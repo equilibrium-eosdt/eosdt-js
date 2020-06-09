@@ -4,13 +4,12 @@ import {
     BasicEosdtPosition,
     BasicEosdtPosParameters,
     basicEosdtPosParametersKeys,
-    BasicEosdtPosSettings,
-    basicEosdtPosSettingsKeys,
-    basicPositionKeys
+    PosContractSettings,
+    basicPositionKeys,
+    posContractSettingsKeys
 } from "./interfaces/basic-positions-contract"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 import {
-    contractSettingsKeys,
     eosdtPosParametersKeys,
     LtvRatios,
     ltvRatiosKeys,
@@ -64,21 +63,20 @@ export class BasicPositionsContract {
 
         this.contractName = POSITION_CONTRACTS[tokenSymbol]
         this.tokenContract = TOKEN_CONTRACTS[tokenSymbol]
+        this.contractSettingsKeys = posContractSettingsKeys
 
         if (tokenSymbol === "EOS") {
             this.positionKeys = positionKeys
             this.contractParametersKeys = eosdtPosParametersKeys
-            this.contractSettingsKeys = contractSettingsKeys
         } else {
             this.positionKeys = basicPositionKeys
             this.contractParametersKeys = basicEosdtPosParametersKeys
-            this.contractSettingsKeys = basicEosdtPosSettingsKeys
         }
     }
 
     /**
-     * Creates new position, using specified amount of collateral and issuing specified amount
-     * of EOSDT to creator. If `collatAmount` argument is equal to zero, creates an empty position.
+     * Creates new position, sending specified amount of collateral and issuing specified amount
+     * of EOSDT to creator.
      *
      * @param {string} accountName Creator's account name
      * @param {string | number} collatAmount Amount of collateral tokens to transfer to position
@@ -86,7 +84,7 @@ export class BasicPositionsContract {
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
      * @returns {Promise} Promise of transaction receipt
      */
-    public async create(
+    public async newPosition(
         accountName: string,
         collatAmount: string | number,
         eosdtAmount: string | number,
@@ -95,41 +93,37 @@ export class BasicPositionsContract {
         const trxParams = setTransactionParams(transactionParams)
         const authorization = [{ actor: accountName, permission: trxParams.permission }]
 
-        // Action to create a new empty position
-        const actions = []
-        actions.push({
-            account: this.contractName,
-            name: "positionadd",
-            authorization,
-            data: { maker: accountName }
-        })
-
-        // Sends collateral and generates EOSDT if collatAmount > 0
         if (typeof collatAmount === "string") collatAmount = parseFloat(collatAmount)
+        if (typeof eosdtAmount === "string") eosdtAmount = parseFloat(eosdtAmount)
 
-        if (collatAmount > 0) {
-            const collatAssetString = amountToAssetString(
-                collatAmount,
-                this.tokenSymbol,
-                this.decimals
-            )
-            const eosdtAssetString = amountToAssetString(eosdtAmount, "EOSDT")
-
-            actions.push({
-                account: this.tokenContract,
-                name: "transfer",
-                authorization,
-                data: {
-                    from: accountName,
-                    to: this.contractName,
-                    quantity: collatAssetString,
-                    memo: eosdtAssetString === "0.000000000 EOSDT" ? "" : eosdtAssetString
-                }
-            })
+        if (collatAmount <= 0) {
+            const errMsg =
+                `To create position via transfer you need to transfer positive amount of ` +
+                `${this.tokenSymbol}. Cannot transfer '${collatAmount}'. You can create empty ` +
+                `position, using method '${this.newEmptyPosition.name}'`
+            throw new Error(errMsg)
         }
 
+        const collatAssetString = amountToAssetString(collatAmount, this.tokenSymbol)
+
+        const eosdtAssetString = amountToAssetString(eosdtAmount, "EOSDT")
+
         const receipt = await this.api.transact(
-            { actions },
+            {
+                actions: [
+                    {
+                        account: this.tokenContract,
+                        name: "transfer",
+                        authorization,
+                        data: {
+                            from: accountName,
+                            to: this.contractName,
+                            quantity: collatAssetString,
+                            memo: eosdtAssetString
+                        }
+                    }
+                ]
+            },
             {
                 blocksBehind: trxParams.blocksBehind,
                 expireSeconds: trxParams.expireSeconds
@@ -140,104 +134,36 @@ export class BasicPositionsContract {
     }
 
     /**
-     * Same as `create`, but used when creator already have positions
+     * Creates new position with 0 debt and collateral
      *
-     * @param {string} accountName Creator's account
-     * @param {string | number} collatAmount Amount of collateral tokens to transfer to position
-     * @param {string | number} eosdtAmount EOSDT amount to issue
-     * @param {number} [referralId] Referral id. Only works with EOS positions
+     * @param {string} maker Account to create position for
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
-     * @returns {Promise} Promise of transaction receipt
      */
-    public async createWhenPositionsExist(
-        accountName: string,
-        collatAmount: string | number,
-        eosdtAmount: string | number,
-        referralId?: number,
+    public async newEmptyPosition(
+        maker: string,
         transactionParams?: ITrxParamsArgument
     ): Promise<any> {
         const trxParams = setTransactionParams(transactionParams)
-        const authorization = [{ actor: accountName, permission: trxParams.permission }]
-
-        let createPosAction: any
-        if (referralId !== undefined) {
-            createPosAction = {
-                account: this.contractName,
-                name: "posandrefadd",
-                authorization,
-                data: {
-                    referral_id: referralId,
-                    maker: accountName
-                }
-            }
-        } else {
-            createPosAction = {
-                account: this.contractName,
-                name: "positionadd",
-                authorization,
-                data: { maker: accountName }
-            }
-        }
-
-        // Creating position and getting it's id
-        const creationReceipt = await this.api.transact(
-            { actions: [createPosAction] },
-            {
-                blocksBehind: trxParams.blocksBehind,
-                expireSeconds: trxParams.expireSeconds
-            }
-        )
-
-        const position = await this.getLatestUserPosition(accountName)
-        if (!position) throw new Error(`Couldn't created find position for user ${accountName}`)
-        const positionId = position.position_id
-
-        const actions = []
-        // Sends collateral and generates EOSDT if collatAmount > 0
-        if (typeof collatAmount === "string") collatAmount = parseFloat(collatAmount)
-        if (collatAmount > 0) {
-            const collatAssetString = amountToAssetString(
-                collatAmount,
-                this.tokenSymbol,
-                this.decimals
-            )
-
-            actions.push({
-                account: this.tokenContract,
-                name: "transfer",
-                authorization,
-                data: {
-                    from: accountName,
-                    to: this.contractName,
-                    quantity: collatAssetString,
-                    memo: `position_id:${positionId}`
-                }
-            })
-        }
-
-        if (typeof eosdtAmount === "string") eosdtAmount = parseFloat(eosdtAmount)
-        if (eosdtAmount > 0) {
-            const eosdtAssetString = amountToAssetString(eosdtAmount, "EOSDT")
-            actions.push({
-                account: this.contractName,
-                name: "debtgenerate",
-                authorization,
-                data: {
-                    debt: eosdtAssetString,
-                    position_id: positionId
-                }
-            })
-        }
+        const authorization = [{ actor: maker, permission: trxParams.permission }]
 
         const receipt = await this.api.transact(
-            { actions },
+            {
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "positionadd",
+                        authorization,
+                        data: { maker }
+                    }
+                ]
+            },
             {
                 blocksBehind: trxParams.blocksBehind,
                 expireSeconds: trxParams.expireSeconds
             }
         )
 
-        return [creationReceipt, receipt]
+        return receipt
     }
 
     /**
@@ -912,7 +838,7 @@ export class BasicPositionsContract {
     /**
      * @returns {Promise<object>} Positions contract settings
      */
-    public async getSettings(): Promise<BasicEosdtPosSettings> {
+    public async getSettings(): Promise<PosContractSettings> {
         const table = await this.rpc.get_table_rows({
             code: this.contractName,
             scope: this.contractName,

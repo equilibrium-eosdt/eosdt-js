@@ -35,20 +35,19 @@ class BasicPositionsContract {
         this.api = connector.api;
         this.contractName = config_1.POSITION_CONTRACTS[tokenSymbol];
         this.tokenContract = config_1.TOKEN_CONTRACTS[tokenSymbol];
+        this.contractSettingsKeys = basic_positions_contract_1.posContractSettingsKeys;
         if (tokenSymbol === "EOS") {
             this.positionKeys = positions_contract_1.positionKeys;
             this.contractParametersKeys = positions_contract_1.eosdtPosParametersKeys;
-            this.contractSettingsKeys = positions_contract_1.contractSettingsKeys;
         }
         else {
             this.positionKeys = basic_positions_contract_1.basicPositionKeys;
             this.contractParametersKeys = basic_positions_contract_1.basicEosdtPosParametersKeys;
-            this.contractSettingsKeys = basic_positions_contract_1.basicEosdtPosSettingsKeys;
         }
     }
     /**
-     * Creates new position, using specified amount of collateral and issuing specified amount
-     * of EOSDT to creator. If `collatAmount` argument is equal to zero, creates an empty position.
+     * Creates new position, sending specified amount of collateral and issuing specified amount
+     * of EOSDT to creator.
      *
      * @param {string} accountName Creator's account name
      * @param {string | number} collatAmount Amount of collateral tokens to transfer to position
@@ -56,37 +55,37 @@ class BasicPositionsContract {
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
      * @returns {Promise} Promise of transaction receipt
      */
-    create(accountName, collatAmount, eosdtAmount, transactionParams) {
+    newPosition(accountName, collatAmount, eosdtAmount, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: accountName, permission: trxParams.permission }];
-            // Action to create a new empty position
-            const actions = [];
-            actions.push({
-                account: this.contractName,
-                name: "positionadd",
-                authorization,
-                data: { maker: accountName }
-            });
-            // Sends collateral and generates EOSDT if collatAmount > 0
             if (typeof collatAmount === "string")
                 collatAmount = parseFloat(collatAmount);
-            if (collatAmount > 0) {
-                const collatAssetString = utils_1.amountToAssetString(collatAmount, this.tokenSymbol, this.decimals);
-                const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
-                actions.push({
-                    account: this.tokenContract,
-                    name: "transfer",
-                    authorization,
-                    data: {
-                        from: accountName,
-                        to: this.contractName,
-                        quantity: collatAssetString,
-                        memo: eosdtAssetString === "0.000000000 EOSDT" ? "" : eosdtAssetString
-                    }
-                });
+            if (typeof eosdtAmount === "string")
+                eosdtAmount = parseFloat(eosdtAmount);
+            if (collatAmount <= 0) {
+                const errMsg = `To create position via transfer you need to transfer positive amount of ` +
+                    `${this.tokenSymbol}. Cannot transfer '${collatAmount}'. You can create empty ` +
+                    `position, using method '${this.newEmptyPosition.name}'`;
+                throw new Error(errMsg);
             }
-            const receipt = yield this.api.transact({ actions }, {
+            const collatAssetString = utils_1.amountToAssetString(collatAmount, this.tokenSymbol);
+            const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: this.tokenContract,
+                        name: "transfer",
+                        authorization,
+                        data: {
+                            from: accountName,
+                            to: this.contractName,
+                            quantity: collatAssetString,
+                            memo: eosdtAssetString
+                        }
+                    }
+                ]
+            }, {
                 blocksBehind: trxParams.blocksBehind,
                 expireSeconds: trxParams.expireSeconds
             });
@@ -94,85 +93,29 @@ class BasicPositionsContract {
         });
     }
     /**
-     * Same as `create`, but used when creator already have positions
+     * Creates new position with 0 debt and collateral
      *
-     * @param {string} accountName Creator's account
-     * @param {string | number} collatAmount Amount of collateral tokens to transfer to position
-     * @param {string | number} eosdtAmount EOSDT amount to issue
-     * @param {number} [referralId] Referral id. Only works with EOS positions
+     * @param {string} maker Account to create position for
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
-     * @returns {Promise} Promise of transaction receipt
      */
-    createWhenPositionsExist(accountName, collatAmount, eosdtAmount, referralId, transactionParams) {
+    newEmptyPosition(maker, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
             const trxParams = utils_1.setTransactionParams(transactionParams);
-            const authorization = [{ actor: accountName, permission: trxParams.permission }];
-            let createPosAction;
-            if (referralId !== undefined) {
-                createPosAction = {
-                    account: this.contractName,
-                    name: "posandrefadd",
-                    authorization,
-                    data: {
-                        referral_id: referralId,
-                        maker: accountName
+            const authorization = [{ actor: maker, permission: trxParams.permission }];
+            const receipt = yield this.api.transact({
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "positionadd",
+                        authorization,
+                        data: { maker }
                     }
-                };
-            }
-            else {
-                createPosAction = {
-                    account: this.contractName,
-                    name: "positionadd",
-                    authorization,
-                    data: { maker: accountName }
-                };
-            }
-            // Creating position and getting it's id
-            const creationReceipt = yield this.api.transact({ actions: [createPosAction] }, {
+                ]
+            }, {
                 blocksBehind: trxParams.blocksBehind,
                 expireSeconds: trxParams.expireSeconds
             });
-            const position = yield this.getLatestUserPosition(accountName);
-            if (!position)
-                throw new Error(`Couldn't created find position for user ${accountName}`);
-            const positionId = position.position_id;
-            const actions = [];
-            // Sends collateral and generates EOSDT if collatAmount > 0
-            if (typeof collatAmount === "string")
-                collatAmount = parseFloat(collatAmount);
-            if (collatAmount > 0) {
-                const collatAssetString = utils_1.amountToAssetString(collatAmount, this.tokenSymbol, this.decimals);
-                actions.push({
-                    account: this.tokenContract,
-                    name: "transfer",
-                    authorization,
-                    data: {
-                        from: accountName,
-                        to: this.contractName,
-                        quantity: collatAssetString,
-                        memo: `position_id:${positionId}`
-                    }
-                });
-            }
-            if (typeof eosdtAmount === "string")
-                eosdtAmount = parseFloat(eosdtAmount);
-            if (eosdtAmount > 0) {
-                const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
-                actions.push({
-                    account: this.contractName,
-                    name: "debtgenerate",
-                    authorization,
-                    data: {
-                        debt: eosdtAssetString,
-                        position_id: positionId
-                    }
-                });
-            }
-            const receipt = yield this.api.transact({ actions }, {
-                blocksBehind: trxParams.blocksBehind,
-                expireSeconds: trxParams.expireSeconds
-            });
-            return [creationReceipt, receipt];
+            return receipt;
         });
     }
     /**

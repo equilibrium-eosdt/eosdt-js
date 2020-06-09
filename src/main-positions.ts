@@ -2,7 +2,6 @@ import { BasicPositionsContract } from "./basic-positions"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 import {
     EosdtContractParameters,
-    EosdtContractSettings,
     EosdtPosition,
     PositionReferral,
     positionReferralKeys,
@@ -26,64 +25,34 @@ export class PositionsContract extends BasicPositionsContract {
     }
 
     /**
-     * Same as basic position `create`, but also sets a referral id
+     * Creates position that has a referral. Position would have 0 collateral and 0 debt
      *
-     * @param {string} accountName Creator's account name
-     * @param {string | number} collatAmount Amount of collateral tokens to transfer to position
-     * @param {string | number} eosdtAmount EOSDT amount to issue
-     * @param {number} referralId
+     * @param {string} maker Account to create position for
+     * @param {number} referralId Id of a referral
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
-     * @returns {Promise} Promise of transaction receipt
      */
-    public async createWithReferral(
-        accountName: string,
-        collatAmount: string | number,
-        eosdtAmount: string | number,
+    public async newEmptyPositionWithRef(
+        maker: string,
         referralId: number,
         transactionParams?: ITrxParamsArgument
     ): Promise<any> {
         const trxParams = setTransactionParams(transactionParams)
-        const authorization = [{ actor: accountName, permission: trxParams.permission }]
-
-        // Creates a new empty position
-        const actions = []
-        actions.push({
-            account: this.contractName,
-            name: "posandrefadd",
-            authorization,
-            data: {
-                referral_id: referralId,
-                maker: accountName
-            }
-        })
-
-        // Sends collateral and generates EOSDT if collatAmount > 0
-        if (typeof collatAmount === "string") collatAmount = parseFloat(collatAmount)
-        if (collatAmount > 0) {
-            const collatAssetString = amountToAssetString(
-                collatAmount,
-                this.tokenSymbol,
-                this.decimals
-            )
-
-            if (typeof eosdtAmount === "string") eosdtAmount = parseFloat(eosdtAmount)
-            const eosdtAssetString = amountToAssetString(eosdtAmount, "EOSDT")
-
-            actions.push({
-                account: this.tokenContract,
-                name: "transfer",
-                authorization,
-                data: {
-                    from: accountName,
-                    to: this.contractName,
-                    quantity: collatAssetString,
-                    memo: eosdtAssetString === "0.000000000 EOSDT" ? "" : eosdtAssetString
-                }
-            })
-        }
+        const authorization = [{ actor: maker, permission: trxParams.permission }]
 
         const receipt = await this.api.transact(
-            { actions },
+            {
+                actions: [
+                    {
+                        account: this.contractName,
+                        name: "posandrefadd",
+                        authorization,
+                        data: {
+                            maker,
+                            referral_id: referralId
+                        }
+                    }
+                ]
+            },
             {
                 blocksBehind: trxParams.blocksBehind,
                 expireSeconds: trxParams.expireSeconds
@@ -140,12 +109,13 @@ export class PositionsContract extends BasicPositionsContract {
         return super.getParameters() as Promise<EosdtContractParameters>
     }
 
-    /**
-     * @returns {Promise<object[]>} Positions contract settings
-     */
-    public async getSettings(): Promise<EosdtContractSettings> {
-        return super.getSettings() as Promise<EosdtContractSettings>
-    }
+    // FIX
+    // /**
+    //  * @returns {Promise<object[]>} Positions contract settings
+    //  */
+    // public async getSettings(): Promise<EosdtContractSettings> {
+    //     return super.getSettings() as Promise<EosdtContractSettings>
+    // }
 
     /**
      * Creates new referral, staking given amount of NUT tokens. Rejects when amount is less then

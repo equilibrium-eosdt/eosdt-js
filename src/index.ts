@@ -7,7 +7,7 @@ export { GovernanceContract } from "./governance"
 export {
     BasicEosdtPosition,
     BasicEosdtPosParameters,
-    BasicEosdtPosSettings
+    PosContractSettings
 } from "./interfaces/basic-positions-contract"
 export { EosdtConnectorInterface } from "./interfaces/connector"
 export {
@@ -24,7 +24,7 @@ export {
 export { LiquidatorParameters, LiquidatorSettings } from "./interfaces/liquidator"
 export {
     EosdtContractParameters,
-    EosdtContractSettings,
+    // EosdtContractSettings, // FIX
     EosdtPosition,
     LtvRatios,
     PositionReferral,

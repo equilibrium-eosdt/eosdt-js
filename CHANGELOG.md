@@ -2,6 +2,19 @@
 
 All notable changes will be documented in this file.
 
+#### [1.0.0] - 2020-06-09 - Position creation changes
+
+Positions creation changed to enable creating a new position by transferring collateral, even if maker already has a position. This resulted in following changes in `BasicPositionsContract` and `PositionsContract`
+
+-   method `create` removed
+-   method `createWhenPositionsExist` removed
+-   method `createWithReferral` removed
+-   new method `newPosition`. It can be used to create position with any amount of debt and some collateral
+-   to create new empty position use method `createEmptyPosition`
+-   EOS positions with referral can now only be created with `newEmptyPositionWithRef`. It creates empty position and requires adding debt and collateral as separate actions.
+
+Also, `BpManager` method `registerBlockProducer` updated. It is now an EOS transfer, not `eosdtgovernc` action
+
 #### [0.9.2] - 2020-04-28 - PBTC collateral positions
 
 -   Positions contracts wrappers split into 2 different classes:
