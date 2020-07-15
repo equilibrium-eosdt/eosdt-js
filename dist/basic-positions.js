@@ -23,7 +23,7 @@ class BasicPositionsContract {
      * @param {string} tokenSymbol Currently only "PBTC"
      */
     constructor(connector, tokenSymbol) {
-        const availableCollateralTokens = ["EOS", "PBTC", "KGRAM"];
+        const availableCollateralTokens = ["EOS", "PBTC"];
         if (!availableCollateralTokens.includes(tokenSymbol)) {
             const errMsg = `Cannot initiate positions contract logic for token '${tokenSymbol}'. ` +
                 `Available tokens: ${availableCollateralTokens.join(", ")}`;

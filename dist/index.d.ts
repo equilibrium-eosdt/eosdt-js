@@ -1,9 +1,11 @@
 export { Api, JsonRpc } from "eosjs";
+export { ArmContract } from "./armeq";
 export { BalanceGetter } from "./balance";
 export { BasicPositionsContract } from "./basic-positions";
 export { BpManager } from "./bp-manager";
 export { EosdtConnector } from "./connector";
 export { GovernanceContract } from "./governance";
+export { ArmContractSettings } from "./interfaces/armeq";
 export { BasicEosdtPosition, BasicEosdtPosParameters, PosContractSettings } from "./interfaces/basic-positions-contract";
 export { EosdtConnectorInterface } from "./interfaces/connector";
 export { BpPosition, BPVotes, EosdtVote, EosVoterInfo, GovernanceParameters, GovernanceSettings, ProposeObject, StoredProposal, VoterInfo } from "./interfaces/governance";

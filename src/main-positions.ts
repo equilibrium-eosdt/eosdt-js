@@ -109,14 +109,6 @@ export class PositionsContract extends BasicPositionsContract {
         return super.getParameters() as Promise<EosdtContractParameters>
     }
 
-    // FIX
-    // /**
-    //  * @returns {Promise<object[]>} Positions contract settings
-    //  */
-    // public async getSettings(): Promise<EosdtContractSettings> {
-    //     return super.getSettings() as Promise<EosdtContractSettings>
-    // }
-
     /**
      * Creates new referral, staking given amount of NUT tokens. Rejects when amount is less then
      * `referral_min_stake` in positions contract settings.

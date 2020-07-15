@@ -1,9 +1,11 @@
 export { Api, JsonRpc } from "eosjs"
+export { ArmContract } from "./armeq"
 export { BalanceGetter } from "./balance"
 export { BasicPositionsContract } from "./basic-positions"
 export { BpManager } from "./bp-manager"
 export { EosdtConnector } from "./connector"
 export { GovernanceContract } from "./governance"
+export { ArmContractSettings } from "./interfaces/armeq"
 export {
     BasicEosdtPosition,
     BasicEosdtPosParameters,
@@ -24,7 +26,6 @@ export {
 export { LiquidatorParameters, LiquidatorSettings } from "./interfaces/liquidator"
 export {
     EosdtContractParameters,
-    // EosdtContractSettings, // FIX
     EosdtPosition,
     LtvRatios,
     PositionReferral,

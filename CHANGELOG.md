@@ -2,6 +2,10 @@
 
 All notable changes will be documented in this file.
 
+#### [1.1.0] - 2020-07-15 - Added wrappers for 'arm.eq' contract
+
+Added `ArmContract` as an export, added method to create instance of it to `EosdtConnector`
+
 #### [1.0.0] - 2020-06-09 - Position creation changes
 
 Positions creation changed to enable creating a new position by transferring collateral, even if maker already has a position. This resulted in following changes in `BasicPositionsContract` and `PositionsContract`

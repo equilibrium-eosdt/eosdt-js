@@ -8,6 +8,7 @@ const eosjs_jssig_1 = require("eosjs/dist/eosjs-jssig");
 const node_fetch_1 = __importDefault(require("node-fetch"));
 const text_encoding_1 = require("text-encoding");
 const _1 = require(".");
+const armeq_1 = require("./armeq");
 const balance_1 = require("./balance");
 const basic_positions_1 = require("./basic-positions");
 const main_positions_1 = require("./main-positions");
@@ -61,6 +62,13 @@ class EosdtConnector {
      */
     getSavingsRateCont() {
         return new savings_rate_1.SavingsRateContract(this);
+    }
+    /**
+     * Creates a wrapper for 'arm.eq' contract
+     * @returns Instance of `ArmContract`
+     */
+    getArmContract() {
+        return new armeq_1.ArmContract(this);
     }
     /**
      * Instantiates `GovernanceContract` - a wrapper to work with `eosdtgovernc`

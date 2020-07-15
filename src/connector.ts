@@ -3,6 +3,7 @@ import { JsSignatureProvider } from "eosjs/dist/eosjs-jssig"
 import Fetch from "node-fetch"
 import { TextDecoder, TextEncoder } from "text-encoding"
 import { GovernanceContract, LiquidatorContract } from "."
+import { ArmContract } from "./armeq"
 import { BalanceGetter } from "./balance"
 import { BasicPositionsContract } from "./basic-positions"
 import { PositionsContract } from "./main-positions"
@@ -65,6 +66,14 @@ export class EosdtConnector {
      */
     public getSavingsRateCont(): SavingsRateContract {
         return new SavingsRateContract(this)
+    }
+
+    /**
+     * Creates a wrapper for 'arm.eq' contract
+     * @returns Instance of `ArmContract`
+     */
+    public getArmContract(): ArmContract {
+        return new ArmContract(this)
     }
 
     /**

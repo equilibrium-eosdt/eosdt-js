@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var eosjs_1 = require("eosjs");
 exports.Api = eosjs_1.Api;
 exports.JsonRpc = eosjs_1.JsonRpc;
+var armeq_1 = require("./armeq");
+exports.ArmContract = armeq_1.ArmContract;
 var balance_1 = require("./balance");
 exports.BalanceGetter = balance_1.BalanceGetter;
 var basic_positions_1 = require("./basic-positions");

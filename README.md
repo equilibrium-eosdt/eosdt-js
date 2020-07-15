@@ -52,6 +52,8 @@ Fore more code examples, checkout `examples` folder.
 ## Classes
 
 <dl>
+<dt><a href="#ArmContract">ArmContract</a></dt>
+<dd><p>Module to manage EOSDT arming operations</p></dd>
 <dt><a href="#BalanceGetter">BalanceGetter</a></dt>
 <dd><p>Module to get account's balances of EOSDT, EOS, PBTC and NUT</p></dd>
 <dt><a href="#BasicPositionsContract">BasicPositionsContract</a></dt>
@@ -71,6 +73,77 @@ Fore more code examples, checkout `examples` folder.
 <dd><p>A wrapper class to invoke actions of Equilibrium Savings Rate contract</p></dd>
 </dl>
 
+<a name="ArmContract"></a>
+
+## ArmContract
+
+<p>Module to manage EOSDT arming operations</p>
+
+**Kind**: global class
+
+-   [ArmContract](#ArmContract)
+    -   [.armEos(accountName, amount, arm, [transactionParams])](#ArmContract+armEos) ⇒ <code>Promise</code>
+    -   [.armExistingEosPosition(owner, positionId, arm, [transactionParams])](#ArmContract+armExistingEosPosition) ⇒ <code>Promise</code>
+    -   [.dearmEosPosition(owner, positionId, debtTarget, [transactionParams])](#ArmContract+dearmEosPosition) ⇒ <code>Promise</code>
+    -   [.getSettings()](#ArmContract+getSettings) ⇒ <code>Promise.&lt;object&gt;</code>
+
+<a name="ArmContract+armEos"></a>
+
+### armContract.armEos(accountName, amount, arm, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Creates EOSDT position with given EOS, then sells received EOSDT to buy more EOS and add it
+to position. Contract would continue for 20 iterations or until given arm is reached</p>
+
+**Kind**: instance method of [<code>ArmContract</code>](#ArmContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                          |
+| ------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------ |
+| accountName         | <code>string</code>                        | <p>name of account that sends EOS and receives position</p>                          |
+| amount              | <code>number</code> \| <code>string</code> | <p>transferred amount of EOS</p>                                                     |
+| arm                 | <code>number</code>                        | <p>arm value. With arm = 2.1 and 100 EOS user will receive position with 210 EOS</p> |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p>         |
+
+<a name="ArmContract+armExistingEosPosition"></a>
+
+### armContract.armExistingEosPosition(owner, positionId, arm, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Gives EOS-EOSDT position to 'arm.eq' contract and it arms that position (see <code>armEos</code>)</p>
+
+**Kind**: instance method of [<code>ArmContract</code>](#ArmContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                          |
+| ------------------- | ------------------- | ------------------------------------------------------------------------------------ |
+| owner               | <code>string</code> | <p>name of position maker account</p>                                                |
+| positionId          | <code>number</code> |                                                                                      |
+| arm                 | <code>number</code> | <p>arm value. With arm = 2.1 and 100 EOS user will receive position with 210 EOS</p> |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p>         |
+
+<a name="ArmContract+dearmEosPosition"></a>
+
+### armContract.dearmEosPosition(owner, positionId, debtTarget, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Reduces debt on position, selling it's collateral. Will stop, when position has LTV,
+equal to critical LTV + arm safety margin. Excess EOSDT would be returned to maker acc
+balance</p>
+
+**Kind**: instance method of [<code>ArmContract</code>](#ArmContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| owner               | <code>string</code> | <p>name of maker account</p>                                                 |
+| positionId          | <code>number</code> |                                                                              |
+| debtTarget          | <code>number</code> | <p>approximate desired debt amount</p>                                       |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="ArmContract+getSettings"></a>
+
+### armContract.getSettings() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>ArmContract</code>](#ArmContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Positions contract settings</p>  
 <a name="BalanceGetter"></a>
 
 ## BalanceGetter
@@ -602,6 +675,7 @@ EOS for a block producer</p>
     -   [.getPositions()](#EosdtConnector+getPositions)
     -   [.getLiquidator([collateralToken])](#EosdtConnector+getLiquidator) ⇒
     -   [.getSavingsRateCont()](#EosdtConnector+getSavingsRateCont) ⇒
+    -   [.getArmContract()](#EosdtConnector+getArmContract) ⇒
     -   [.getGovernance()](#EosdtConnector+getGovernance) ⇒
     -   [.getBalances()](#EosdtConnector+getBalances) ⇒
 
@@ -657,6 +731,14 @@ EOS for a block producer</p>
 
 **Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
 **Returns**: <p>Instance of <code>SavingsRateContract</code></p>  
+<a name="EosdtConnector+getArmContract"></a>
+
+### eosdtConnector.getArmContract() ⇒
+
+<p>Creates a wrapper for 'arm.eq' contract</p>
+
+**Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
+**Returns**: <p>Instance of <code>ArmContract</code></p>  
 <a name="EosdtConnector+getGovernance"></a>
 
 ### eosdtConnector.getGovernance() ⇒

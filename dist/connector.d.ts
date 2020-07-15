@@ -1,5 +1,6 @@
 import { Api, JsonRpc } from "eosjs";
 import { GovernanceContract, LiquidatorContract } from ".";
+import { ArmContract } from "./armeq";
 import { BalanceGetter } from "./balance";
 import { BasicPositionsContract } from "./basic-positions";
 import { PositionsContract } from "./main-positions";
@@ -37,6 +38,11 @@ export declare class EosdtConnector {
      * @returns Instance of `SavingsRateContract`
      */
     getSavingsRateCont(): SavingsRateContract;
+    /**
+     * Creates a wrapper for 'arm.eq' contract
+     * @returns Instance of `ArmContract`
+     */
+    getArmContract(): ArmContract;
     /**
      * Instantiates `GovernanceContract` - a wrapper to work with `eosdtgovernc`
      * @returns Instance of `GovernanceContract`
