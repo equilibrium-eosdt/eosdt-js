@@ -2,6 +2,27 @@
 
 All notable changes will be documented in this file.
 
+#### [1.2.0] - 2020-08-19 - Added wrappers for 'tokenswap.eq' contract 
+#### and updated liquidator and positions contracts
+
+-   Updated to support liquidator and position contracts changes
+-   `Liquidator` updated interface `LiquidatorSettings`: field `set_aside_rate` renamed to `tokenswap_rate`
+-   `BasicPositionsContract` updated interface `PosContractSettings`: new field `tokenswap_account`
+
+-   Added `TokenswapContract` wrapper and method to create instance of it to `EosdtConnector`. 
+It is used to interact with contract `tokenswap.eq`:
+    -   `getParameters` method to get contract parameters
+    -   `getSettings` method to get contract settings
+    -   `getAllPositions` method to get array of all positions created on contract
+    -   `transferNut` method to transfer NUT to contract with Ethereum address in memo
+    -   `claim` method to get back NUT and verify Ethereum signature
+
+-   `Tokenswap` new interfaces:
+    -   `TokenswapContractParams`
+    -   `TokenswapContractSettings`
+    -   `TokenswapPositions`
+
+
 #### [1.1.0] - 2020-07-15 - Added wrappers for 'arm.eq' contract
 
 Added `ArmContract` as an export, added method to create instance of it to `EosdtConnector`

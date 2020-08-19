@@ -21,3 +21,5 @@ var main_positions_1 = require("./main-positions");
 exports.PositionsContract = main_positions_1.PositionsContract;
 var savings_rate_1 = require("./savings-rate");
 exports.SavingsRateContract = savings_rate_1.SavingsRateContract;
+var tokenswap_1 = require("./tokenswap");
+exports.TokenSwapContract = tokenswap_1.TokenSwapContract;

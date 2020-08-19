@@ -13,6 +13,7 @@ const balance_1 = require("./balance");
 const basic_positions_1 = require("./basic-positions");
 const main_positions_1 = require("./main-positions");
 const savings_rate_1 = require("./savings-rate");
+const tokenswap_1 = require("./tokenswap");
 /**
  * A connector object, used to build classes to work with EOSDT ecosystem contracts
  */
@@ -69,6 +70,13 @@ class EosdtConnector {
      */
     getArmContract() {
         return new armeq_1.ArmContract(this);
+    }
+    /**
+     * Creates a wrapper for 'tokenswap.eq' contract
+     * @returns Instance of `TokenSwapContract`
+     */
+    getTokenSwapContract() {
+        return new tokenswap_1.TokenSwapContract(this);
     }
     /**
      * Instantiates `GovernanceContract` - a wrapper to work with `eosdtgovernc`

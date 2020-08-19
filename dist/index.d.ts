@@ -12,7 +12,9 @@ export { BpPosition, BPVotes, EosdtVote, EosVoterInfo, GovernanceParameters, Gov
 export { LiquidatorParameters, LiquidatorSettings } from "./interfaces/liquidator";
 export { EosdtContractParameters, EosdtPosition, LtvRatios, PositionReferral, Referral, TokenRate } from "./interfaces/positions-contract";
 export { SRContractParams, SRContractSettings, SRPosition } from "./interfaces/savings-rate";
+export { TokenswapContractParams, TokenswapContractSettings, TokenswapPositions } from "./interfaces/tokenswap";
 export { ITrxParams, ITrxParamsArgument } from "./interfaces/transaction";
 export { LiquidatorContract } from "./liquidator";
 export { PositionsContract } from "./main-positions";
 export { SavingsRateContract } from "./savings-rate";
+export { TokenSwapContract } from "./tokenswap";

@@ -29,7 +29,8 @@ exports.posContractSettingsKeys = [
     "collateral_account",
     "collateral_token",
     "savings_account",
-    "min_pos"
+    "min_pos",
+    "tokenswap_account"
 ];
 exports.basicEosdtPosParametersKeys = [
     "parameter_id",

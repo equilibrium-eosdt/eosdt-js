@@ -71,6 +71,8 @@ Fore more code examples, checkout `examples` folder.
 <code>BasicPositionsContract</code> and includes all it's methods.</p></dd>
 <dt><a href="#SavingsRateContract">SavingsRateContract</a></dt>
 <dd><p>A wrapper class to invoke actions of Equilibrium Savings Rate contract</p></dd>
+<dt><a href="#TokenSwapContract">TokenSwapContract</a></dt>
+<dd><p>A wrapper class to invoke actions of Equilibrium Token Swap contract</p></dd>
 </dl>
 
 <a name="ArmContract"></a>
@@ -676,6 +678,7 @@ EOS for a block producer</p>
     -   [.getLiquidator([collateralToken])](#EosdtConnector+getLiquidator) ⇒
     -   [.getSavingsRateCont()](#EosdtConnector+getSavingsRateCont) ⇒
     -   [.getArmContract()](#EosdtConnector+getArmContract) ⇒
+    -   [.getTokenSwapContract()](#EosdtConnector+getTokenSwapContract) ⇒
     -   [.getGovernance()](#EosdtConnector+getGovernance) ⇒
     -   [.getBalances()](#EosdtConnector+getBalances) ⇒
 
@@ -739,6 +742,14 @@ EOS for a block producer</p>
 
 **Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
 **Returns**: <p>Instance of <code>ArmContract</code></p>  
+<a name="EosdtConnector+getTokenSwapContract"></a>
+
+### eosdtConnector.getTokenSwapContract() ⇒
+
+<p>Creates a wrapper for 'tokenswap.eq' contract</p>
+
+**Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
+**Returns**: <p>Instance of <code>TokenSwapContract</code></p>  
 <a name="EosdtConnector+getGovernance"></a>
 
 ### eosdtConnector.getGovernance() ⇒
@@ -1403,13 +1414,91 @@ positions referrals ids</p>
 ### savingsRateContract.getParameters() ⇒ <code>Promise.&lt;object&gt;</code>
 
 **Kind**: instance method of [<code>SavingsRateContract</code>](#SavingsRateContract)  
-**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Positions contract parameters</p>  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Savings Rate contract parameters</p>  
 <a name="SavingsRateContract+getSettings"></a>
 
 ### savingsRateContract.getSettings() ⇒ <code>Promise.&lt;object&gt;</code>
 
 **Kind**: instance method of [<code>SavingsRateContract</code>](#SavingsRateContract)  
-**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Positions contract settings</p>
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>Savings Rate contract settings</p>  
+<a name="TokenSwapContract"></a>
+
+## TokenSwapContract
+
+<p>A wrapper class to invoke actions of Equilibrium Token Swap contract</p>
+
+**Kind**: global class
+
+-   [TokenSwapContract](#TokenSwapContract)
+    -   [new TokenSwapContract(connector)](#new_TokenSwapContract_new)
+    -   [.transferNut(senderName, nutAmount, ethereumAddress, [transactionParams])](#TokenSwapContract+transferNut) ⇒ <code>Promise</code>
+    -   [.claim(toAccount, positionId, ethereumSignature, [transactionParams])](#TokenSwapContract+claim) ⇒ <code>Promise</code>
+    -   [.getParameters()](#TokenSwapContract+getParameters) ⇒ <code>Promise.&lt;object&gt;</code>
+    -   [.getSettings()](#TokenSwapContract+getSettings) ⇒ <code>Promise.&lt;object&gt;</code>
+    -   [.getAllPositions()](#TokenSwapContract+getAllPositions) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+<a name="new_TokenSwapContract_new"></a>
+
+### new TokenSwapContract(connector)
+
+<p>Instantiates TokenSwapContract</p>
+
+| Param     | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| connector | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
+
+<a name="TokenSwapContract+transferNut"></a>
+
+### tokenSwapContract.transferNut(senderName, nutAmount, ethereumAddress, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Sends NUT tokens to TokenSwap contract. Send Ethereum address (format with prefix &quot;0x&quot;)
+in memo to verify Ethereum signature</p>
+
+**Kind**: instance method of [<code>TokenSwapContract</code>](#TokenSwapContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                                       | Description                                                                  |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| senderName          | <code>string</code>                        |                                                                              |
+| nutAmount           | <code>string</code> \| <code>number</code> |                                                                              |
+| ethereumAddress     | <code>string</code>                        |                                                                              |
+| [transactionParams] | <code>object</code>                        | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="TokenSwapContract+claim"></a>
+
+### tokenSwapContract.claim(toAccount, positionId, ethereumSignature, [transactionParams]) ⇒ <code>Promise</code>
+
+<p>Returns NUT from TokenSwap contract to account balance
+and verifies Ethereum signature (format with prefix &quot;0x&quot;)</p>
+
+**Kind**: instance method of [<code>TokenSwapContract</code>](#TokenSwapContract)  
+**Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>
+
+| Param               | Type                | Description                                                                  |
+| ------------------- | ------------------- | ---------------------------------------------------------------------------- |
+| toAccount           | <code>string</code> |                                                                              |
+| positionId          | <code>number</code> |                                                                              |
+| ethereumSignature   | <code>string</code> |                                                                              |
+| [transactionParams] | <code>object</code> | <p>see <a href="#ITrxParamsArgument"><code>ITrxParamsArgument</code></a></p> |
+
+<a name="TokenSwapContract+getParameters"></a>
+
+### tokenSwapContract.getParameters() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>TokenSwapContract</code>](#TokenSwapContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>TokenSwap contract parameters</p>  
+<a name="TokenSwapContract+getSettings"></a>
+
+### tokenSwapContract.getSettings() ⇒ <code>Promise.&lt;object&gt;</code>
+
+**Kind**: instance method of [<code>TokenSwapContract</code>](#TokenSwapContract)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - <p>TokenSwap contract settings</p>  
+<a name="TokenSwapContract+getAllPositions"></a>
+
+### tokenSwapContract.getAllPositions() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>TokenSwapContract</code>](#TokenSwapContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>An array of all positions created on TokenSwap contract</p>
 
 ---
 

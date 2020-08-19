@@ -41,6 +41,8 @@ export interface PosContractSettings {
     savings_account: string // EOS type: name
 
     min_pos: string // EOS type: asset
+
+    tokenswap_account: string // EOS type: name
 }
 export const posContractSettingsKeys = [
     "setting_id",
@@ -70,7 +72,8 @@ export const posContractSettingsKeys = [
     "collateral_account",
     "collateral_token",
     "savings_account",
-    "min_pos"
+    "min_pos",
+    "tokenswap_account"
 ]
 
 export interface BasicEosdtPosParameters {

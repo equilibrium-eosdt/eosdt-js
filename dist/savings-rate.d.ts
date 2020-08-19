@@ -43,11 +43,11 @@ export declare class SavingsRateContract {
      */
     getUserPositions(maker: string): Promise<SRPosition[]>;
     /**
-     * @returns {Promise<object>} Positions contract parameters
+     * @returns {Promise<object>} Savings Rate contract parameters
      */
     getParameters(): Promise<SRContractParams>;
     /**
-     * @returns {Promise<object>} Positions contract settings
+     * @returns {Promise<object>} Savings Rate contract settings
      */
     getSettings(): Promise<SRContractSettings>;
 }

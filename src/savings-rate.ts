@@ -174,7 +174,7 @@ export class SavingsRateContract {
     }
 
     /**
-     * @returns {Promise<object>} Positions contract parameters
+     * @returns {Promise<object>} Savings Rate contract parameters
      */
     public async getParameters(): Promise<SRContractParams> {
         const table = await this.rpc.get_table_rows({
@@ -186,7 +186,7 @@ export class SavingsRateContract {
     }
 
     /**
-     * @returns {Promise<object>} Positions contract settings
+     * @returns {Promise<object>} Savings Rate contract settings
      */
     public async getSettings(): Promise<SRContractSettings> {
         const table = await this.rpc.get_table_rows({

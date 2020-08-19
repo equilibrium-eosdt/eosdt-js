@@ -20,7 +20,7 @@ export interface LiquidatorSettings {
     auction_price: string // EOS type: asset
     burn_rate: string // EOS type: float64
     gov_return_rate: string // EOS type: float64
-    set_aside_rate: string // EOS type: float64
+    tokenswap_rate: string // EOS type: float64
     savings_rate: string // EOS type: float64
 }
 export const liquidatorSettingsKeys = [
@@ -30,6 +30,6 @@ export const liquidatorSettingsKeys = [
     "auction_price",
     "burn_rate",
     "gov_return_rate",
-    "set_aside_rate",
+    "tokenswap_rate",
     "savings_rate"
 ]

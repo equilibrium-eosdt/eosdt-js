@@ -9,45 +9,53 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const savings_rate_1 = require("./interfaces/savings-rate");
+const tokenswap_1 = require("./interfaces/tokenswap");
 const utils_1 = require("./utils");
 /**
- * A wrapper class to invoke actions of Equilibrium Savings Rate contract
+ * A wrapper class to invoke actions of Equilibrium Token Swap contract
  */
-class SavingsRateContract {
+class TokenSwapContract {
     /**
-     * Instantiates SavingsRateContract
+     * Instantiates TokenSwapContract
      * @param connector EosdtConnector (see `README` section `Usage`)
      */
     constructor(connector) {
-        this.name = "eosdtsavings";
+        this.name = "tokenswap.eq";
         this.rpc = connector.rpc;
         this.api = connector.api;
     }
     /**
-     * Transfers EOSDT from user to Savings Rate contract
+     * Sends NUT tokens to TokenSwap contract. Send Ethereum address (format with prefix "0x")
+     * in memo to verify Ethereum signature
      * @param {string} senderName
-     * @param {string | number} eosdtAmount
-     * @param {string} [trxMemo]
+     * @param {string | number} nutAmount
+     * @param {string} ethereumAddress
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
      * @returns {Promise} Promise of transaction receipt
      */
-    stake(senderName, eosdtAmount, trxMemo, transactionParams) {
+    transferNut(senderName, nutAmount, ethereumAddress, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
+            if (ethereumAddress.length !== 42) {
+                const msg = `Ethereum address format mismatch: should start with prefix "0x",` +
+                    `example "0xb794f5ea0ba39494ce839613fffba74279579268". ` +
+                    `Received address: \n${ethereumAddress}"`;
+                throw new Error(msg);
+            }
+            ethereumAddress = ethereumAddress.slice(2);
+            const nutAssetString = utils_1.amountToAssetString(nutAmount, "NUT");
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: senderName, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
-                        account: "eosdtsttoken",
+                        account: "eosdtnutoken",
                         name: "transfer",
                         authorization,
                         data: {
                             from: senderName,
                             to: this.name,
-                            quantity: eosdtAssetString,
-                            memo: trxMemo ? trxMemo : "eosdt-js SR transfer()"
+                            quantity: nutAssetString,
+                            memo: ethereumAddress
                         }
                     }
                 ]
@@ -59,26 +67,36 @@ class SavingsRateContract {
         });
     }
     /**
-     * Returns EOSDT from Savings Rate contract to account balance
+     * Returns NUT from TokenSwap contract to account balance
+     * and verifies Ethereum signature (format with prefix "0x")
      * @param {string} toAccount
-     * @param {string | number} eosdtAmount
+     * @param {number} positionId
+     * @param {string} ethereumSignature
      * @param {object} [transactionParams] see [<code>ITrxParamsArgument</code>](#ITrxParamsArgument)
      * @returns {Promise} Promise of transaction receipt
      */
-    unstake(toAccount, eosdtAmount, transactionParams) {
+    claim(toAccount, positionId, ethereumSignature, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            const eosdtAssetString = utils_1.amountToAssetString(eosdtAmount, "EOSDT");
+            if (ethereumSignature.length !== 132) {
+                const msg = `Ethereum signature format mismatch: should start with prefix "0x",` +
+                    `example "0xfa076d068ca83ec87203f394c630a1a992f0d39eac5e761aec4c90011204f0b77` +
+                    `6adf698fe3d626dfd4e7c6ef1f89adb4b9831adaeac72dd19093381265b45471b". ` +
+                    `\nReceived signature: \n${ethereumSignature}"`;
+                throw new Error(msg);
+            }
+            ethereumSignature = ethereumSignature.slice(2);
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: toAccount, permission: trxParams.permission }];
             const receipt = yield this.api.transact({
                 actions: [
                     {
                         account: this.name,
-                        name: "unstake",
+                        name: "claim",
                         authorization,
                         data: {
                             to: toAccount,
-                            quantity: eosdtAssetString
+                            position_id: positionId,
+                            signature: ethereumSignature
                         }
                     }
                 ]
@@ -90,7 +108,33 @@ class SavingsRateContract {
         });
     }
     /**
-     * @returns {Promise<object[]>} An array of all positions on Savings Rate contract
+     * @returns {Promise<object>} TokenSwap contract parameters
+     */
+    getParameters() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.name,
+                scope: this.name,
+                table: "swpparams"
+            });
+            return utils_1.validateExternalData(table.rows[0], "TokenSwap contract parameters", tokenswap_1.tsContractParamsKeys);
+        });
+    }
+    /**
+     * @returns {Promise<object>} TokenSwap contract settings
+     */
+    getSettings() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.name,
+                scope: this.name,
+                table: "swpsettings"
+            });
+            return utils_1.validateExternalData(table.rows[0], "TokenSwap contract settings", tokenswap_1.tsContractSettingsKeys);
+        });
+    }
+    /**
+     * @returns {Promise<Array<object>>} An array of all positions created on TokenSwap contract
      */
     getAllPositions() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -100,7 +144,7 @@ class SavingsRateContract {
                 const table = yield this.rpc.get_table_rows({
                     code: this.name,
                     scope: this.name,
-                    table: "savpositions",
+                    table: "swppositions",
                     lower_bound: lowerBound,
                     limit
                 });
@@ -115,69 +159,8 @@ class SavingsRateContract {
                 result.push(...morePositions.rows);
                 more = morePositions.more;
             }
-            return utils_1.validateExternalData(result, "SR position", savings_rate_1.srPositionKeys);
-        });
-    }
-    /**
-     * @returns {Promise<object | undefined>} A Savings Rate position object with given id
-     */
-    getPositionById(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const table = yield this.rpc.get_table_rows({
-                code: this.name,
-                scope: this.name,
-                table: "savpositions",
-                table_key: "position_id",
-                lower_bound: id,
-                upper_bound: id
-            });
-            return utils_1.validateExternalData(table.rows[0], "SR position", savings_rate_1.srPositionKeys);
-        });
-    }
-    /**
-     * @returns {Promise<object[]>} Array of all positions objects, created by the maker
-     */
-    getUserPositions(maker) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const table = yield this.rpc.get_table_rows({
-                code: this.name,
-                scope: this.name,
-                table: "savpositions",
-                limit: 10000,
-                table_key: "owner",
-                index_position: "secondary",
-                key_type: "name",
-                lower_bound: maker,
-                upper_bound: maker
-            });
-            return utils_1.validateExternalData(table.rows, "SR position", savings_rate_1.srPositionKeys);
-        });
-    }
-    /**
-     * @returns {Promise<object>} Savings Rate contract parameters
-     */
-    getParameters() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const table = yield this.rpc.get_table_rows({
-                code: this.name,
-                scope: this.name,
-                table: "savparams"
-            });
-            return utils_1.validateExternalData(table.rows[0], "SR contract parameters", savings_rate_1.srContractParamsKeys);
-        });
-    }
-    /**
-     * @returns {Promise<object>} Savings Rate contract settings
-     */
-    getSettings() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const table = yield this.rpc.get_table_rows({
-                code: this.name,
-                scope: this.name,
-                table: "savsettings"
-            });
-            return utils_1.validateExternalData(table.rows[0], "SR contract settings", savings_rate_1.srContractSettingsKeys);
+            return utils_1.validateExternalData(result, "TokenSwap contract positions", tokenswap_1.tsContractPositionsKeys);
         });
     }
 }
-exports.SavingsRateContract = SavingsRateContract;
+exports.TokenSwapContract = TokenSwapContract;

@@ -34,6 +34,7 @@ export interface PosContractSettings {
     collateral_token: string;
     savings_account: string;
     min_pos: string;
+    tokenswap_account: string;
 }
 export declare const posContractSettingsKeys: string[];
 export interface BasicEosdtPosParameters {

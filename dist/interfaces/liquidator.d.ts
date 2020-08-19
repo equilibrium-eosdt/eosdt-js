@@ -13,7 +13,7 @@ export interface LiquidatorSettings {
     auction_price: string;
     burn_rate: string;
     gov_return_rate: string;
-    set_aside_rate: string;
+    tokenswap_rate: string;
     savings_rate: string;
 }
 export declare const liquidatorSettingsKeys: string[];

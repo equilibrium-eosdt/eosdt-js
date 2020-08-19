@@ -8,6 +8,7 @@ import { BalanceGetter } from "./balance"
 import { BasicPositionsContract } from "./basic-positions"
 import { PositionsContract } from "./main-positions"
 import { SavingsRateContract } from "./savings-rate"
+import { TokenSwapContract } from "./tokenswap"
 
 /**
  * A connector object, used to build classes to work with EOSDT ecosystem contracts
@@ -74,6 +75,14 @@ export class EosdtConnector {
      */
     public getArmContract(): ArmContract {
         return new ArmContract(this)
+    }
+
+    /**
+     * Creates a wrapper for 'tokenswap.eq' contract
+     * @returns Instance of `TokenSwapContract`
+     */
+    public getTokenSwapContract() : TokenSwapContract {
+        return new TokenSwapContract(this)
     }
 
     /**
