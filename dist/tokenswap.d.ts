@@ -14,7 +14,8 @@ export declare class TokenSwapContract {
      */
     constructor(connector: EosdtConnectorInterface);
     /**
-     * Sends NUT tokens to TokenSwap contract. Send Ethereum address (format with prefix "0x")
+     * Sends NUT tokens to TokenSwap contract. Send Ethereum address
+     * (available format with and without prefix "0x")
      * in memo to verify Ethereum signature
      * @param {string} senderName
      * @param {string | number} nutAmount
@@ -25,7 +26,7 @@ export declare class TokenSwapContract {
     transferNut(senderName: string, nutAmount: string | number, ethereumAddress: string, transactionParams?: ITrxParamsArgument): Promise<any>;
     /**
      * Returns NUT from TokenSwap contract to account balance
-     * and verifies Ethereum signature (format with prefix "0x")
+     * and verifies Ethereum signature (available format with and without prefix "0x")
      * @param {string} toAccount
      * @param {number} positionId
      * @param {string} ethereumSignature

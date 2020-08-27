@@ -25,7 +25,8 @@ class TokenSwapContract {
         this.api = connector.api;
     }
     /**
-     * Sends NUT tokens to TokenSwap contract. Send Ethereum address (format with prefix "0x")
+     * Sends NUT tokens to TokenSwap contract. Send Ethereum address
+     * (available format with and without prefix "0x")
      * in memo to verify Ethereum signature
      * @param {string} senderName
      * @param {string | number} nutAmount
@@ -35,13 +36,6 @@ class TokenSwapContract {
      */
     transferNut(senderName, nutAmount, ethereumAddress, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (ethereumAddress.length !== 42) {
-                const msg = `Ethereum address format mismatch: should start with prefix "0x",` +
-                    `example "0xb794f5ea0ba39494ce839613fffba74279579268". ` +
-                    `Received address: \n${ethereumAddress}"`;
-                throw new Error(msg);
-            }
-            ethereumAddress = ethereumAddress.slice(2);
             const nutAssetString = utils_1.amountToAssetString(nutAmount, "NUT");
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: senderName, permission: trxParams.permission }];
@@ -68,7 +62,7 @@ class TokenSwapContract {
     }
     /**
      * Returns NUT from TokenSwap contract to account balance
-     * and verifies Ethereum signature (format with prefix "0x")
+     * and verifies Ethereum signature (available format with and without prefix "0x")
      * @param {string} toAccount
      * @param {number} positionId
      * @param {string} ethereumSignature
@@ -77,14 +71,6 @@ class TokenSwapContract {
      */
     claim(toAccount, positionId, ethereumSignature, transactionParams) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (ethereumSignature.length !== 132) {
-                const msg = `Ethereum signature format mismatch: should start with prefix "0x",` +
-                    `example "0xfa076d068ca83ec87203f394c630a1a992f0d39eac5e761aec4c90011204f0b77` +
-                    `6adf698fe3d626dfd4e7c6ef1f89adb4b9831adaeac72dd19093381265b45471b". ` +
-                    `\nReceived signature: \n${ethereumSignature}"`;
-                throw new Error(msg);
-            }
-            ethereumSignature = ethereumSignature.slice(2);
             const trxParams = utils_1.setTransactionParams(transactionParams);
             const authorization = [{ actor: toAccount, permission: trxParams.permission }];
             const receipt = yield this.api.transact({

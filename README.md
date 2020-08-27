@@ -1451,7 +1451,8 @@ positions referrals ids</p>
 
 ### tokenSwapContract.transferNut(senderName, nutAmount, ethereumAddress, [transactionParams]) ⇒ <code>Promise</code>
 
-<p>Sends NUT tokens to TokenSwap contract. Send Ethereum address (format with prefix &quot;0x&quot;)
+<p>Sends NUT tokens to TokenSwap contract. Send Ethereum address
+(available format with and without prefix &quot;0x&quot;)
 in memo to verify Ethereum signature</p>
 
 **Kind**: instance method of [<code>TokenSwapContract</code>](#TokenSwapContract)  
@@ -1469,7 +1470,7 @@ in memo to verify Ethereum signature</p>
 ### tokenSwapContract.claim(toAccount, positionId, ethereumSignature, [transactionParams]) ⇒ <code>Promise</code>
 
 <p>Returns NUT from TokenSwap contract to account balance
-and verifies Ethereum signature (format with prefix &quot;0x&quot;)</p>
+and verifies Ethereum signature (available format with and without prefix &quot;0x&quot;)</p>
 
 **Kind**: instance method of [<code>TokenSwapContract</code>](#TokenSwapContract)  
 **Returns**: <code>Promise</code> - <p>Promise of transaction receipt</p>

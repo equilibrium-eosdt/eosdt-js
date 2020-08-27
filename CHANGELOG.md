@@ -2,6 +2,14 @@
 
 All notable changes will be documented in this file.
 
+#### [1.2.1] - 2020-08-27 - Updated wrappers for 'tokenswap.eq' contract
+
+-   Updated`TokenswapContract` wrapper. 
+Both methods accept string with prefix "0x", without prefix and with spaces on any side:
+    -   `transferNut` method now doesn't have limitations for Ethereum address in memo
+    -   `claim` method now doesn't have limitations for Ethereum signature in parameters
+
+
 #### [1.2.0] - 2020-08-19 - Added wrappers for 'tokenswap.eq' contract 
 #### and updated liquidator and positions contracts
 
