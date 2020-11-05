@@ -37,7 +37,7 @@ class EosdtConnector {
     }
     /**
      * Creates class to work with basic positions contract (non-EOS collateral)
-     * @param {string} collateralToken Currently "PBTC" only
+     * @param {string} collateralToken "PBTC" or "PETH"
      * @returns Instance of `BasicPositionsContract`
      */
     getBasicPositions(collateralToken) {
@@ -51,7 +51,7 @@ class EosdtConnector {
     }
     /**
      * Creates a class to work with specified liquidator contract
-     * @param {string=} [collateralToken] "EOS" of "PBTC"
+     * @param {string=} [collateralToken] "EOS", "PBTC" or "PETH"
      * @returns Instance of `LiquidatorContract`
      */
     getLiquidator(collateralToken = "EOS") {

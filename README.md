@@ -27,6 +27,9 @@ const eosLiquidator = connector.getLiquidator()
 const pbtcPositions = connector.getBasicPositions("PBTC")
 const pbtcLiquidator = connector.getLiquidator("PBTC")
 
+const pethPositions = connector.getBasicPositions("PETH")
+const pethLiquidator = connector.getLiquidator("PETH")
+
 const governance = connector.getGovernance()
 const balances = connector.getBalances()
 const savings = connector.getSavingsRate()
@@ -55,7 +58,7 @@ Fore more code examples, checkout `examples` folder.
 <dt><a href="#ArmContract">ArmContract</a></dt>
 <dd><p>Module to manage EOSDT arming operations</p></dd>
 <dt><a href="#BalanceGetter">BalanceGetter</a></dt>
-<dd><p>Module to get account's balances of EOSDT, EOS, PBTC and NUT</p></dd>
+<dd><p>Module to get account's balances of EOSDT, EOS, PBTC, PETH and NUT</p></dd>
 <dt><a href="#BasicPositionsContract">BasicPositionsContract</a></dt>
 <dd><p>Module to manage EOSDT positions with non-EOS collateral</p></dd>
 <dt><a href="#BpManager">BpManager</a></dt>
@@ -150,7 +153,7 @@ balance</p>
 
 ## BalanceGetter
 
-<p>Module to get account's balances of EOSDT, EOS, PBTC and NUT</p>
+<p>Module to get account's balances of EOSDT, EOS, PBTC, PETH and NUT</p>
 
 **Kind**: global class
 
@@ -160,6 +163,7 @@ balance</p>
     -   [.getEosdt(account)](#BalanceGetter+getEosdt) ⇒ <code>Promise.&lt;number&gt;</code>
     -   [.getNut(account)](#BalanceGetter+getNut) ⇒ <code>Promise.&lt;number&gt;</code>
     -   [.getPbtc(account)](#BalanceGetter+getPbtc) ⇒ <code>Promise.&lt;number&gt;</code>
+    -   [.getPeth(account)](#BalanceGetter+getPeth) ⇒ <code>Promise.&lt;number&gt;</code>
 
 <a name="new_BalanceGetter_new"></a>
 
@@ -215,6 +219,17 @@ balance</p>
 | ------- | ------------------- | ------------------- |
 | account | <code>string</code> | <p>Account name</p> |
 
+<a name="BalanceGetter+getPeth"></a>
+
+### balanceGetter.getPeth(account) ⇒ <code>Promise.&lt;number&gt;</code>
+
+**Kind**: instance method of [<code>BalanceGetter</code>](#BalanceGetter)  
+**Returns**: <code>Promise.&lt;number&gt;</code> - <p>PETH balance of account</p>
+
+| Param   | Type                | Description         |
+| ------- | ------------------- | ------------------- |
+| account | <code>string</code> | <p>Account name</p> |
+
 <a name="BasicPositionsContract"></a>
 
 ## BasicPositionsContract
@@ -259,7 +274,7 @@ balance</p>
 | Param       | Type                | Description                                                                |
 | ----------- | ------------------- | -------------------------------------------------------------------------- |
 | connector   |                     | <p>EosdtConnector (see <code>README</code> section <code>Usage</code>)</p> |
-| tokenSymbol | <code>string</code> | <p>Currently only &quot;PBTC&quot;</p>                                     |
+| tokenSymbol | <code>string</code> | <p>&quot;PBTC&quot; or &quot;PETH&quot;</p>                                |
 
 <a name="BasicPositionsContract+newPosition"></a>
 
@@ -702,9 +717,9 @@ EOS for a block producer</p>
 **Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
 **Returns**: <p>Instance of <code>BasicPositionsContract</code></p>
 
-| Param           | Type                | Description                            |
-| --------------- | ------------------- | -------------------------------------- |
-| collateralToken | <code>string</code> | <p>Currently &quot;PBTC&quot; only</p> |
+| Param           | Type                | Description                                 |
+| --------------- | ------------------- | ------------------------------------------- |
+| collateralToken | <code>string</code> | <p>&quot;PBTC&quot; or &quot;PETH&quot;</p> |
 
 <a name="EosdtConnector+getPositions"></a>
 
@@ -722,9 +737,9 @@ EOS for a block producer</p>
 **Kind**: instance method of [<code>EosdtConnector</code>](#EosdtConnector)  
 **Returns**: <p>Instance of <code>LiquidatorContract</code></p>
 
-| Param             | Type                | Default                      | Description                                |
-| ----------------- | ------------------- | ---------------------------- | ------------------------------------------ |
-| [collateralToken] | <code>string</code> | <code>&quot;EOS&quot;</code> | <p>&quot;EOS&quot; of &quot;PBTC&quot;</p> |
+| Param             | Type                | Default                      | Description                                                  |
+| ----------------- | ------------------- | ---------------------------- | ------------------------------------------------------------ |
+| [collateralToken] | <code>string</code> | <code>&quot;EOS&quot;</code> | <p>&quot;EOS&quot;, &quot;PBTC&quot; or &quot;PETH&quot;</p> |
 
 <a name="EosdtConnector+getSavingsRateCont"></a>
 

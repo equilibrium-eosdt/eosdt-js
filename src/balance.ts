@@ -3,7 +3,7 @@ import { EosdtConnectorInterface } from "./interfaces/connector"
 import { balanceToNumber } from "./utils"
 
 /**
- * Module to get account's balances of EOSDT, EOS, PBTC and NUT
+ * Module to get account's balances of EOSDT, EOS, PBTC, PETH and NUT
  */
 export class BalanceGetter {
     private rpc: JsonRpc
@@ -51,6 +51,15 @@ export class BalanceGetter {
      */
     public async getPbtc(account: string): Promise<number> {
         const balance = await this.rpc.get_currency_balance("btc.ptokens", account, "PBTC")
+        return balanceToNumber(balance)
+    }
+
+    /**
+     * @param {string} account Account name
+     * @returns {Promise<number>} PETH balance of account
+     */
+    public async getPeth(account: string): Promise<number> {
+        const balance = await this.rpc.get_currency_balance("eth.ptokens", account, "PETH")
         return balanceToNumber(balance)
     }
 }

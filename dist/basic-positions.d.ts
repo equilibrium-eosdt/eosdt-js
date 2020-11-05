@@ -19,7 +19,7 @@ export declare class BasicPositionsContract {
     /**
      * Creates an instance of `BasicPositionsContract`
      * @param connector EosdtConnector (see `README` section `Usage`)
-     * @param {string} tokenSymbol Currently only "PBTC"
+     * @param {string} tokenSymbol "PBTC" or "PETH"
      */
     constructor(connector: EosdtConnectorInterface, tokenSymbol: string);
     /**

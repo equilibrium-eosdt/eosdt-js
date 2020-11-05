@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("./utils");
 /**
- * Module to get account's balances of EOSDT, EOS, PBTC and NUT
+ * Module to get account's balances of EOSDT, EOS, PBTC, PETH and NUT
  */
 class BalanceGetter {
     /**
@@ -58,6 +58,16 @@ class BalanceGetter {
     getPbtc(account) {
         return __awaiter(this, void 0, void 0, function* () {
             const balance = yield this.rpc.get_currency_balance("btc.ptokens", account, "PBTC");
+            return utils_1.balanceToNumber(balance);
+        });
+    }
+    /**
+     * @param {string} account Account name
+     * @returns {Promise<number>} PETH balance of account
+     */
+    getPeth(account) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const balance = yield this.rpc.get_currency_balance("eth.ptokens", account, "PETH");
             return utils_1.balanceToNumber(balance);
         });
     }

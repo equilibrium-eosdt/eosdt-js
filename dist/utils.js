@@ -36,7 +36,7 @@ function amountToAssetString(amount, assetSymbol, customDecimals) {
     else if (assetSymbol === "PBTC") {
         decimals = 8;
     }
-    else if (assetSymbol === "EOSDT" || assetSymbol === "NUT") {
+    else if (assetSymbol === "EOSDT" || assetSymbol === "NUT" || assetSymbol === "PETH") {
         decimals = 9;
     }
     else if (customDecimals) {

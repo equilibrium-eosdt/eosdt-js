@@ -44,10 +44,10 @@ export class BasicPositionsContract {
     /**
      * Creates an instance of `BasicPositionsContract`
      * @param connector EosdtConnector (see `README` section `Usage`)
-     * @param {string} tokenSymbol Currently only "PBTC"
+     * @param {string} tokenSymbol "PBTC" or "PETH"
      */
     constructor(connector: EosdtConnectorInterface, tokenSymbol: string) {
-        const availableCollateralTokens = ["EOS", "PBTC"]
+        const availableCollateralTokens = ["EOS", "PBTC", "PETH"]
         if (!availableCollateralTokens.includes(tokenSymbol)) {
             const errMsg =
                 `Cannot initiate positions contract logic for token '${tokenSymbol}'. ` +

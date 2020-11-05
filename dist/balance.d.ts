@@ -1,6 +1,6 @@
 import { EosdtConnectorInterface } from "./interfaces/connector";
 /**
- * Module to get account's balances of EOSDT, EOS, PBTC and NUT
+ * Module to get account's balances of EOSDT, EOS, PBTC, PETH and NUT
  */
 export declare class BalanceGetter {
     private rpc;
@@ -29,4 +29,9 @@ export declare class BalanceGetter {
      * @returns {Promise<number>} PBTC balance of account
      */
     getPbtc(account: string): Promise<number>;
+    /**
+     * @param {string} account Account name
+     * @returns {Promise<number>} PETH balance of account
+     */
+    getPeth(account: string): Promise<number>;
 }
