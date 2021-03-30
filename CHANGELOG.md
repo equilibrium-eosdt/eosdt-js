@@ -2,6 +2,10 @@
 
 All notable changes will be documented in this file.
 
+### [1.3.6] - 2021-03-30 - No changes
+
+Update just to increment npm version
+
 ### [1.3.5] - 2021-03-29 - Updates for 'pricefeed.eq' contract
 
 A new table 'newrates' was added to 'pricefeed.eq' contract, it contains Equilibrium prices feed data. Previously you could use `getRates` on `BasicPositionsContract` to get system rates. This works same as before, but now you can also use `getRatesNew`. Property `rate` property would be the same in both old and new `TokenRate` objects, but `TokenRateNew` contains more system data.
