@@ -1,7 +1,8 @@
 import { Api, JsonRpc } from "eosjs";
+import { PositionsConstructorData } from "./config";
 import { BasicEosdtPosition, BasicEosdtPosParameters, PosContractSettings } from "./interfaces/basic-positions-contract";
 import { EosdtConnectorInterface } from "./interfaces/connector";
-import { LtvRatios, TokenRate } from "./interfaces/positions-contract";
+import { LtvRatios, TokenRate, TokenRateNew } from "./interfaces/positions-contract";
 import { ITrxParamsArgument } from "./interfaces/transaction";
 /**
  * Module to manage EOSDT positions with non-EOS collateral
@@ -13,6 +14,7 @@ export declare class BasicPositionsContract {
     protected decimals: number;
     protected contractName: string;
     protected tokenContract: string;
+    protected ratesContract: string;
     protected positionKeys: Array<string>;
     protected contractParametersKeys: Array<string>;
     protected contractSettingsKeys: Array<string>;
@@ -21,7 +23,7 @@ export declare class BasicPositionsContract {
      * @param connector EosdtConnector (see `README` section `Usage`)
      * @param {string} tokenSymbol "PBTC" or "PETH"
      */
-    constructor(connector: EosdtConnectorInterface, tokenSymbol: string);
+    constructor(connector: EosdtConnectorInterface, tokenSymbol: string, data?: PositionsConstructorData);
     /**
      * Creates new position, sending specified amount of collateral and issuing specified amount
      * of EOSDT to creator.
@@ -145,9 +147,16 @@ export declare class BasicPositionsContract {
      */
     getContractTokenBalance(): Promise<number>;
     /**
-     * @returns {Promise<Array<object>>} Table of current system token prices (rates)
+     * @returns {Promise<Array<object>>} Table of current system token prices (contract
+     * 'pricefeed.eq' - table 'oraclerates'). These are valid rates, except fields
+     * 'backend_price' and 'backend_update' are missing
      */
     getRates(): Promise<TokenRate[]>;
+    /**
+     * @returns {Promise<Array<object>>} Table of current system token prices (contract
+     * 'pricefeed.eq' - table 'newrates'). These are valid rates including all rates data
+     */
+    getRatesNew(): Promise<TokenRateNew[]>;
     getRelativeRates(): Promise<TokenRate[]>;
     /**
      * @returns {Promise<Array<object>>} Table of current LTV ratios for all positions.

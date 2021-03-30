@@ -10,7 +10,7 @@ export { BasicEosdtPosition, BasicEosdtPosParameters, PosContractSettings } from
 export { EosdtConnectorInterface } from "./interfaces/connector";
 export { BpPosition, BPVotes, EosdtVote, EosVoterInfo, GovernanceParameters, GovernanceSettings, ProposeObject, StoredProposal, VoterInfo } from "./interfaces/governance";
 export { LiquidatorParameters, LiquidatorSettings } from "./interfaces/liquidator";
-export { EosdtContractParameters, EosdtPosition, LtvRatios, PositionReferral, Referral, TokenRate } from "./interfaces/positions-contract";
+export { EosdtContractParameters, EosdtPosition, LtvRatios, PositionReferral, Referral, TokenRate, TokenRateNew } from "./interfaces/positions-contract";
 export { SRContractParams, SRContractSettings, SRPosition } from "./interfaces/savings-rate";
 export { TokenswapContractParams, TokenswapContractSettings, TokenswapPositions } from "./interfaces/tokenswap";
 export { ITrxParams, ITrxParamsArgument } from "./interfaces/transaction";

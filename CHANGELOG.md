@@ -2,6 +2,39 @@
 
 All notable changes will be documented in this file.
 
+### [1.3.5] - 2021-03-29 - Updates for 'pricefeed.eq' contract
+
+A new table 'newrates' was added to 'pricefeed.eq' contract, it contains Equilibrium prices feed data. Previously you could use `getRates` on `BasicPositionsContract` to get system rates. This works same as before, but now you can also use `getRatesNew`. Property `rate` property would be the same in both old and new `TokenRate` objects, but `TokenRateNew` contains more system data.
+
+-   New interface added: `TokenRateNew`
+-   Added method `getRatesNew` to `BasicPositionsContract`
+
+### [1.3.4] - 2021-03-15 - Optional argument is now interface with contract data
+
+Default behavior didn't change. If it is needed to explicitly configure contract - use optional argument.
+Contract that support optional argument configuration:
+
+-   `BasicPositionsContract`
+-   `PositionsContract`
+-   `TokenSwapContract`
+-   `LiquidatorContract`
+
+#### [1.3.3] - 2021-03-11 - Optional argument added to main positions contract
+
+Default contract name didn't change. If optional argument is not stated mainnet contract name is used.
+Contract that now support two networks names:
+
+-   `PositionsContract`
+
+#### [1.3.2] - 2021-03-11 - Added optional argument for different networks contracts names
+
+Default contracts names didn't change. If optional argument is not stated mainnet contract name is used.
+Contracts that now support two networks names:
+
+-   `TokenSwapContract`
+-   `LiquidatorContract`
+-   `BasicPositionsContract`
+
 #### [1.3.1] - 2020-11-05 - Added support for PETH positions contracts
 
 -   `EosdtConnector` can now construct adapters to work with PETH positions and liquidator contracts. `BasicPositionsContract` and `LiquidatorContract` can now be instantiated with PETH as collateral token.
@@ -10,7 +43,7 @@ All notable changes will be documented in this file.
 
 #### [1.2.1] - 2020-08-27 - Updated wrappers for 'tokenswap.eq' contract
 
--   Updated`TokenswapContract` wrapper.
+-   Updated `TokenswapContract` wrapper.
     Both methods accept string with prefix "0x", without prefix and with spaces on any side: - `transferNut` method now doesn't have limitations for Ethereum address in memo - `claim` method now doesn't have limitations for Ethereum signature in parameters
 
 #### [1.2.0] - 2020-08-19 - Added wrappers for 'tokenswap.eq' contract

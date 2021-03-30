@@ -1,4 +1,5 @@
 import { Api, JsonRpc } from "eosjs"
+import { ConstructorData } from "./config"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 import {
     TokenswapContractParams,
@@ -15,7 +16,7 @@ import { ITrxParamsArgument } from "./interfaces/transaction"
  * A wrapper class to invoke actions of Equilibrium Token Swap contract
  */
 export class TokenSwapContract {
-    private name = "tokenswap.eq"
+    private name: string
     private rpc: JsonRpc
     private api: Api
 
@@ -23,9 +24,16 @@ export class TokenSwapContract {
      * Instantiates TokenSwapContract
      * @param connector EosdtConnector (see `README` section `Usage`)
      */
-    constructor(connector: EosdtConnectorInterface) {
+    constructor(connector: EosdtConnectorInterface, data?: ConstructorData) {
         this.rpc = connector.rpc
         this.api = connector.api
+
+        if(data) {
+            this.name = data.contractName
+        }
+        else {
+            this.name = "tokenswap.eq"
+        }
     }
 
     /**

@@ -1,6 +1,6 @@
 {
     "name": "@eosdt/eosdt-js",
-    "version": "1.3.1",
+    "version": "1.3.5",
     "description": "JS library to execute EOSDT contracts methods",
     "main": "./dist/index.js",
     "scripts": {
@@ -14,11 +14,11 @@
         "@types/node-fetch": "^2.5.2",
         "@types/text-encoding": "0.0.35",
         "eosjs": "^20.0.0",
-        "node-fetch": "^2.6.0",
+        "node-fetch": "^2.6.1",
         "text-encoding": "^0.7.0"
     },
     "devDependencies": {
-        "@babel/cli": "^7.8.4",
+        "@babel/cli": "^7.13.10",
         "@babel/core": "^7.9.0",
         "@babel/plugin-proposal-class-properties": "^7.8.3",
         "@babel/plugin-proposal-numeric-separator": "^7.8.3",

@@ -1,3 +1,13 @@
+export interface ConstructorData {
+    contractName: string;
+}
+export interface PositionsConstructorData extends ConstructorData {
+    tokenContract: string;
+    ratesContract: string;
+}
+export interface LiquidatorConstructorData extends ConstructorData {
+    positionsContract: string;
+}
 export declare const DECIMALS: {
     [key: string]: number;
 };

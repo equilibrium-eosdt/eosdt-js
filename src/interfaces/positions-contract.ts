@@ -23,6 +23,36 @@ export interface PositionReferral {
 }
 export const positionReferralKeys = ["referral_id", "position_id"]
 
+export interface TokenRateNew {
+    id: number // EOS type: uint64
+    base: string // EOS type: symbol
+    rate: string // EOS type: asset
+    update: string // EOS type: time_point_sec
+    provablecb1a_price: string // EOS type: asset
+    provablecb1a_update: string // EOS type: time_point_sec
+    delphioracle_price: string // EOS type: asset
+    delphioracle_update: string // EOS type: time_point_sec
+    equilibriumdsp_price: string // EOS type: asset
+    equilibriumdsp_update: string // EOS type: time_point_sec
+    backend_price: string // EOS type: asset
+    backend_update: string // EOS type: time_point_sec
+   
+}
+export const tokenRateNewKeys = [
+    "id",
+    "base",
+    "rate",
+    "update",
+    "provablecb1a_price",
+    "provablecb1a_update",
+    "delphioracle_price",
+    "delphioracle_update",
+    "equilibriumdsp_price",
+    "equilibriumdsp_update",
+    "backend_price",
+    "backend_update"
+]
+
 export interface TokenRate {
     rate: string // EOS type: asset
     update: string // EOS type: time_point_sec

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ArmContract = void 0;
 const armeq_1 = require("./interfaces/armeq");
 const utils_1 = require("./utils");
 /**

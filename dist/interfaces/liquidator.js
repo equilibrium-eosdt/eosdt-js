@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.liquidatorSettingsKeys = exports.liquidatorParametersKeys = void 0;
 exports.liquidatorParametersKeys = [
     "parameter_id",
     "surplus_debt",

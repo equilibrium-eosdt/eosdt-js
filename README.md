@@ -255,6 +255,7 @@ balance</p>
     -   [.close(senderAccount, positionId, [transactionParams])](#BasicPositionsContract+close) ⇒ <code>Promise</code>
     -   [.getContractTokenBalance()](#BasicPositionsContract+getContractTokenBalance) ⇒ <code>Promise.&lt;number&gt;</code>
     -   [.getRates()](#BasicPositionsContract+getRates) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    -   [.getRatesNew()](#BasicPositionsContract+getRatesNew) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
     -   [.getLtvRatiosTable()](#BasicPositionsContract+getLtvRatiosTable) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
     -   [.getPositionLtvRatio(id)](#BasicPositionsContract+getPositionLtvRatio) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
     -   [.getPositionById(id)](#BasicPositionsContract+getPositionById) ⇒ <code>Promise.&lt;(object\|undefined)&gt;</code>
@@ -493,7 +494,16 @@ would be refunded to user account</p>
 ### basicPositionsContract.getRates() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
 
 **Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
-**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Table of current system token prices (rates)</p>  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Table of current system token prices (contract
+'pricefeed.eq' - table 'oraclerates'). These are valid rates, except fields
+'backend_price' and 'backend_update' are missing</p>  
+<a name="BasicPositionsContract+getRatesNew"></a>
+
+### basicPositionsContract.getRatesNew() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+
+**Kind**: instance method of [<code>BasicPositionsContract</code>](#BasicPositionsContract)  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - <p>Table of current system token prices (contract
+'pricefeed.eq' - table 'newrates'). These are valid rates including all rates data</p>  
 <a name="BasicPositionsContract+getLtvRatiosTable"></a>
 
 ### basicPositionsContract.getLtvRatiosTable() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
@@ -1518,4 +1528,4 @@ and verifies Ethereum signature (available format with and without prefix &quot;
 
 ---
 
-&copy; 2019-2020 Equilibrium
+&copy; 2019-2021 Equilibrium

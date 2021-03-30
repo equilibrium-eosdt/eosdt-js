@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.basicEosdtPosParametersKeys = exports.posContractSettingsKeys = exports.basicPositionKeys = void 0;
 exports.basicPositionKeys = ["position_id", "maker", "outstanding", "collateral"];
 exports.posContractSettingsKeys = [
     "setting_id",

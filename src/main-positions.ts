@@ -1,4 +1,5 @@
 import { BasicPositionsContract } from "./basic-positions"
+import { PositionsConstructorData } from "./config"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 import {
     EosdtContractParameters,
@@ -20,8 +21,8 @@ export class PositionsContract extends BasicPositionsContract {
      * Creates an instance of PositionsContract
      * @param connector EosdtConnector (see `README` section `Usage`)
      */
-    constructor(connector: EosdtConnectorInterface) {
-        super(connector, "EOS")
+    constructor(connector: EosdtConnectorInterface, data?: PositionsConstructorData) {
+        super(connector, "EOS", data)
     }
 
     /**

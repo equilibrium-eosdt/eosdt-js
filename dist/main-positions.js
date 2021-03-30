@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PositionsContract = void 0;
 const basic_positions_1 = require("./basic-positions");
 const positions_contract_1 = require("./interfaces/positions-contract");
 const utils_1 = require("./utils");
@@ -21,8 +22,8 @@ class PositionsContract extends basic_positions_1.BasicPositionsContract {
      * Creates an instance of PositionsContract
      * @param connector EosdtConnector (see `README` section `Usage`)
      */
-    constructor(connector) {
-        super(connector, "EOS");
+    constructor(connector, data) {
+        super(connector, "EOS", data);
     }
     /**
      * Creates position that has a referral. Position would have 0 collateral and 0 debt

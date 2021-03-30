@@ -1,5 +1,5 @@
 import { Api, JsonRpc } from "eosjs"
-import { LIQUIDATOR_CONTRACTS, POSITION_CONTRACTS } from "./config"
+import { POSITION_CONTRACTS, LiquidatorConstructorData, LIQUIDATOR_CONTRACTS } from "./config"
 import { EosdtConnectorInterface } from "./interfaces/connector"
 import {
     LiquidatorParameters,
@@ -24,13 +24,20 @@ export class LiquidatorContract {
      * Instantiates `LiquidatorContract`
      *  @param connector EosdtConnector (see `README` section `Usage`)
      */
-    constructor(connector: EosdtConnectorInterface, collateralToken: string = "EOS") {
+    constructor(connector: EosdtConnectorInterface, collateralToken: string = "EOS", data?: LiquidatorConstructorData) {
         this.rpc = connector.rpc
         this.api = connector.api
 
         this.tokenSymbol = collateralToken
-        this.contractName = LIQUIDATOR_CONTRACTS[collateralToken]
-        this.posContractName = POSITION_CONTRACTS[collateralToken]
+
+        if(data) {
+            this.contractName = data.contractName
+            this.posContractName = data.positionsContract
+        }
+        else {
+            this.contractName = LIQUIDATOR_CONTRACTS[collateralToken]
+            this.posContractName = POSITION_CONTRACTS[collateralToken]
+        }
     }
 
     /**

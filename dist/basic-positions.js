@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.BasicPositionsContract = void 0;
 const config_1 = require("./config");
 const basic_positions_contract_1 = require("./interfaces/basic-positions-contract");
 const positions_contract_1 = require("./interfaces/positions-contract");
@@ -22,7 +23,7 @@ class BasicPositionsContract {
      * @param connector EosdtConnector (see `README` section `Usage`)
      * @param {string} tokenSymbol "PBTC" or "PETH"
      */
-    constructor(connector, tokenSymbol) {
+    constructor(connector, tokenSymbol, data) {
         const availableCollateralTokens = ["EOS", "PBTC", "PETH"];
         if (!availableCollateralTokens.includes(tokenSymbol)) {
             const errMsg = `Cannot initiate positions contract logic for token '${tokenSymbol}'. ` +
@@ -33,8 +34,16 @@ class BasicPositionsContract {
         this.decimals = config_1.DECIMALS[tokenSymbol];
         this.rpc = connector.rpc;
         this.api = connector.api;
-        this.contractName = config_1.POSITION_CONTRACTS[tokenSymbol];
-        this.tokenContract = config_1.TOKEN_CONTRACTS[tokenSymbol];
+        if (data) {
+            this.contractName = data.contractName;
+            this.tokenContract = data.tokenContract;
+            this.ratesContract = data.ratesContract;
+        }
+        else {
+            this.contractName = config_1.POSITION_CONTRACTS[tokenSymbol];
+            this.tokenContract = config_1.TOKEN_CONTRACTS[tokenSymbol];
+            this.ratesContract = "pricefeed.eq";
+        }
         this.contractSettingsKeys = basic_positions_contract_1.posContractSettingsKeys;
         if (tokenSymbol === "EOS") {
             this.positionKeys = positions_contract_1.positionKeys;
@@ -510,17 +519,34 @@ class BasicPositionsContract {
         });
     }
     /**
-     * @returns {Promise<Array<object>>} Table of current system token prices (rates)
+     * @returns {Promise<Array<object>>} Table of current system token prices (contract
+     * 'pricefeed.eq' - table 'oraclerates'). These are valid rates, except fields
+     * 'backend_price' and 'backend_update' are missing
      */
     getRates() {
         return __awaiter(this, void 0, void 0, function* () {
             const table = yield this.rpc.get_table_rows({
-                code: "eosdtorclize",
-                scope: "eosdtorclize",
+                code: this.ratesContract,
+                scope: this.ratesContract,
                 table: "oraclerates",
                 limit: 1000
             });
             return utils_1.validateExternalData(table.rows, "rate", positions_contract_1.tokenRateKeys);
+        });
+    }
+    /**
+     * @returns {Promise<Array<object>>} Table of current system token prices (contract
+     * 'pricefeed.eq' - table 'newrates'). These are valid rates including all rates data
+     */
+    getRatesNew() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const table = yield this.rpc.get_table_rows({
+                code: this.ratesContract,
+                scope: this.ratesContract,
+                table: "newrates",
+                limit: 1000
+            });
+            return utils_1.validateExternalData(table.rows, "rate new", positions_contract_1.tokenRateNewKeys);
         });
     }
     getRelativeRates() {

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.BpManager = void 0;
 const governance_1 = require("./interfaces/governance");
 const utils_1 = require("./utils");
 /**

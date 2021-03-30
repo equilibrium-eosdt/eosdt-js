@@ -1,11 +1,11 @@
 import { Api, JsonRpc } from "eosjs"
-import { DECIMALS, POSITION_CONTRACTS, TOKEN_CONTRACTS } from "./config"
+import { DECIMALS, PositionsConstructorData, POSITION_CONTRACTS, TOKEN_CONTRACTS } from "./config"
 import {
     BasicEosdtPosition,
     BasicEosdtPosParameters,
     basicEosdtPosParametersKeys,
-    PosContractSettings,
     basicPositionKeys,
+    PosContractSettings,
     posContractSettingsKeys
 } from "./interfaces/basic-positions-contract"
 import { EosdtConnectorInterface } from "./interfaces/connector"
@@ -15,7 +15,9 @@ import {
     ltvRatiosKeys,
     positionKeys,
     TokenRate,
-    tokenRateKeys
+    tokenRateKeys,
+    TokenRateNew,
+    tokenRateNewKeys
 } from "./interfaces/positions-contract"
 import { ITrxParamsArgument } from "./interfaces/transaction"
 import {
@@ -36,6 +38,7 @@ export class BasicPositionsContract {
     protected decimals: number
     protected contractName: string
     protected tokenContract: string
+    protected ratesContract: string
 
     protected positionKeys: Array<string>
     protected contractParametersKeys: Array<string>
@@ -46,7 +49,11 @@ export class BasicPositionsContract {
      * @param connector EosdtConnector (see `README` section `Usage`)
      * @param {string} tokenSymbol "PBTC" or "PETH"
      */
-    constructor(connector: EosdtConnectorInterface, tokenSymbol: string) {
+    constructor(
+        connector: EosdtConnectorInterface,
+        tokenSymbol: string,
+        data?: PositionsConstructorData
+    ) {
         const availableCollateralTokens = ["EOS", "PBTC", "PETH"]
         if (!availableCollateralTokens.includes(tokenSymbol)) {
             const errMsg =
@@ -61,8 +68,16 @@ export class BasicPositionsContract {
         this.rpc = connector.rpc
         this.api = connector.api
 
-        this.contractName = POSITION_CONTRACTS[tokenSymbol]
-        this.tokenContract = TOKEN_CONTRACTS[tokenSymbol]
+        if (data) {
+            this.contractName = data.contractName
+            this.tokenContract = data.tokenContract
+            this.ratesContract = data.ratesContract
+        } else {
+            this.contractName = POSITION_CONTRACTS[tokenSymbol]
+            this.tokenContract = TOKEN_CONTRACTS[tokenSymbol]
+            this.ratesContract = "pricefeed.eq"
+        }
+
         this.contractSettingsKeys = posContractSettingsKeys
 
         if (tokenSymbol === "EOS") {
@@ -665,16 +680,32 @@ export class BasicPositionsContract {
     }
 
     /**
-     * @returns {Promise<Array<object>>} Table of current system token prices (rates)
+     * @returns {Promise<Array<object>>} Table of current system token prices (contract
+     * 'pricefeed.eq' - table 'oraclerates'). These are valid rates, except fields
+     * 'backend_price' and 'backend_update' are missing
      */
     public async getRates(): Promise<TokenRate[]> {
         const table = await this.rpc.get_table_rows({
-            code: "eosdtorclize",
-            scope: "eosdtorclize",
+            code: this.ratesContract,
+            scope: this.ratesContract,
             table: "oraclerates",
             limit: 1000
         })
         return validateExternalData(table.rows, "rate", tokenRateKeys)
+    }
+
+    /**
+     * @returns {Promise<Array<object>>} Table of current system token prices (contract
+     * 'pricefeed.eq' - table 'newrates'). These are valid rates including all rates data
+     */
+    public async getRatesNew(): Promise<TokenRateNew[]> {
+        const table = await this.rpc.get_table_rows({
+            code: this.ratesContract,
+            scope: this.ratesContract,
+            table: "newrates",
+            limit: 1000
+        })
+        return validateExternalData(table.rows, "rate new", tokenRateNewKeys)
     }
 
     public async getRelativeRates(): Promise<TokenRate[]> {

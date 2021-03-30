@@ -1,4 +1,5 @@
 import { BasicPositionsContract } from "./basic-positions";
+import { PositionsConstructorData } from "./config";
 import { EosdtConnectorInterface } from "./interfaces/connector";
 import { EosdtContractParameters, EosdtPosition, PositionReferral, Referral } from "./interfaces/positions-contract";
 import { ITrxParamsArgument } from "./interfaces/transaction";
@@ -11,7 +12,7 @@ export declare class PositionsContract extends BasicPositionsContract {
      * Creates an instance of PositionsContract
      * @param connector EosdtConnector (see `README` section `Usage`)
      */
-    constructor(connector: EosdtConnectorInterface);
+    constructor(connector: EosdtConnectorInterface, data?: PositionsConstructorData);
     /**
      * Creates position that has a referral. Position would have 0 collateral and 0 debt
      *

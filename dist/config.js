@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TOKEN_CONTRACTS = exports.LIQUIDATOR_CONTRACTS = exports.POSITION_CONTRACTS = exports.DECIMALS = void 0;
 exports.DECIMALS = {
     EOS: 4,
     PBTC: 8,

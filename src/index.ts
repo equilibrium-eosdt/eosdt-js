@@ -30,7 +30,8 @@ export {
     LtvRatios,
     PositionReferral,
     Referral,
-    TokenRate
+    TokenRate,
+    TokenRateNew
 } from "./interfaces/positions-contract"
 export { SRContractParams, SRContractSettings, SRPosition } from "./interfaces/savings-rate"
 export {

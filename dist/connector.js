@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EosdtConnector = void 0;
 const eosjs_1 = require("eosjs");
 const eosjs_jssig_1 = require("eosjs/dist/eosjs-jssig");
 const node_fetch_1 = __importDefault(require("node-fetch"));

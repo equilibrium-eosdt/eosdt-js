@@ -1,3 +1,4 @@
+import { ConstructorData } from "./config";
 import { EosdtConnectorInterface } from "./interfaces/connector";
 import { TokenswapContractParams, TokenswapContractSettings, TokenswapPositions } from "./interfaces/tokenswap";
 import { ITrxParamsArgument } from "./interfaces/transaction";
@@ -12,7 +13,7 @@ export declare class TokenSwapContract {
      * Instantiates TokenSwapContract
      * @param connector EosdtConnector (see `README` section `Usage`)
      */
-    constructor(connector: EosdtConnectorInterface);
+    constructor(connector: EosdtConnectorInterface, data?: ConstructorData);
     /**
      * Sends NUT tokens to TokenSwap contract. Send Ethereum address
      * (available format with and without prefix "0x")

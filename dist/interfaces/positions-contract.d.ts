@@ -14,6 +14,21 @@ export interface PositionReferral {
     position_id: number;
 }
 export declare const positionReferralKeys: string[];
+export interface TokenRateNew {
+    id: number;
+    base: string;
+    rate: string;
+    update: string;
+    provablecb1a_price: string;
+    provablecb1a_update: string;
+    delphioracle_price: string;
+    delphioracle_update: string;
+    equilibriumdsp_price: string;
+    equilibriumdsp_update: string;
+    backend_price: string;
+    backend_update: string;
+}
+export declare const tokenRateNewKeys: string[];
 export interface TokenRate {
     rate: string;
     update: string;

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.LiquidatorContract = void 0;
 const config_1 = require("./config");
 const liquidator_1 = require("./interfaces/liquidator");
 const utils_1 = require("./utils");
@@ -20,12 +21,18 @@ class LiquidatorContract {
      * Instantiates `LiquidatorContract`
      *  @param connector EosdtConnector (see `README` section `Usage`)
      */
-    constructor(connector, collateralToken = "EOS") {
+    constructor(connector, collateralToken = "EOS", data) {
         this.rpc = connector.rpc;
         this.api = connector.api;
         this.tokenSymbol = collateralToken;
-        this.contractName = config_1.LIQUIDATOR_CONTRACTS[collateralToken];
-        this.posContractName = config_1.POSITION_CONTRACTS[collateralToken];
+        if (data) {
+            this.contractName = data.contractName;
+            this.posContractName = data.positionsContract;
+        }
+        else {
+            this.contractName = config_1.LIQUIDATOR_CONTRACTS[collateralToken];
+            this.posContractName = config_1.POSITION_CONTRACTS[collateralToken];
+        }
     }
     /**
      * Performs margin call on a position and transfers specified amount of EOSDT to liquidator

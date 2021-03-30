@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.bpPositionKeys = exports.eosVoterInfoKeys = exports.voterInfoKeys = exports.bpVotesKeys = exports.governanceParametersKeys = exports.governanceSettingsKeys = exports.eosdtVoteKeys = exports.proposeObjectKeys = exports.storedProposalKeys = void 0;
 exports.storedProposalKeys = [
     "proposal_name",
     "proposer",

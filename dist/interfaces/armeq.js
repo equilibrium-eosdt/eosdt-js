@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.armContractSettings = void 0;
 exports.armContractSettings = [
     "setting_id",
     "safety_margin",

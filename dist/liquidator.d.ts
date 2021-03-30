@@ -1,3 +1,4 @@
+import { LiquidatorConstructorData } from "./config";
 import { EosdtConnectorInterface } from "./interfaces/connector";
 import { LiquidatorParameters, LiquidatorSettings } from "./interfaces/liquidator";
 import { ITrxParamsArgument } from "./interfaces/transaction";
@@ -14,7 +15,7 @@ export declare class LiquidatorContract {
      * Instantiates `LiquidatorContract`
      *  @param connector EosdtConnector (see `README` section `Usage`)
      */
-    constructor(connector: EosdtConnectorInterface, collateralToken?: string);
+    constructor(connector: EosdtConnectorInterface, collateralToken?: string, data?: LiquidatorConstructorData);
     /**
      * Performs margin call on a position and transfers specified amount of EOSDT to liquidator
      * to buyout freed collateral
